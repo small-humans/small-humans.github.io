@@ -1,0 +1,27 @@
+{
+ "version": 1,
+ "titres": [
+  {
+   "id": "tmdb-movie-1375441",
+   "type": "film",
+   "titre": "Primetime",
+   "annee": 2026,
+   "statut": "vu",
+   "date_vu": "2026-09-23",
+   "note": 0.5,
+   "commentaire": "Difficilement Rania le, on peut à la requiem for a dream ",
+   "genres": [
+    "Drame",
+    "Thriller"
+   ],
+   "duree_min": 110,
+   "affiche": "/rhF8JALH8wrxKtXSCAB7a09tWsc.jpg",
+   "tmdb": {
+    "id": 1375441,
+    "type": "movie"
+   },
+   "ajoute_le": "2026-11-02",
+   "maj": "2026-11-02"
+  }
+ ]
+}
