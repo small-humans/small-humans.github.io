@@ -28561,5 +28561,17 @@
 "source": "ajout",
 "artiste_fiable": false,
 "mix": false
+},
+{
+"youtube": "7KnKLX629DA",
+"titre": "Schrotthagen | Full Set at Ritter Butzke",
+"artiste": "Ritter Butzke",
+"genre": "electro-melodique",
+"tags": [
+"electro-melodique"
+],
+"source": "ajout",
+"artiste_fiable": false,
+"mix": true
 }
 ]
