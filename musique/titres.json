@@ -28573,5 +28573,17 @@
 "source": "ajout",
 "artiste_fiable": false,
 "mix": true
+},
+{
+"youtube": "EIQ-uVn34qw",
+"titre": "Afterlife (The Jane Doze Remix)",
+"artiste": "XYLØ",
+"genre": "electro-melodique",
+"tags": [
+"electro-melodique"
+],
+"source": "ajout",
+"artiste_fiable": true,
+"mix": false
 }
 ]
