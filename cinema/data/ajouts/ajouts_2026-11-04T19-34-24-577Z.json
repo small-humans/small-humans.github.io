@@ -1,0 +1,30 @@
+{
+ "version": 1,
+ "titres": [
+  {
+   "id": "tmdb-movie-1465063",
+   "type": "film",
+   "titre": "L'Île des Souvenirs",
+   "annee": 2026,
+   "statut": "vu",
+   "date_vu": "2026-09-10",
+   "note": 4,
+   "commentaire": "Très bon film animation, bonne diee",
+   "genres": [
+    "Animation",
+    "Aventure",
+    "Fantastique",
+    "Comédie",
+    "Familial"
+   ],
+   "duree_min": 109,
+   "affiche": "/A12dkvb10IgoQxHxU5TXOc6WR4k.jpg",
+   "tmdb": {
+    "id": 1465063,
+    "type": "movie"
+   },
+   "ajoute_le": "2026-11-04",
+   "maj": "2026-11-04"
+  }
+ ]
+}
