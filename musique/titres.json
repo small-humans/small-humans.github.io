@@ -28585,5 +28585,17 @@
 "source": "ajout",
 "artiste_fiable": true,
 "mix": false
+},
+{
+"youtube": "dIM69mkp1Gw",
+"titre": "Kyrr",
+"artiste": "inekt",
+"genre": "ambient",
+"tags": [
+"ambient"
+],
+"source": "ajout",
+"artiste_fiable": false,
+"mix": false
 }
 ]
