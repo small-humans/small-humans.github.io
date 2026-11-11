@@ -70,7 +70,9 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .puce{min-height:44px;background:var(--nuit);padding:0 18px;border-radius:999px;transition:background-color .18s ease;font-size:15px}
 .puce:hover{background:var(--nuit2)}
 .puce[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.recherche{width:100%;min-height:44px;background:var(--nuit);border:0;border-radius:999px;padding:0 18px}
+.recherche{width:100%;min-height:44px;background:var(--nuit);border:0;border-radius:999px;padding:0 48px 0 18px}
+.rech{position:relative}.recherche::-webkit-search-cancel-button{-webkit-appearance:none}
+.rech-x{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:50%;background:var(--nuit2);color:var(--ink);font-size:22px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center}.rech-x[hidden]{display:none}
 .menus{display:flex;gap:8px}
 .menus select{flex:1 1 0;width:0;min-width:0;min-height:44px;background:var(--nuit);border:0;border-radius:0;padding:0 26px 0 12px;border-radius:999px;appearance:none;-webkit-appearance:none;text-overflow:ellipsis;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23BABBCF' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
 .menus select[hidden]{display:none}
@@ -251,7 +253,7 @@ textarea.export{min-height:180px;font-size:13px}
 
   <div class="outils" id="outils">
     <div class="puces" role="group" aria-label="Type"></div>
-    <input id="f-q" class="recherche" type="search" placeholder="Chercher un titre" aria-label="Chercher dans les titres pas encore vus" autocomplete="off" hidden>
+    <div id="rech" class="rech" hidden><input id="f-q" class="recherche" type="search" placeholder="Chercher un titre" aria-label="Chercher dans les titres pas encore vus" autocomplete="off"><button id="f-q-x" class="rech-x" type="button" aria-label="Effacer la recherche" hidden>×</button></div>
     <div class="menus">
       <select id="f-annee" aria-label="Année de visionnage"></select>
       <select id="f-genre" aria-label="Genre"></select>
@@ -283,7 +285,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.27 · 11 nov. 2026';
+const VERSION = '0.28 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -401,7 +403,7 @@ function tuile(f) {
 function rendre() {
   const p = $('#panneau'); p.textContent = '';
   const stats = S.vue === 'stats', base = S.vue === 'base', sorties = S.vue === 'sorties';
-  $('#outils').hidden = stats || sorties; $('#compte').hidden = stats || sorties; $('#f-q').hidden = !base;
+  $('#outils').hidden = stats || sorties; $('#compte').hidden = stats || sorties; $('#rech').hidden = !base; $('#f-q-x').hidden = !S.q;
   ['vus', 'avoir', 'base', 'sorties', 'stats'].forEach(v => { const b = $('#o-' + v); b.setAttribute('aria-selected', String(v === S.vue)); });
   const tout = fusion();
   const vus = tout.filter(f => f.statut === 'vu');
@@ -743,6 +745,7 @@ const pc = $('.puces');
   pc.append(b);
 });
 $('#f-q').addEventListener('input', e => { S.q = e.target.value; S.montre = PAGE; rendre(); });
+$('#f-q-x').addEventListener('click', () => { S.q = ''; $('#f-q').value = ''; S.montre = PAGE; rendre(); $('#f-q').focus(); });
 $('#f-annee').addEventListener('change', e => { S.annee = e.target.value; S.montre = PAGE; rendre(); });
 $('#f-genre').addEventListener('change', e => { S.genre = e.target.value; S.montre = PAGE; rendre(); });
 $('#f-tri').addEventListener('change', e => { S.tri = e.target.value; S.montre = PAGE; rendre(); });
