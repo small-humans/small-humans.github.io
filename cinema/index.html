@@ -301,8 +301,7 @@ dialog.clavier .carte .cache-clavier{display:none}
 .c-avis .qui{color:var(--acier);font-size:var(--t-small)}
 .c-avis .txt{white-space:pre-wrap;overflow-wrap:anywhere}
 .c-avis .txt.rien{color:var(--acier)}
-.c-etat{position:sticky;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--bg);color:var(--acier);font-size:var(--t-small);min-height:48px}
-.c-bas{display:flex;align-items:center;gap:16px}.c-bas .c-etat{position:static;flex:1;gap:8px}.c-bas .btn{margin-left:auto;padding:0 24px}
+.c-bas{display:flex;align-items:center;gap:16px}.c-bas .btn{margin-left:auto;padding:0 24px}
 .c-confirme{display:grid;gap:8px;background:var(--nuit);padding:12px 16px}
 .c-confirme .deux{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .c-confirme .btn{min-height:48px;padding:0 8px;font-size:var(--t-small)}
@@ -320,7 +319,8 @@ dialog.clavier .carte .cache-clavier{display:none}
 .rd-aff .gh{position:absolute;right:-.06em;bottom:-.18em;font-size:320px;font-weight:700;line-height:1;color:var(--nuit2);letter-spacing:-.06em}
 .rd-tt{position:absolute;left:24px;right:24px;bottom:32px;font-size:40px;font-weight:700;line-height:1.05;text-wrap:balance;overflow-wrap:anywhere}
 .rd-panneau{position:absolute;inset:0;background:var(--bg);border-radius:16px 16px 0 0;overflow:hidden;touch-action:none;transform:translateY(calc(100% - var(--pk)));transition:transform .28s var(--ease)}
-.rd-panneau.ouvert{transform:none;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+.rd-panneau.ouvert{transform:none;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;border-radius:0}   /* v0.58 : état 2 = plein écran, fond uni, ni arrondi ni poignée (on replie en tirant vers le bas, sans indice) */
+.rd-panneau.ouvert .rd-poignee{visibility:hidden;height:16px}
 .rd-pk{height:var(--pk);padding:0 var(--marge)}
 .rd-panneau.ouvert .rd-pk{height:auto}
 .rd-panneau.ouvert .rd-pk .rd-ligne,.rd-panneau.ouvert .rd-pk .c-genres{display:none}
@@ -344,8 +344,14 @@ dialog.clavier .carte .cache-clavier{display:none}
 .rd-panneau:not(.ouvert) .rd-pk::after{content:"";margin-top:auto}
 .rd-panneau:not(.ouvert) .rd-poignee{margin-bottom:-16px}   /* l'espace se compte depuis la barre de la poignée, pas depuis sa zone tactile */
 .corps.rideau:not(.ouvert) .rd-aff{touch-action:none}   /* état 1 : tirer vers le haut sur l'affiche déplie la fiche, rien ne défile */
-/* « Enregistré · Annuler » : ligne fixe en bas du panneau, ne décale rien au-dessus */
-.rd-panneau>.c-etat{padding:0 var(--marge) env(safe-area-inset-bottom);border-top:1px solid var(--nuit2);min-height:calc(48px + env(safe-area-inset-bottom))}.f-tete h2.t-film{flex:1;min-width:0;text-transform:none;letter-spacing:0;font-weight:400;line-height:1.3}
+/* v0.58 : « Annuler les changements » = icône en haut à gauche, à côté de la flèche retour ; sa place est réservée (pas de saut du titre), elle apparaît en fondu */
+.ico-annuler{flex:none;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .2s,visibility 0s .2s}
+.ico-annuler.vis{visibility:visible;opacity:1;pointer-events:auto;transition:opacity .2s}
+.ico-annuler svg{width:22px;height:22px;display:block}
+.f-tete .ico-annuler{width:44px;height:44px;display:grid;place-items:center;margin-left:-8px;color:var(--accent)}
+.f-tete .ico-annuler[hidden]{display:none}
+.rd-annuler{position:absolute;left:60px;top:max(8px,env(safe-area-inset-top));width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(5,8,15,.6);color:var(--ink)}
+.f-tete h2.t-film{flex:1;min-width:0;text-transform:none;letter-spacing:0;font-weight:400;line-height:1.3}
 .feuille{grid-template-columns:minmax(0,1fr)}
 .f-tete{min-width:0}
 .f-tete h2.t-film{display:flex;align-items:center;gap:12px}
@@ -423,7 +429,7 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.57 · 11 nov. 2026';
+const VERSION = '0.58 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -769,6 +775,41 @@ function feuille(titre, ...contenu) {
   F.scrollTop = 0;
 }
 F.addEventListener('click', e => { if (e.target === F) F.close(); });
+/* v0.58 : glisser pour fermer une feuille ou une carte (fiche rideau états 1 et 2, « Je l'ai vu », Ajouter, Saisir à la main…) et revenir à la liste.
+   Horizontal (dans les deux sens) partout ; vers le bas sur les feuilles si la zone touchée est tout en haut de son défilement
+   (fiche rideau : le bas est géré par le rideau, état 2 = replier, état 1 = fermer).
+   Jamais : sur les étoiles, dans un champ de saisie, en écriture d'avis, dans une bande qui peut encore défiler dans ce sens, ni si un défilement interne a bougé.
+   Seuils : 60 px au moins, et l'axe du geste au moins deux fois plus grand que l'autre. */
+let fermeEnCours = false;
+function fermerGlisse(sx, sy) {
+  if (fermeEnCours || !F.open) return;
+  if (!F.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) { F.close(); return; }
+  fermeEnCours = true;   // courte sortie dans le sens du geste, puis fermeture
+  const a = F.animate([{ transform: 'none', opacity: 1 }, { transform: `translate(${sx * innerWidth * .5}px,${sy * innerHeight * .3}px)`, opacity: 0 }], { duration: 180, easing: 'ease-in', fill: 'forwards' });
+  const fin = () => { if (!fermeEnCours) return; fermeEnCours = false; F.close(); a.cancel(); };
+  a.finished.catch(() => {}).then(fin); setTimeout(fin, 260);   // filet : fermeture même si l'animation ne se termine pas
+}
+(() => {
+  let g = null;
+  const defile = el => { for (let n = el; n && n !== document.documentElement; n = n.parentElement) { const o = getComputedStyle(n).overflowY; if ((o === 'auto' || o === 'scroll') && n.scrollHeight > n.clientHeight + 1) return n; if (n === F) break; } return null; };
+  F.addEventListener('touchstart', e => {
+    const t = e.target; g = null;
+    if (e.touches.length !== 1 || t.closest('input, select, textarea, [contenteditable], .c-stars') || F.querySelector('.avis-ouvert')) return;
+    const b = t.closest('.bande'), z = defile(t);
+    g = { x: e.touches[0].clientX, y: e.touches[0].clientY, z, top: z ? z.scrollTop : 0, rideau: !!t.closest('.corps.rideau'),
+      bande: b ? { b, x: b.scrollLeft, debut: b.scrollLeft <= 1, fin: b.scrollLeft + b.clientWidth >= b.scrollWidth - 2 } : null };
+  }, { passive: true });
+  F.addEventListener('touchend', e => {
+    const s = g; g = null; if (!s || !F.open) return;
+    const dx = e.changedTouches[0].clientX - s.x, dy = e.changedTouches[0].clientY - s.y, ax = Math.abs(dx), ay = Math.abs(dy);
+    if (s.z && s.z.scrollTop !== s.top) return;   // un défilement interne a eu lieu
+    if (ax >= 60 && ax >= 2 * ay) {
+      if (s.bande && (s.bande.b.scrollLeft !== s.bande.x || !(dx > 0 ? s.bande.debut : s.bande.fin))) return;   // la bande pouvait encore défiler : c'est elle qui bouge
+      fermerGlisse(dx > 0 ? 1 : -1, 0);
+    } else if (!s.rideau && dy >= 60 && dy >= 2 * ax && s.top <= 0) fermerGlisse(0, 1);
+  }, { passive: true });
+  F.addEventListener('touchcancel', () => { g = null; }, { passive: true });
+})();
 F.addEventListener('close', () => { F.classList.remove('rd-ferme'); const tt = $('#toast'); if (tt.parentNode === F) document.body.append(tt); });
 /* iPhone : le clavier ne redimensionne pas la page, on suit la zone réellement visible */
 if (window.visualViewport) {
@@ -862,10 +903,12 @@ function carte(f0) {
 }
 
 /* fiche d'un titre vu : on lit d'abord ; note, date et avis se modifient sur place et s'enregistrent au fil de l'eau.
-   « Annuler » remet l'état d'ouverture de la fiche ; « À voir » et « Retirer » sont dans l'en-tête. */
+   L'icône « annuler » (en haut à gauche, à côté de la flèche retour, visible dès qu'il y a un changement) remet l'état d'ouverture de la fiche ;
+   « À voir » et « Retirer » sont dans l'en-tête. Sauvegarde silencieuse (v0.58 : plus de texte « Enregistré », l'icône pulse juste). */
 const ICO = {
   oeil: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12c2.2-4.3 5.4-6.5 9.5-6.5s7.3 2.2 9.5 6.5c-2.2 4.3-5.4 6.5-9.5 6.5S4.7 16.3 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>',
   avoir: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10a1 1 0 0 1 1 1v16l-6-4-6 4v-16a1 1 0 0 1 1-1z"/></svg>',
+  annuler: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>',
   retour: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   retirer: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/></svg>'
 };
@@ -877,8 +920,8 @@ function carteVu(f0) {
   const syn = h('details', { class: 'syn cache-clavier', hidden: true }, h('summary', null, 'Synopsis'), h('p'));
   synopsis(f).then(t => { syn.lastChild.textContent = t; syn.hidden = !t; });
   const sauve = () => { clearTimeout(minuteur); minuteur = null; enregistrer(f); };
-  const change = (dessine) => { modifie = true; sauve(); if (dessine !== false) dessiner(); else majEtat(); };
-  const planifie = () => { modifie = true; clearTimeout(minuteur); minuteur = setTimeout(() => { sauve(); majEtat(); }, 500); };
+  const change = (dessine) => { modifie = true; sauve(); if (dessine !== false) dessiner(); else majEtat(); pulse(); };
+  const planifie = () => { modifie = true; clearTimeout(minuteur); minuteur = setTimeout(() => { sauve(); majEtat(); pulse(); }, 500); };
   F.addEventListener('close', () => { if (minuteur) sauve(); clearTimeout(tConf); }, { once: true });
   const restaurer = () => {   // remet l'état d'ouverture (note, date, avis, statut)
     clearTimeout(minuteur); minuteur = null; clearTimeout(tConf); confirme = false;
@@ -896,13 +939,11 @@ function carteVu(f0) {
   const bRetour = h('button', { class: 'f-retour', type: 'button', 'aria-label': 'Fermer la fiche', on: { click: () => F.close() } }); bRetour.innerHTML = ICO.retour;
   /* rideau fermé : pas d'en-tête (flèche posée sur l'affiche) ; fiche dépliée : flèche retour à gauche du titre, sans « Fermer » */
   const majTete = () => { const lecture = !etat && !avis; F.classList.toggle('rd-ferme', lecture && !ouvert); bRetour.hidden = !(lecture && ouvert); const fe = F.querySelector('.f-tete > .btn:last-child'); if (fe) fe.hidden = lecture && ouvert; };
-  const ligneEtat = h('div', { class: 'c-etat', role: 'status' });
-  const majEtat = () => {
-    ligneEtat.textContent = '';
-    if (!modifie) { ligneEtat.hidden = true; return; }
-    ligneEtat.hidden = false;
-    ligneEtat.append(h('span', null, minuteur ? 'Enregistrement…' : 'Enregistré'), h('button', { class: 'effacer', type: 'button', on: { click: restaurer } }, avis ? 'Annuler' : 'Annuler les changements'));
-  };
+  /* icône « annuler » : une dans l'en-tête (fiche dépliée, écriture d'avis), une posée sur l'affiche à côté de la flèche (rideau fermé) */
+  const bAnnuler = h('button', { class: 'ico-annuler', type: 'button', 'aria-label': 'Annuler les changements', title: 'Annuler les changements', on: { click: () => restaurer() } }); bAnnuler.innerHTML = ICO.annuler;
+  const bAnnulerAff = h('button', { class: 'ico-annuler rd-annuler', type: 'button', 'aria-label': 'Annuler les changements', title: 'Annuler les changements', on: { click: () => restaurer() } }); bAnnulerAff.innerHTML = ICO.annuler;
+  const majEtat = () => { bAnnuler.hidden = !!etat; [bAnnuler, bAnnulerAff].forEach(b => b.classList.toggle('vis', modifie && !etat)); };
+  const pulse = () => { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; [bAnnuler, bAnnulerAff].forEach(b => { if (b.isConnected && b.animate) b.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.18)' }, { transform: 'scale(1)' }], { duration: 320, easing: 'ease-out' }); }); };   // retour discret : la sauvegarde est faite
   const ouvrirAvis = cle => { auteur = cle; avis = true; confirme = false; clearTimeout(tConf); dessiner(); const t = $('#ch-com'); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } };   // focus dans le toucher : iOS ouvre le clavier
   const pastilles = () => f.genres && f.genres.length ? h('div', { class: 'c-genres', role: 'group', 'aria-label': 'Genres : toucher pour filtrer la liste' }, f.genres.map(g => h('button', { class: 'puce', type: 'button', on: { click: () => { F.close(); allerVue('vus'); S.genre = g; rendre(); scrollTo({ top: 0 }); } } }, g))) : null;
   const dessiner = () => {
@@ -928,7 +969,7 @@ function carteVu(f0) {
       const majPoints = () => onglets.forEach((b, i) => { const cle = i ? 'commentaire_oriana' : 'commentaire'; b.setAttribute('aria-pressed', String(auteur === cle)); b.classList.toggle('plein-c', !!(f[cle] || '').trim()); });
       majPoints();
       corps.append(h('div', { class: 'champ com' }, h('div', { class: 'ctabs', role: 'group', 'aria-label': 'Avis de' }, onglets), ta),
-        h('div', { class: 'c-bas' }, ligneEtat, h('button', { class: 'btn', type: 'button', on: { click: () => { if (minuteur) sauve(); avis = false; dessiner(); } } }, 'Terminé')));
+        h('div', { class: 'c-bas' }, h('button', { class: 'btn', type: 'button', on: { click: () => { if (minuteur) sauve(); avis = false; dessiner(); } } }, 'Terminé')));
       majEtat(); return;
     }
     const sans = !f.affiche;
@@ -954,9 +995,16 @@ function carteVu(f0) {
       h('div', { class: 'rd-ligne' }, h('span', { class: 'rd-note' }, etoiles(f.note || 0, 100), f.note ? h('b', null, fmtNote(f.note)) : null), h('span', { class: 'rd-quand' }, icone(ICO.oeil, d === aujourdhui() ? 'aujourd’hui' : court))),
       pastilles());
     /* geste : tirer vers le haut depuis n'importe où (affiche, flèche, aperçu) déplie ; tirer vers le bas (en haut de la fiche) replie */
-    let y0 = null, t0 = 0;
-    const debut = e => { y0 = e.touches[0].clientY; t0 = panneau.scrollTop; };
-    const fin = e => { if (y0 === null) return; const dy = e.changedTouches[0].clientY - y0; y0 = null; if (!ouvert && dy < -40) bascule(true); else if (ouvert && t0 <= 0 && panneau.scrollTop <= 0 && dy > 70) bascule(false); };
+    /* v0.58 : tirer vers le bas (depuis n'importe où) = retour : état 2 en haut du panneau → état 1, état 1 → liste ; jamais depuis les étoiles, une bande ou un champ ; un glissé horizontal net est laissé à la fermeture commune (voir fermerGlisse) */
+    let y0 = null, t0 = 0, x0 = 0, libre = true;
+    const debut = e => { y0 = e.touches[0].clientY; x0 = e.touches[0].clientX; t0 = panneau.scrollTop; libre = !e.target.closest('input, select, textarea, [contenteditable], .c-stars, .bande'); };
+    const fin = e => {
+      if (y0 === null) return; const dy = e.changedTouches[0].clientY - y0, ax = Math.abs(e.changedTouches[0].clientX - x0); y0 = null;
+      if (ax >= 60 && ax >= 2 * Math.abs(dy)) return;
+      if (!ouvert && dy < -40) bascule(true);
+      else if (ouvert && libre && t0 <= 0 && panneau.scrollTop <= 0 && dy > 70) bascule(false);
+      else if (!ouvert && libre && dy >= 60 && dy >= 2 * ax) fermerGlisse(0, 1);
+    };
     [aff, panneau].forEach(z => { z.addEventListener('touchstart', debut, { passive: true }); z.addEventListener('touchend', fin, { passive: true }); });
     /* lecture : note (glisser le doigt sur les étoiles, demi-étoiles, enregistrée au relâchement), date, avis, synopsis, même esprit */
     const lib = h('span', { class: 'lib' }), val = h('span', { class: 'val' });
@@ -973,11 +1021,11 @@ function carteVu(f0) {
       })),
       syn, meme);
     lect.inert = !ouvert;
-    panneau.append(pk, lect, ligneEtat);   // « Enregistré · Annuler » : ligne fixe en bas du panneau, sous le contenu
+    panneau.append(pk, lect);
     corps.classList.add('rideau'); corps.classList.toggle('ouvert', ouvert);
     const retour = h('button', { class: 'rd-retour', type: 'button', 'aria-label': 'Fermer la fiche', on: { click: () => F.close() } }); retour.innerHTML = ICO.retour;
     retour.addEventListener('touchstart', debut, { passive: true }); retour.addEventListener('touchend', fin, { passive: true });
-    corps.append(aff, retour, panneau);
+    corps.append(aff, retour, bAnnulerAff, panneau);
     panneau.scrollTop = st; pRef = panneau;
     majEtat(); if (!meme.firstChild) memeRemplir();
   };
@@ -1014,7 +1062,7 @@ function carteVu(f0) {
     meme.append(h('h2', null, 'Dans le même esprit'), pastilles(), bande); meme.hidden = false;
   };
   feuille('Vu', corps);
-  const tete = F.querySelector('.f-tete'); tete.insertBefore(icones, tete.lastChild); tete.prepend(bRetour);
+  const tete = F.querySelector('.f-tete'); tete.insertBefore(icones, tete.lastChild); tete.prepend(bRetour, bAnnuler);
   F.classList.add('plein');
   dessiner();
 }
