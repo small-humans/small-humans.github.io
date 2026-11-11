@@ -186,7 +186,10 @@ dialog[open]{animation:monte .28s var(--ease)}
 .f-syn{color:var(--acier);line-height:1.5;margin:0}
 details.syn{color:var(--acier)}
 details.syn[hidden],.f-syn[hidden]{display:none}
-details.syn summary{min-height:32px;display:flex;align-items:center;cursor:pointer;font-size:var(--t-small)}
+details.syn summary{min-height:32px;display:flex;align-items:center;cursor:pointer;font-size:var(--t-small);list-style:none;gap:10px}
+details.syn summary::-webkit-details-marker{display:none}
+details.syn summary::before{content:"";flex:none;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .2s var(--ease)}   /* chevron « > », pointe en bas quand le synopsis est déplié */
+details.syn[open] summary::before{transform:translateY(-2px) rotate(45deg)}
 details.syn p{margin:4px 0 0;line-height:1.5;max-height:28dvh;overflow:auto}
 .champ>label,.champ>.lib{color:var(--acier);font-size:var(--t-small)}
 .champ input[type=date]{display:block;min-width:0;max-width:100%;box-sizing:border-box;-webkit-appearance:none;appearance:none;text-align:left}
@@ -273,9 +276,7 @@ textarea.export{min-height:180px;font-size:13px}
 .c-ok b{display:block;font-weight:500}
 .c-date{position:relative;display:inline-flex;align-items:center;min-height:44px;color:var(--acier);font-size:var(--t-small)}
 .c-date input{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;border:0;padding:0;background:none}
-.c-stars{position:relative;width:240px;height:48px}
-.c-hit{position:absolute;inset:0;display:flex}.c-hit button{flex:1;height:48px}
-.carte .btn{flex:none}
+.c-stars{position:relative;width:240px;height:48px;touch-action:pan-y;cursor:pointer;display:flex;align-items:center}   /* pan-y : le glissé horizontal reste aux étoiles */.carte .btn{flex:none}
 .carte.avis-ouvert .cache-clavier{display:none}
 dialog.clavier .carte .cache-clavier{display:none}
 /* fiche d'un titre vu : lecture d'abord, chaque élément se modifie sur place */
@@ -288,12 +289,13 @@ dialog.clavier .carte .cache-clavier{display:none}
 .f-ico[aria-pressed="true"]{color:var(--ink);background:var(--nuit2)}
 .carte.vu{gap:16px}
 .carte.vu>*{flex:none}
-.carte.vu .c-stars{width:280px;height:56px}.carte.vu .c-hit button{height:56px}
+.carte.vu .c-stars{width:280px;height:56px}
 .c-date.oeil{gap:8px;color:var(--ink);font-size:var(--t-body);padding-right:8px;align-self:flex-start}
 .c-date.oeil svg{width:22px;height:22px;flex:none;color:var(--accent)}
 .c-genres{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .c-genres .puce{padding:0 14px;font-size:var(--t-small)}
 .c-meme h2{font-size:17px;font-weight:600;margin-bottom:12px}
+.c-meme .c-genres{margin:0 0 16px}   /* espace net entre les pastilles de genre et la bande d'affiches */
 .c-avis{display:grid;gap:8px}
 .c-avis>button{display:grid;gap:4px;width:100%;text-align:left;background:var(--nuit);padding:12px 16px;min-height:48px}
 .c-avis .qui{color:var(--acier);font-size:var(--t-small)}
@@ -332,7 +334,18 @@ dialog.clavier .carte .cache-clavier{display:none}
 .rd-lect{padding:8px var(--marge) calc(40px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:24px}
 .rd-lect>*{flex:none}
 .rideau .c-avis>button{background:none;padding:0}
-.f-tete h2.t-film{flex:1;min-width:0;text-transform:none;letter-spacing:0;font-weight:400;line-height:1.3}
+/* état 2 : même écart visible (36 px) entre chaque bloc : note, date, avis, synopsis, même esprit ; 24 px entre l'avis de Simon et celui d'Oriana */
+.rideau .c-avis{gap:20px;margin-top:-3px}
+.rideau .note-tete .effacer{margin-block:-12px}   /* « Effacer » garde sa zone tactile de 44 px sans pousser la note vers le bas */
+.rideau .rd-lect .syn{margin-block:1px 2px}
+/* état 1 : l'aperçu (étoiles et date, puis genres) forme un bloc centré sous la poignée : même espace au-dessus et au-dessous, plus de vide sous les genres */
+.rd-panneau:not(.ouvert) .rd-pk{display:flex;flex-direction:column;gap:12px;padding-bottom:env(safe-area-inset-bottom)}
+.rd-panneau:not(.ouvert) .rd-pk>.rd-ligne{margin-top:auto}
+.rd-panneau:not(.ouvert) .rd-pk::after{content:"";margin-top:auto}
+.rd-panneau:not(.ouvert) .rd-poignee{margin-bottom:-16px}   /* l'espace se compte depuis la barre de la poignée, pas depuis sa zone tactile */
+.corps.rideau:not(.ouvert) .rd-aff{touch-action:none}   /* état 1 : tirer vers le haut sur l'affiche déplie la fiche, rien ne défile */
+/* « Enregistré · Annuler » : ligne fixe en bas du panneau, ne décale rien au-dessus */
+.rd-panneau>.c-etat{padding:0 var(--marge) env(safe-area-inset-bottom);border-top:1px solid var(--nuit2);min-height:calc(48px + env(safe-area-inset-bottom))}.f-tete h2.t-film{flex:1;min-width:0;text-transform:none;letter-spacing:0;font-weight:400;line-height:1.3}
 .feuille{grid-template-columns:minmax(0,1fr)}
 .f-tete{min-width:0}
 .f-tete h2.t-film{display:flex;align-items:center;gap:12px}
@@ -410,7 +423,7 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.56 · 11 nov. 2026';
+const VERSION = '0.57 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -498,6 +511,22 @@ function etoiles(note, largeur) {
   const e = h('div', { class: 'etoiles', style: `--w:${largeur}px` }, svg('fond'), clip);
   e.set = n => { clip.style.width = (n || 0) / 5 * 100 + '%'; };
   e.set(note); return e;
+}
+/* note par demi-étoile : glisser le doigt sur les étoiles fait varier la note en direct (demi-étoile selon la position du doigt),
+   elle est enregistrée au relâchement. Le glissé horizontal ne fait ni défiler la fiche, ni changer d'onglet, ni déplier ou replier le rideau. */
+function noteGlisse(n0, largeur, apercu, valider) {
+  let n = n0 || 0, actif = false;
+  const et = etoiles(n, largeur);
+  const z = h('div', { class: 'c-stars', role: 'slider', tabindex: '0', 'aria-label': 'Note sur 5', 'aria-valuemin': '0', 'aria-valuemax': '5' }, et);
+  const maj = x => { n = Math.max(0, Math.min(5, x)); et.set(n); z.setAttribute('aria-valuenow', n); z.setAttribute('aria-valuetext', n ? fmtNote(n) + ' sur 5' : 'pas de note'); apercu(n); };
+  const depuis = ev => { const r = et.getBoundingClientRect(); maj(Math.max(.5, Math.ceil((ev.clientX - r.left) / r.width * 10) / 2)); };
+  z.addEventListener('pointerdown', ev => { if (ev.button) return; actif = true; try { z.setPointerCapture(ev.pointerId); } catch (e) { /* tant pis */ } depuis(ev); });
+  z.addEventListener('pointermove', ev => { if (actif) depuis(ev); });
+  z.addEventListener('pointerup', () => { if (!actif) return; actif = false; valider(n || null); });
+  z.addEventListener('pointercancel', () => { if (!actif) return; actif = false; maj(n0 || 0); });   // le navigateur a pris le geste (défilement vertical) : on remet la note d'avant
+  ['touchstart', 'touchend'].forEach(t => z.addEventListener(t, ev => ev.stopPropagation(), { passive: true }));   // pas de rideau qui se déplie ou se replie pendant qu'on note
+  z.addEventListener('keydown', ev => { const d = { ArrowRight: .5, ArrowUp: .5, ArrowLeft: -.5, ArrowDown: -.5 }[ev.key]; if (d) { ev.preventDefault(); maj(n + d); valider(n || null); } });
+  maj(n); return z;
 }
 
 /* ---------- vue principale ---------- */
@@ -809,11 +838,11 @@ function carte(f0) {
       h('div', null, h('b', null, 'Vu ' + quand), h('label', { class: 'c-date' }, 'Enregistré · changer la date',
         h('input', { type: 'date', value: f.date_vu, max: aujourdhui(), 'aria-label': 'Date de visionnage', on: { change: e => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) { f.date_vu = e.target.value; sauve(); dessiner(); } } } }))),
       h('button', { class: 'effacer', type: 'button', on: { click: annuler } }, 'Annuler')));
-    /* note : un toucher par étoile ; toucher la même étoile = demi-étoile */
-    const et = etoiles(f.note || 0, 240), hit = h('div', { class: 'c-hit' });
-    for (let i = 1; i <= 5; i++) hit.append(h('button', { type: 'button', 'aria-label': i + ' sur 5', on: { click: () => { f.note = f.note === i ? i - .5 : i; sauve(); dessiner(); } } }));
-    corps.append(h('div', { class: 'champ note' }, h('div', { class: 'note-tete' }, h('span', { class: 'lib' }, 'Une note ? Facultatif'), h('span', { class: 'val' }, f.note ? fmtNote(f.note) + ' / 5' : ''),
-      f.note ? h('button', { class: 'effacer', type: 'button', on: { click: () => { f.note = null; sauve(); dessiner(); } } }, 'Effacer') : null), h('div', { class: 'c-stars' }, et, hit)));
+    /* note : glisser le doigt sur les étoiles (demi-étoiles), valeur affichée en direct, enregistrée au relâchement */
+    const val = h('span', { class: 'val' });
+    const zn = noteGlisse(f.note, 240, n => { val.textContent = n ? fmtNote(n) + ' / 5' : ''; }, n => { f.note = n; sauve(); dessiner(); });
+    corps.append(h('div', { class: 'champ note' }, h('div', { class: 'note-tete' }, h('span', { class: 'lib' }, 'Une note ? Facultatif'), val,
+      f.note ? h('button', { class: 'effacer', type: 'button', on: { click: () => { f.note = null; sauve(); dessiner(); } } }, 'Effacer') : null), zn));
     /* avis : replié derrière un bouton ; ouvert, il prend toute la place visible (clavier compris) */
     if (!avis) {
       const dit = (f.commentaire || f.commentaire_oriana || '').trim();
@@ -908,7 +937,7 @@ function carteVu(f0) {
     const court = new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', annee ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'long', year: 'numeric' });
     const oeil = h('label', { class: 'c-date oeil' }, icone(ICO.oeil, d === aujourdhui() ? 'Vu aujourd’hui' : 'Vu le ' + court),
       h('input', { type: 'date', value: d, max: aujourdhui(), 'aria-label': 'Date de visionnage, ' + fmtDate(d, true) + ' : toucher pour changer', on: { change: e => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value) && e.target.value !== f.date_vu) { f.date_vu = e.target.value; change(); } } } }));
-    /* « rideau » : ouverture = affiche entière, jamais recouverte, titre non répété, aperçu dessous ; on tire l'aperçu vers le haut pour lire la fiche */
+    /* « rideau » : ouverture = affiche entière, jamais recouverte, titre non répété, aperçu dessous ; on tire vers le haut (n'importe où) pour lire la fiche */
     const aff = sans
       ? h('div', { class: 'rd-aff typo', role: 'img', 'aria-label': f.titre + ', sans affiche' }, h('span', { class: 'gh', 'aria-hidden': 'true' }, (f.titre || '?').trim().replace(/^(L’|L'|Le |La |Les )/, '').charAt(0).toUpperCase()), h('b', { class: 'rd-tt' }, f.titre))
       : h('div', { class: 'rd-aff', role: 'img', 'aria-label': 'Affiche de ' + f.titre, style: `background-image:url("${IMG}w500${f.affiche}")` });
@@ -924,28 +953,30 @@ function carteVu(f0) {
     const pk = h('div', { class: 'rd-pk', on: { click: e => { if (!ouvert && !e.target.closest('.c-genres')) bascule(true); } } }, poignee,
       h('div', { class: 'rd-ligne' }, h('span', { class: 'rd-note' }, etoiles(f.note || 0, 100), f.note ? h('b', null, fmtNote(f.note)) : null), h('span', { class: 'rd-quand' }, icone(ICO.oeil, d === aujourdhui() ? 'aujourd’hui' : court))),
       pastilles());
-    /* geste : tirer vers le haut déplie, tirer vers le bas (en haut de la fiche) replie */
+    /* geste : tirer vers le haut depuis n'importe où (affiche, flèche, aperçu) déplie ; tirer vers le bas (en haut de la fiche) replie */
     let y0 = null, t0 = 0;
-    panneau.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; t0 = panneau.scrollTop; }, { passive: true });
-    panneau.addEventListener('touchend', e => { if (y0 === null) return; const dy = e.changedTouches[0].clientY - y0; y0 = null; if (!ouvert && dy < -40) bascule(true); else if (ouvert && t0 <= 0 && panneau.scrollTop <= 0 && dy > 70) bascule(false); }, { passive: true });
-    /* lecture : note (un toucher par étoile ; la même étoile = demi-étoile), date, avis, synopsis, même esprit */
-    const et = etoiles(f.note || 0, 280), hit = h('div', { class: 'c-hit' });
-    for (let i = 1; i <= 5; i++) hit.append(h('button', { type: 'button', 'aria-label': i + ' sur 5', on: { click: () => { f.note = f.note === i ? i - .5 : i; change(); } } }));
+    const debut = e => { y0 = e.touches[0].clientY; t0 = panneau.scrollTop; };
+    const fin = e => { if (y0 === null) return; const dy = e.changedTouches[0].clientY - y0; y0 = null; if (!ouvert && dy < -40) bascule(true); else if (ouvert && t0 <= 0 && panneau.scrollTop <= 0 && dy > 70) bascule(false); };
+    [aff, panneau].forEach(z => { z.addEventListener('touchstart', debut, { passive: true }); z.addEventListener('touchend', fin, { passive: true }); });
+    /* lecture : note (glisser le doigt sur les étoiles, demi-étoiles, enregistrée au relâchement), date, avis, synopsis, même esprit */
+    const lib = h('span', { class: 'lib' }), val = h('span', { class: 'val' });
+    const zn = noteGlisse(f.note, 280, n => { lib.textContent = n ? 'Ta note' : 'Pas encore de note'; val.textContent = n ? fmtNote(n) + ' / 5' : ''; }, n => { f.note = n; change(); });
     if (blocConfirme) lect.append(blocConfirme);
     lect.append(
-      h('div', { class: 'champ note' }, h('div', { class: 'note-tete' }, h('span', { class: 'lib' }, f.note ? 'Ta note' : 'Pas encore de note'), h('span', { class: 'val' }, f.note ? fmtNote(f.note) + ' / 5' : ''),
-        f.note ? h('button', { class: 'effacer', type: 'button', on: { click: () => { f.note = null; change(); } } }, 'Effacer') : null), h('div', { class: 'c-stars' }, et, hit)),
+      h('div', { class: 'champ note' }, h('div', { class: 'note-tete' }, lib, val,
+        f.note ? h('button', { class: 'effacer', type: 'button', on: { click: () => { f.note = null; change(); } } }, 'Effacer') : null), zn),
       oeil,
       h('div', { class: 'c-avis' }, [['commentaire', 'Simon'], ['commentaire_oriana', 'Oriana']].map(([cle, nom]) => {
         const txt = (f[cle] || '').trim();
         return h('button', { type: 'button', 'aria-label': (txt ? 'Modifier l’avis ' : 'Écrire l’avis ') + (nom === 'Oriana' ? 'd’Oriana' : 'de Simon'), on: { click: () => ouvrirAvis(cle) } },
           h('span', { class: 'qui' }, nom === 'Oriana' ? 'Avis d’Oriana' : 'Avis de Simon'), h('span', { class: 'txt' + (txt ? '' : ' rien') }, txt || 'Toucher pour écrire'));
       })),
-      syn, ligneEtat, meme);
+      syn, meme);
     lect.inert = !ouvert;
-    panneau.append(pk, lect);
+    panneau.append(pk, lect, ligneEtat);   // « Enregistré · Annuler » : ligne fixe en bas du panneau, sous le contenu
     corps.classList.add('rideau'); corps.classList.toggle('ouvert', ouvert);
     const retour = h('button', { class: 'rd-retour', type: 'button', 'aria-label': 'Fermer la fiche', on: { click: () => F.close() } }); retour.innerHTML = ICO.retour;
+    retour.addEventListener('touchstart', debut, { passive: true }); retour.addEventListener('touchend', fin, { passive: true });
     corps.append(aff, retour, panneau);
     panneau.scrollTop = st; pRef = panneau;
     majEtat(); if (!meme.firstChild) memeRemplir();
