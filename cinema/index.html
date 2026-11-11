@@ -285,7 +285,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.28 · 11 nov. 2026';
+const VERSION = '0.29 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -635,8 +635,10 @@ function chargerBase() {
 function ajout() {
   const liste = h('ul', { class: 'resultats' });
   const etat = h('p', { class: 'compte', role: 'status' });
-  const q = h('input', { id: 'ch-q', type: 'search', placeholder: 'Titre du film, de la série, de l’anime', autocomplete: 'off', enterkeyhint: 'search' });
+  const q = h('input', { id: 'ch-q', type: 'search', placeholder: 'Titre du film, de la série, de l’anime', autocomplete: 'off', enterkeyhint: 'search', style: 'padding-right:48px' });
+  const croix = h('button', { class: 'rech-x', type: 'button', 'aria-label': 'Effacer la recherche', hidden: true, on: { click: () => { q.value = ''; chercher(); q.focus(); } } }, '×');
   const chercher = async () => {
+    croix.hidden = !q.value;
     liste.textContent = '';
     const mots = norm(q.value.trim()).split(/\s+/).filter(Boolean);
     if (q.value.trim().length < 2) { etat.textContent = ''; return; }
@@ -648,7 +650,7 @@ function ajout() {
       affiche(f), h('div', { style: 'min-width:0' }, h('b', null, f.titre), h('span', null, [TYPES[f.type] ? TYPES[f.type].replace(/s$/, '') : '', f.annee, deja.has(f.id) ? 'déjà dans ta liste' : ''].filter(Boolean).join(' · ')))))));
   };
   let t; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(chercher, 180); });
-  feuille('Ajouter', h('div', { class: 'champ' }, h('label', { for: 'ch-q' }, 'Chercher dans la base'), q), etat, liste,
+  feuille('Ajouter', h('div', { class: 'champ' }, h('label', { for: 'ch-q' }, 'Chercher dans la base'), h('div', { class: 'rech' }, q, croix)), etat, liste,
     h('button', { class: 'btn', type: 'button', on: { click: manuel } }, 'Saisir à la main'));
   F.classList.add('haute');
   setTimeout(() => { chargerBase(); q.focus(); }, 60);
