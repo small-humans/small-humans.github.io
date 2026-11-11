@@ -297,7 +297,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.37 · 11 nov. 2026';
+const VERSION = '0.38 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -614,10 +614,15 @@ function formulaire(f, passerVu) {
     if (f.statut === 'vu') {
       corps.append(champNote(f.note, n => { f.note = n; }));
       const ta = h('textarea', { id: 'ch-com', maxlength: 1000, 'aria-label': 'Commentaire (facultatif)', on: { input: e => { f[auteur] = e.target.value; majPoints(); } } }, f[auteur] || '');
-      const onglets = [['commentaire', 'Simon'], ['commentaire_oriana', 'Oriana']].map(([cle, nom]) => h('button', { type: 'button', class: 'ctab', on: { click: () => { auteur = cle; ta.value = f[auteur] || ''; majPoints(); ta.focus(); } } }, nom));
+      const onglets = [['commentaire', 'Simon'], ['commentaire_oriana', 'Oriana']].map(([cle, nom]) => h('button', { type: 'button', class: 'ctab', on: { click: () => choisir(cle) } }, nom));
       const majPoints = () => onglets.forEach((b, i) => { const cle = i ? 'commentaire_oriana' : 'commentaire'; b.setAttribute('aria-pressed', String(auteur === cle)); b.classList.toggle('plein-c', !!(f[cle] || '').trim()); });
+      const choisir = cle => { auteur = cle; ta.value = f[auteur] || ''; majPoints(); ta.focus(); };
       majPoints();
-      corps.append(h('div', { class: 'champ com' }, h('div', { class: 'ctabs', role: 'group', 'aria-label': 'Commentaire de' }, onglets), ta));
+      const zone = h('div', { class: 'champ com' }, h('div', { class: 'ctabs', role: 'group', 'aria-label': 'Commentaire de' }, onglets), ta);
+      let x0 = 0, y0 = 0;   // glisser le pouce à gauche / à droite pour passer de Simon à Oriana
+      zone.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+      zone.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; if (Math.abs(dx) > 70 && Math.abs(dx) > 2 * Math.abs(dy)) { const cle = dx < 0 ? 'commentaire_oriana' : 'commentaire'; if (cle !== auteur) choisir(cle); } }, { passive: true });
+      corps.append(zone);
       corps.append(h('div', { class: 'champ date' }, h('label', { for: 'ch-date' }, 'Date de visionnage'), h('input', { id: 'ch-date', type: 'date', value: f.date_vu, max: aujourdhui(), on: { change: e => { f.date_vu = e.target.value; } } })));
     } else {
       corps.append(h('div', { class: 'champ' }, h('span', { class: 'lib' }, 'Envie (facultatif)'),
