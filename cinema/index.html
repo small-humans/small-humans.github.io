@@ -118,7 +118,12 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .btn.fort:hover{background:#8BB9FF}
 .btn:disabled{opacity:.45;cursor:default}
 .actions .btn{flex:none;padding:0 20px;font-size:15px;line-height:1.2;border-radius:999px;background:var(--nuit2);min-height:52px}.actions .btn.fort{background:var(--accent);color:var(--accent-ink)}
-.actions #b-ajout,.actions #b-haut{width:46px;height:46px;min-height:46px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}.actions .rangee{align-items:center}
+.actions .capsule{display:flex;align-items:center;padding:4px;border-radius:999px;background:rgba(5,8,15,.92);border:1px solid rgba(111,168,255,.55);pointer-events:auto}
+.actions .capsule .btn{width:40px;height:40px;min-height:40px;padding:0;border-radius:50%;background:transparent;color:var(--accent);display:inline-flex;align-items:center;justify-content:center}
+.actions .capsule #b-haut{position:relative;color:var(--acier);border-radius:50% 0 0 50%}
+.actions .capsule #b-haut::after{content:"";position:absolute;right:0;top:10px;bottom:10px;width:1px;background:rgba(255,255,255,.2)}
+.actions .capsule #b-ajout{border-radius:50%}
+.actions .capsule #b-haut:not([hidden])+#b-ajout{border-radius:0 50% 50% 0}.actions .rangee{align-items:center}
 .actions #b-haut[hidden]{display:none}
 .actions #b-copie{position:relative;width:52px;padding:0;display:inline-flex;align-items:center;justify-content:center}
 .actions #b-copie[hidden]{display:none}
@@ -277,9 +282,11 @@ textarea.export{min-height:180px;font-size:13px}
 
 <div class="actions">
   <div class="rangee">
+    <button class="btn" id="b-copie" type="button" aria-label="Envoyer mes ajouts" hidden><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg><span class="nb" id="nb"></span></button>
+    <div class="capsule">
     <button class="btn" id="b-haut" type="button" aria-label="Remonter en haut" hidden><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
     <button class="btn fort" id="b-ajout" type="button" aria-label="Ajouter un titre"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-    <button class="btn" id="b-copie" type="button" aria-label="Envoyer mes ajouts" hidden><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg><span class="nb" id="nb"></span></button>
+    </div>
   </div>
 </div>
 <p class="version" id="version"></p>
@@ -289,7 +296,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.32 · 11 nov. 2026';
+const VERSION = '0.33 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
