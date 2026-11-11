@@ -259,6 +259,23 @@ textarea.export{min-height:180px;font-size:13px}
 .effacer{min-height:44px;padding:0 4px;text-decoration:underline;text-underline-offset:.2em;color:var(--acier)}
 .f-actions.ligne{grid-auto-flow:column;grid-auto-columns:1fr}
 .f-actions.ligne .btn{min-height:48px;font-size:15px;padding:0 8px}
+/* carte « Je l'ai vu » */
+.c-aff{flex:none;height:200px;background-size:cover;background-position:50% 30%;background-color:var(--nuit)}
+.c-aff.typo{position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:16px}
+.c-aff .gh{position:absolute;right:-.06em;bottom:-.2em;font-size:200px;font-weight:700;line-height:1;color:var(--nuit2);letter-spacing:-.06em}
+.c-typo{position:relative;display:block;font-size:var(--t-lead);font-weight:500;letter-spacing:.06em;text-transform:uppercase;line-height:1.2;overflow-wrap:anywhere}
+.c-info h3{font-size:var(--t-lead);font-weight:500;line-height:1.2;letter-spacing:.06em;text-transform:uppercase;overflow-wrap:anywhere}
+.c-info p{color:var(--acier);margin-top:4px}
+.carte .c-vu{min-height:64px;font-size:18px;flex:none}
+.c-ok{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none}
+.c-ok b{display:block;font-weight:500}
+.c-date{position:relative;display:inline-flex;align-items:center;min-height:44px;color:var(--acier);font-size:var(--t-small)}
+.c-date input{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;border:0;padding:0;background:none}
+.c-stars{position:relative;width:240px;height:48px}
+.c-hit{position:absolute;inset:0;display:flex}.c-hit button{flex:1;height:48px}
+.carte .btn{flex:none}
+.carte.avis-ouvert .cache-clavier{display:none}
+dialog.clavier .carte .cache-clavier{display:none}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
@@ -321,7 +338,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.50 · 11 nov. 2026';
+const VERSION = '0.51 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -671,21 +688,68 @@ function retirerBouton(id) {
 function fiche(id, obj) {
   const f = fusion().find(x => x.id === id) || obj; if (!f) return;
   if (f.statut === 'vu') return formulaire(Object.assign({}, f), false);   // un titre vu s'ouvre directement sur la note et le commentaire
-  const connu = f.statut === 'a_voir';
-  const act = [h('button', { class: 'btn fort', type: 'button', on: { click: () => formulaire(Object.assign({}, f), true) } }, 'Je l’ai vu')];
-  if (connu) act.push(h('div', { class: 'deux' }, h('button', { class: 'btn', type: 'button', on: { click: () => formulaire(Object.assign({}, f), false) } }, 'Modifier'), retirerBouton(id)));
-  else {
-    const rapide = envie => { enregistrer(Object.assign({}, f, { statut: 'a_voir', envie: envie || null })); F.close(); toast('Ajouté à « à voir ».'); };
-    act.push(h('button', { class: 'btn', type: 'button', on: { click: () => rapide('') } }, 'Mettre dans « à voir »'));
-    act.push(h('div', { class: 'choix', style: '--n:3' }, Object.entries(ENVIES).map(([v, t]) => h('button', { type: 'button', on: { click: () => rapide(v) } }, t))));
-  }
-  const syn = h('details', { class: 'syn', hidden: true }, h('summary', null, 'Synopsis'), h('p')); synopsis(f).then(t => { syn.lastChild.textContent = t; syn.hidden = !t; });
-  feuille(connu ? 'À voir' : 'Titre',
-    h('div', { class: 'f-haut' }, affiche(f, 'grand'), h('div', null, h('h3', null, f.titre), h('p', null, infosDe(f)), f.genres && f.genres.length ? h('p', null, f.genres.join(', ')) : null, f.envie ? h('p', null, ENVIES[f.envie]) : null)),
-    syn,
-    f.commentaire ? h('p', { class: 'f-com' }, f.commentaire) : null,
-    f.commentaire_oriana ? h('p', { class: 'f-com' }, h('b', null, 'Oriana : '), f.commentaire_oriana) : null,
-    h('div', { class: 'f-actions' }, act));
+  return carte(f);   // titre pas encore vu (Non vus, recherche, À voir) : carte « Je l'ai vu »
+}
+
+/* carte « Je l'ai vu » : un toucher enregistre aussitôt (date du jour) ; note, avis et date se complètent sur la même carte.
+   Pas de bouton Enregistrer : tout est sauvegardé au fil de l'eau, « Annuler » défait l'ajout. */
+function carte(f0) {
+  const f = Object.assign({}, f0), id = f.id, avant = memoire[id];   // « avant » sert à Annuler
+  const corps = h('div', { class: 'corps carte' });
+  let auteur = 'commentaire', avis = false, minuteur = null;
+  const sauve = () => { clearTimeout(minuteur); minuteur = null; enregistrer(f); };
+  const planifie = () => { clearTimeout(minuteur); minuteur = setTimeout(sauve, 500); };
+  F.addEventListener('close', () => { if (minuteur) sauve(); }, { once: true });
+  const annuler = () => { clearTimeout(minuteur); minuteur = null; if (avant === undefined) delete memoire[id]; else memoire[id] = avant; ecrire(); majBoutons(); rendre(); F.close(); toast('Annulé.'); };
+  const vu = () => { f.statut = 'vu'; delete f.envie; f.date_vu = aujourdhui(); sauve(); dessiner(); };
+  const envie = (e, ferme) => { f.statut = 'a_voir'; f.envie = e || null; sauve(); if (ferme) { F.close(); toast('Ajouté à « à voir ».'); } else dessiner(); };
+  const dessiner = () => {
+    corps.textContent = ''; corps.classList.toggle('avis-ouvert', avis);
+    const sans = !f.affiche, genres = f.genres && f.genres.length ? ' · ' + f.genres.join(', ') : '';
+    corps.append(sans
+      ? h('div', { class: 'c-aff typo cache-clavier' }, h('span', { class: 'gh', 'aria-hidden': 'true' }, (f.titre || '?').trim().charAt(0).toUpperCase()), h('b', { class: 'c-typo' }, f.titre))
+      : h('div', { class: 'c-aff cache-clavier', role: 'img', 'aria-label': 'Affiche de ' + f.titre, style: `background-image:url("${IMG}w342${f.affiche}")` }));
+    corps.append(h('div', { class: 'c-info cache-clavier' }, sans ? null : h('h3', null, f.titre), h('p', null, infosDe(f) + genres)));
+    if (f.statut !== 'vu') {
+      const connu = fusion().some(x => x.id === id && x.statut === 'a_voir');
+      corps.append(h('button', { class: 'btn fort c-vu', type: 'button', on: { click: vu } }, 'Je l’ai vu'));
+      if (connu) {
+        corps.append(h('div', { class: 'champ' }, h('span', { class: 'lib' }, 'Dans « à voir » · envie'),
+          h('div', { class: 'choix', style: '--n:3' }, Object.entries(ENVIES).map(([v, t]) => h('button', { type: 'button', 'aria-pressed': String(f.envie === v), on: { click: () => envie(f.envie === v ? '' : v) } }, t)))));
+        const r = retirerBouton(id); if (r) corps.append(h('div', { class: 'f-actions' }, r));
+      } else {
+        corps.append(h('div', { class: 'champ' }, h('span', { class: 'lib' }, 'Mettre dans « à voir »'),
+          h('div', { class: 'choix', style: '--n:3' }, Object.entries(ENVIES).map(([v, t]) => h('button', { type: 'button', on: { click: () => envie(v, true) } }, t)))));
+      }
+      return;
+    }
+    /* vu : enregistré, la suite est facultative */
+    const quand = f.date_vu === aujourdhui() ? 'aujourd’hui' : fmtDate(f.date_vu);
+    corps.append(h('div', { class: 'c-ok cache-clavier' },
+      h('div', null, h('b', null, 'Vu ' + quand), h('label', { class: 'c-date' }, 'Enregistré · changer la date',
+        h('input', { type: 'date', value: f.date_vu, max: aujourdhui(), 'aria-label': 'Date de visionnage', on: { change: e => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) { f.date_vu = e.target.value; sauve(); dessiner(); } } } }))),
+      h('button', { class: 'effacer', type: 'button', on: { click: annuler } }, 'Annuler')));
+    /* note : un toucher par étoile ; toucher la même étoile = demi-étoile */
+    const et = etoiles(f.note || 0, 240), hit = h('div', { class: 'c-hit' });
+    for (let i = 1; i <= 5; i++) hit.append(h('button', { type: 'button', 'aria-label': i + ' sur 5', on: { click: () => { f.note = f.note === i ? i - .5 : i; sauve(); dessiner(); } } }));
+    corps.append(h('div', { class: 'champ note' }, h('div', { class: 'note-tete' }, h('span', { class: 'lib' }, 'Une note ? Facultatif'), h('span', { class: 'val' }, f.note ? fmtNote(f.note) + ' / 5' : ''),
+      f.note ? h('button', { class: 'effacer', type: 'button', on: { click: () => { f.note = null; sauve(); dessiner(); } } }, 'Effacer') : null), h('div', { class: 'c-stars' }, et, hit)));
+    /* avis : replié derrière un bouton ; ouvert, il prend toute la place visible (clavier compris) */
+    if (!avis) {
+      const dit = (f.commentaire || f.commentaire_oriana || '').trim();
+      corps.append(h('button', { class: 'btn', type: 'button', on: { click: () => { avis = true; dessiner(); setTimeout(() => { const t = $('#ch-com'); if (t) t.focus(); }, 60); } } }, dit ? 'Modifier l’avis' : 'Écrire un avis'));
+      return;
+    }
+    const ta = h('textarea', { id: 'ch-com', maxlength: 1000, 'aria-label': 'Avis (facultatif)', on: { input: e => { f[auteur] = e.target.value; majPoints(); planifie(); } } }, f[auteur] || '');
+    const onglets = [['commentaire', 'Simon'], ['commentaire_oriana', 'Oriana']].map(([cle, nom]) => h('button', { type: 'button', class: 'ctab', on: { click: () => { auteur = cle; ta.value = f[auteur] || ''; majPoints(); } } }, nom));
+    const majPoints = () => onglets.forEach((b, i) => { const cle = i ? 'commentaire_oriana' : 'commentaire'; b.setAttribute('aria-pressed', String(auteur === cle)); b.classList.toggle('plein-c', !!(f[cle] || '').trim()); });
+    majPoints();
+    corps.append(h('div', { class: 'champ com' }, h('div', { class: 'ctabs', role: 'group', 'aria-label': 'Avis de' }, onglets), ta),
+      h('button', { class: 'btn', type: 'button', on: { click: () => { sauve(); avis = false; dessiner(); } } }, 'Fermer l’avis'));
+  };
+  dessiner();
+  feuille(f.statut === 'vu' ? 'Vu' : 'Titre', corps);
+  F.classList.add('plein');
 }
 
 /* note par demi-étoile : glisser, ou boutons − / + */
@@ -778,7 +842,7 @@ function ajout() {
     const deja = new Set(fusion().map(x => x.id));
     const r = (S.base || []).filter(x => mots.every(m => x.n.includes(m))).slice(0, 40);
     etat.textContent = r.length ? `${r.length}${r.length === 40 ? '+' : ''} résultat${r.length > 1 ? 's' : ''}` : 'Rien dans la base. Tu peux le saisir à la main ci-dessous.';
-    r.forEach(({ f }) => liste.append(h('li', null, h('button', { type: 'button', on: { click: () => formulaire(Object.assign({ statut: 'vu' }, f), false) } },
+    r.forEach(({ f }) => liste.append(h('li', null, h('button', { type: 'button', on: { click: () => fiche(f.id, f) } },
       affiche(f), h('div', { style: 'min-width:0' }, h('b', null, f.titre), h('span', null, [TYPES[f.type] ? TYPES[f.type].replace(/s$/, '') : '', f.annee, deja.has(f.id) ? 'déjà dans ta liste' : ''].filter(Boolean).join(' · ')))))));
   };
   let t; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(chercher, 180); });
