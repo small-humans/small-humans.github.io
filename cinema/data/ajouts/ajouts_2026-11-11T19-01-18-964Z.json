@@ -1,0 +1,26 @@
+{
+ "version": 1,
+ "titres": [
+  {
+   "id": "tmdb-movie-1400940",
+   "type": "film",
+   "titre": "Clayface",
+   "annee": 2026,
+   "statut": "a_voir",
+   "envie": "un_jour",
+   "genres": [
+    "Horreur",
+    "Thriller",
+    "Science-Fiction"
+   ],
+   "duree_min": 109,
+   "affiche": "/5RzUMLAYw2xHsd98UKcMC9s0ZQ.jpg",
+   "tmdb": {
+    "id": 1400940,
+    "type": "movie"
+   },
+   "ajoute_le": "2026-11-11",
+   "maj": "2026-11-11"
+  }
+ ]
+}
