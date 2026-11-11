@@ -360,7 +360,7 @@ dialog.clavier .carte .cache-clavier{display:none}
 .ico-annuler{flex:none;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .2s,visibility 0s .2s}
 .ico-annuler.vis{visibility:visible;opacity:1;pointer-events:auto;transition:opacity .2s}
 .ico-annuler svg{width:22px;height:22px;display:block}
-.f-tete .ico-annuler{width:40px;height:44px;display:grid;place-items:center;margin-left:-14px;color:var(--accent)}
+.f-tete .ico-annuler{width:44px;height:44px;display:grid;place-items:center;margin:0 -8px 0 0;color:var(--accent)}   /* v0.61 : à droite du titre */
 /* v0.59 : en-tête de fiche resserré : la place de l'icône annuler reste réservée (le titre ne bouge pas quand elle apparaît) mais étroite,
    la vignette suit à ~17 px, et les icônes de droite débordent dans la marge comme la flèche à gauche : le bloc titre gagne ~30 px */
 .f-tete h2.t-film{gap:10px;margin-left:-4px}
@@ -445,7 +445,7 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.60 · 11 nov. 2026';
+const VERSION = '0.61 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -1093,7 +1093,7 @@ function carteVu(f0, init) {   // init (v0.59, retour depuis l'œil de « Dans l
     if (bxInit) { bande.scrollLeft = bxInit; bxInit = 0; }
   };
   feuille('Vu', corps);
-  const tete = F.querySelector('.f-tete'); tete.insertBefore(icones, tete.lastChild); tete.prepend(bRetour, bAnnuler);
+  const tete = F.querySelector('.f-tete'); tete.insertBefore(icones, tete.lastChild); tete.insertBefore(bAnnuler, icones); tete.prepend(bRetour);   // v0.61 : annuler à droite du film, avant signet/corbeille
   F.classList.add('plein');
   dessiner();
 }
