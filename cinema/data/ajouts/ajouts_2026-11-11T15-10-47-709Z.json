@@ -1,0 +1,25 @@
+{
+ "version": 1,
+ "titres": [
+  {
+   "id": "tmdb-movie-1437925",
+   "type": "film",
+   "titre": "Moulin",
+   "annee": 2026,
+   "statut": "a_voir",
+   "genres": [
+    "Histoire",
+    "Drame",
+    "Guerre"
+   ],
+   "duree_min": 130,
+   "affiche": "/niEnEAPjqc2Mey6IiVPtBun45ZV.jpg",
+   "tmdb": {
+    "id": 1437925,
+    "type": "movie"
+   },
+   "ajoute_le": "2026-11-11",
+   "maj": "2026-11-11"
+  }
+ ]
+}
