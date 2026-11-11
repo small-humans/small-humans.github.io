@@ -300,7 +300,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.43 · 11 nov. 2026';
+const VERSION = '0.44 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -800,7 +800,10 @@ function glisserVers(j, sens) {
   const anim = (de, vers, ms) => reduit ? Promise.resolve() : Promise.all(zone.map(e => e.animate([{ transform: `translateX(${de}px)`, opacity: de ? 0 : 1 }, { transform: `translateX(${vers}px)`, opacity: vers ? 0 : 1 }], { duration: ms, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'both' }).finished));
   anim(0, -sens * 36, 110).then(() => {
     allerVue(ONGLETS[j].dataset.vue);
-    const tete = document.querySelector('.tete'); scrollTo({ top: tete.getBoundingClientRect().bottom + scrollY + 28 });
+    const tete = document.querySelector('.tete'), cadre = document.querySelector('.cadre'); cadre.style.minHeight = '';
+    const y = tete.getBoundingClientRect().bottom + scrollY + 28, manque = y + innerHeight - document.documentElement.scrollHeight;
+    if (manque > 0) cadre.style.minHeight = (cadre.offsetHeight + manque) + 'px';   // liste courte (ex. « À voir » avec 1 titre) : on rallonge la page pour pouvoir atterrir sous l'en-tête
+    scrollTo({ top: y });
     ONGLETS[j].scrollIntoView({ inline: 'center', block: 'nearest' });
     return anim(sens * 36, 0, 170);
   }).catch(() => {}).finally(() => { enCours = false; });
