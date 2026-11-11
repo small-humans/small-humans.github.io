@@ -101,6 +101,9 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .chiffres{display:grid;grid-template-columns:repeat(2,1fr);gap:24px 16px}
 .chiffres b{display:block;font-size:var(--t-head);font-weight:300;line-height:1;letter-spacing:.04em}
 .chiffres span{color:var(--acier);font-size:var(--t-small)}
+.an-puces{margin-top:20px}.stats .gros{font-size:clamp(64px,22vw,110px);font-weight:300;line-height:.95;letter-spacing:-.03em}
+.mois-barres{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;height:120px;align-items:end}.mois-barres div{display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;height:100%;gap:6px}.mois-barres i{display:block;background:var(--nuit2);min-height:2px}.mois-barres .pic i{background:var(--accent)}.mois-barres span{color:var(--acier);font-size:12px;text-align:center}
+.top-notes{list-style:none;margin:0;padding:0;display:grid;gap:2px}.top-notes li{display:flex;justify-content:space-between;gap:12px;background:var(--nuit);padding:12px 14px}.top-notes b{font-weight:500;white-space:nowrap;color:var(--accent)}
 .stats h2{font-size:17px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px}
 .barres{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .barres li{display:grid;grid-template-columns:5.5ch minmax(0,1fr) 4ch;align-items:center;gap:12px;min-height:28px}
@@ -297,7 +300,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.42 · 11 nov. 2026';
+const VERSION = '0.43 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -513,11 +516,33 @@ function rendreStats(p, vus, heures) {
     const max = Math.max(1, ...entrees.map(e => e[1]));
     return h('ul', { class: 'barres ' + (cls || '') }, entrees.map(([k, v]) => h('li', null, h('span', null, k), h('span', { class: 'r' }, h('i', { style: `width:${v / max * 100}%` })), h('span', { class: 'n' }, v))));
   };
+  const dispo = [...new Set(vus.map(f => (f.date_vu || '').slice(0, 4)).filter(a => /^\d{4}$/.test(a)))].sort().reverse();   // années où quelque chose a été vu
+  if (!dispo.includes(S.statAnnee)) S.statAnnee = '';
+  $('#compte').textContent = '';
+  p.append(h('div', { class: 'puces an-puces', role: 'group', 'aria-label': 'Période' }, ['', ...dispo].map(a => h('button', { class: 'puce', type: 'button', 'aria-pressed': String(a === S.statAnnee), on: { click: () => { S.statAnnee = a; rendre(); } } }, a || 'Global'))));
+  if (S.statAnnee) {
+    /* récap d'une année : total, rythme par mois, genres, meilleures notes */
+    const an = S.statAnnee, va = vus.filter(f => (f.date_vu || '').startsWith(an));
+    const hf = Math.round(va.filter(f => f.type === 'film').reduce((t, f) => t + (f.duree_min || 0), 0) / 60);
+    const mois = Array(12).fill(0); va.forEach(f => { mois[+f.date_vu.slice(5, 7) - 1]++; });
+    const pic = Math.max(...mois), moisRecord = mois.indexOf(pic);
+    const NOMS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    const cnt = t => va.filter(f => f.type === t).length;
+    const gensA = Object.entries(va.reduce((m, f) => { (f.genres || []).forEach(g => { m[g] = (m[g] || 0) + 1; }); return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const notesA = va.filter(f => f.note).sort((a, b) => b.note - a.note || a.titre.localeCompare(b.titre, 'fr'));
+    p.append(h('div', { class: 'stats' },
+      h('div', null, h('p', { class: 'gros' }, String(va.length)), h('p', { class: 'compte' }, `titre${va.length > 1 ? 's' : ''} vu${va.length > 1 ? 's' : ''} en ${an} · ${cnt('film')} films, ${cnt('serie')} séries, ${cnt('anime')} anime${hf ? ' · ' + hf + ' h de films' : ''}`)),
+      h('div', null, h('h2', null, 'Mois par mois'),
+        h('div', { class: 'mois-barres', role: 'img', 'aria-label': 'Titres vus par mois' }, mois.map((n, i) => h('div', { class: i === moisRecord && pic ? 'pic' : '' }, h('i', { style: `height:${pic ? n / pic * 100 : 0}%` }), h('span', null, 'JFMAMJJASOND'[i])))),
+        pic ? h('p', { class: 'compte' }, `Mois record : ${NOMS[moisRecord]}, ${pic} titre${pic > 1 ? 's' : ''}.`) : null),
+      gensA.length ? h('div', null, h('h2', null, 'Ce que tu as le plus vu'), barres(gensA, 'genres')) : null,
+      h('div', null, h('h2', null, 'Mieux notés'), notesA.length ? h('ul', { class: 'top-notes' }, notesA.slice(0, 5).map(f => h('li', null, h('span', null, f.titre), h('b', null, `${fmtNote(String(f.note))} / 5`)))) : h('p', { class: 'compte' }, 'Aucune note cette année.'))));
+    return;
+  }
   const ans = par(f => [(f.date_vu || '').slice(0, 4)].filter(Boolean)).sort((a, b) => b[0].localeCompare(a[0]));
   const gens = par(f => f.genres || []).sort((a, b) => b[1] - a[1]).slice(0, 8);
   const notes = vus.filter(f => f.note);
   const moy = notes.length ? fmtNote((notes.reduce((s, f) => s + f.note, 0) / notes.length).toFixed(1)) : '—';
-  $('#compte').textContent = '';
   p.append(h('div', { class: 'stats' },
     h('div', { class: 'chiffres' },
       h('p', null, h('b', null, n('film')), h('span', null, 'films')),
