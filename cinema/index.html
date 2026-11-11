@@ -300,14 +300,14 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.45 · 11 nov. 2026';
+const VERSION = '0.46 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
     const m = t.match(/const VERSION = '([^']+)'/);
     if (!m || m[1] === VERSION) return;
     try { if (sessionStorage.getItem('maj-vers') === m[1]) return; sessionStorage.setItem('maj-vers', m[1]); } catch (e) { return; }   // une seule tentative par version : pas de boucle
-    location.reload();
+    location.replace(location.pathname + '?maj=' + encodeURIComponent(m[1]));   // adresse différente : contourne la copie en cache du raccourci iPhone
   }).catch(() => {});
 }
 verifierVersion();
@@ -810,7 +810,7 @@ function glisserVers(j, sens) {
     scrollTo({ top: y });
     ONGLETS[j].scrollIntoView({ inline: 'center', block: 'nearest' });
     return anim(sens * 36, 0, 170);
-  }).catch(() => {}).finally(() => { enCours = false; });
+  }).catch(e => console.error('glisser', e)).finally(() => { enCours = false; });
 }
 /* glisser le pouce à gauche / à droite dans la liste : onglet suivant / précédent (mêmes seuils que le commentaire) */
 let gx = 0, gy = 0, gt = 0, gok = false;
