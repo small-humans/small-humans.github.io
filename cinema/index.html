@@ -283,7 +283,18 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.26 · 11 nov. 2026';
+const VERSION = '0.27 · 11 nov. 2026';
+/* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
+function verifierVersion() {
+  fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
+    const m = t.match(/const VERSION = '([^']+)'/);
+    if (!m || m[1] === VERSION) return;
+    try { if (sessionStorage.getItem('maj-vers') === m[1]) return; sessionStorage.setItem('maj-vers', m[1]); } catch (e) { return; }   // une seule tentative par version : pas de boucle
+    location.reload();
+  }).catch(() => {});
+}
+verifierVersion();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) verifierVersion(); });
 const IMG = 'https://image.tmdb.org/t/p/';
 const CLE = 'sh-cine-ajouts';
 const CHAMPS = ['id','type','titre','annee','statut','date_vu','note','commentaire','envie','genres','duree_min','affiche','tmdb','ajoute_le','maj'];
