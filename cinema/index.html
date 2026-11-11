@@ -276,6 +276,34 @@ textarea.export{min-height:180px;font-size:13px}
 .carte .btn{flex:none}
 .carte.avis-ouvert .cache-clavier{display:none}
 dialog.clavier .carte .cache-clavier{display:none}
+/* fiche d'un titre vu : lecture d'abord, chaque élément se modifie sur place */
+.f-tete h2{margin-right:auto}
+.f-icones{display:flex;gap:4px}
+.f-ico{min-width:56px;min-height:48px;padding:2px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--acier);font-size:13px;line-height:1.2;border-radius:12px}
+.f-ico svg{width:22px;height:22px;display:block}
+.f-ico[aria-pressed="true"]{color:var(--ink);background:var(--nuit2)}
+.carte.vu{gap:16px}
+.carte.vu>*{flex:none}
+.carte.vu .c-stars{width:280px;height:56px}.carte.vu .c-hit button{height:56px}
+.c-date.oeil{gap:8px;color:var(--ink);font-size:var(--t-body);padding-right:8px;align-self:flex-start}
+.c-date.oeil svg{width:22px;height:22px;flex:none;color:var(--accent)}
+.c-avis{display:grid;gap:8px}
+.c-avis>button{display:grid;gap:4px;width:100%;text-align:left;background:var(--nuit);padding:12px 16px;min-height:48px}
+.c-avis .qui{color:var(--acier);font-size:var(--t-small)}
+.c-avis .txt{white-space:pre-wrap;overflow-wrap:anywhere}
+.c-avis .txt.rien{color:var(--acier)}
+.c-etat{position:sticky;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--bg);color:var(--acier);font-size:var(--t-small);min-height:48px}
+.c-bas{display:flex;align-items:center;gap:16px}.c-bas .c-etat{position:static;flex:1;gap:8px}.c-bas .btn{margin-left:auto;padding:0 24px}
+.c-confirme{display:grid;gap:8px;background:var(--nuit);padding:12px 16px}
+.c-confirme .deux{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.c-confirme .btn{min-height:48px;padding:0 8px;font-size:var(--t-small)}
+.c-fin{display:grid;gap:8px;align-content:start}
+.carte.vu.avis-ouvert .champ.com{flex:1 1 auto;min-height:0}
+@media (max-width:759px){
+  .plein .carte.vu{gap:16px;overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .plein .carte.vu.avis-ouvert{overflow:hidden;padding-bottom:8px}
+  dialog.clavier.plein .carte.vu{gap:8px}
+}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
@@ -338,7 +366,7 @@ dialog.clavier .carte .cache-clavier{display:none}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.51 · 11 nov. 2026';
+const VERSION = '0.52 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -677,17 +705,19 @@ function synopsis(f) {
   return SYN[f.annee].then(m => m[f.id] || '');
 }
 const infosDe = f => [TYPES[f.type] ? TYPES[f.type].replace(/s$/, '') : '', f.annee, f.duree_min ? (f.duree_min >= 60 ? Math.floor(f.duree_min / 60) + ' h ' + String(f.duree_min % 60).padStart(2, '0') : f.duree_min + ' min') + (f.type === 'serie' ? ' / épisode' : '') : ''].filter(Boolean).join(' · ');
-function retirerBouton(id) {
-  const j = dansJournal(id);
-  if (!estLocal(id) && !j) return null;
+const peutRetirer = id => estLocal(id) || dansJournal(id);
+function retirer(id) {   // titre du journal : marqué « retire » ; ajout local seulement : effacé
   const f = fusion().find(x => x.id === id) || memoire[id] || {};
-  return h('button', { class: 'btn', type: 'button', on: { click: () => {
-    if (j) memoire[id] = { id, type: f.type, titre: f.titre, annee: f.annee, statut: 'retire', maj: aujourdhui() }; else delete memoire[id];
-    ecrire(); majBoutons(); rendre(); F.close(); toast('Retiré.'); } } }, 'Retirer');
+  if (dansJournal(id)) memoire[id] = { id, type: f.type, titre: f.titre, annee: f.annee, statut: 'retire', maj: aujourdhui() }; else delete memoire[id];
+  ecrire(); majBoutons(); rendre();
+}
+function retirerBouton(id) {
+  if (!peutRetirer(id)) return null;
+  return h('button', { class: 'btn', type: 'button', on: { click: () => { retirer(id); F.close(); toast('Retiré.'); } } }, 'Retirer');
 }
 function fiche(id, obj) {
   const f = fusion().find(x => x.id === id) || obj; if (!f) return;
-  if (f.statut === 'vu') return formulaire(Object.assign({}, f), false);   // un titre vu s'ouvre directement sur la note et le commentaire
+  if (f.statut === 'vu') return carteVu(f);   // titre vu : fiche en lecture, chaque élément se modifie sur place
   return carte(f);   // titre pas encore vu (Non vus, recherche, À voir) : carte « Je l'ai vu »
 }
 
@@ -737,7 +767,7 @@ function carte(f0) {
     /* avis : replié derrière un bouton ; ouvert, il prend toute la place visible (clavier compris) */
     if (!avis) {
       const dit = (f.commentaire || f.commentaire_oriana || '').trim();
-      corps.append(h('button', { class: 'btn', type: 'button', on: { click: () => { avis = true; dessiner(); setTimeout(() => { const t = $('#ch-com'); if (t) t.focus(); }, 60); } } }, dit ? 'Modifier l’avis' : 'Écrire un avis'));
+      corps.append(h('button', { class: 'btn', type: 'button', on: { click: () => { avis = true; dessiner(); const t = $('#ch-com'); if (t) t.focus(); }   /* focus dans le même toucher : sinon iOS n'ouvre pas le clavier */ } }, dit ? 'Modifier l’avis' : 'Écrire un avis'));
       return;
     }
     const ta = h('textarea', { id: 'ch-com', maxlength: 1000, 'aria-label': 'Avis (facultatif)', on: { input: e => { f[auteur] = e.target.value; majPoints(); planifie(); } } }, f[auteur] || '');
@@ -750,6 +780,100 @@ function carte(f0) {
   dessiner();
   feuille(f.statut === 'vu' ? 'Vu' : 'Titre', corps);
   F.classList.add('plein');
+}
+
+/* fiche d'un titre vu : on lit d'abord ; note, date et avis se modifient sur place et s'enregistrent au fil de l'eau.
+   « Annuler » remet l'état d'ouverture de la fiche ; « À voir » et « Retirer » sont dans l'en-tête. */
+const ICO = {
+  oeil: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12c2.2-4.3 5.4-6.5 9.5-6.5s7.3 2.2 9.5 6.5c-2.2 4.3-5.4 6.5-9.5 6.5S4.7 16.3 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  avoir: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10a1 1 0 0 1 1 1v16l-6-4-6 4v-16a1 1 0 0 1 1-1z"/></svg>',
+  retirer: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/></svg>'
+};
+const icone = (svg, txt) => { const s = h('span'); s.innerHTML = svg; return [s.firstChild, h('span', null, txt)]; };
+function carteVu(f0) {
+  const id = f0.id, avant = memoire[id];   // « avant » : état à l'ouverture, pour Annuler
+  let f = Object.assign({}, f0), auteur = 'commentaire', avis = false, modifie = false, etat = '', minuteur = null, tConf = null, confirme = false;
+  const corps = h('div', { class: 'corps carte vu' });
+  const syn = h('details', { class: 'syn cache-clavier', hidden: true }, h('summary', null, 'Synopsis'), h('p'));
+  synopsis(f).then(t => { syn.lastChild.textContent = t; syn.hidden = !t; });
+  const sauve = () => { clearTimeout(minuteur); minuteur = null; enregistrer(f); };
+  const change = (dessine) => { modifie = true; sauve(); if (dessine !== false) dessiner(); else majEtat(); };
+  const planifie = () => { modifie = true; clearTimeout(minuteur); minuteur = setTimeout(() => { sauve(); majEtat(); }, 500); };
+  F.addEventListener('close', () => { if (minuteur) sauve(); clearTimeout(tConf); }, { once: true });
+  const restaurer = () => {   // remet l'état d'ouverture (note, date, avis, statut)
+    clearTimeout(minuteur); minuteur = null; clearTimeout(tConf); confirme = false;
+    if (avant === undefined) delete memoire[id]; else memoire[id] = avant;
+    ecrire(); majBoutons(); rendre();
+    f = Object.assign({}, f0); modifie = false; etat = ''; avis = false; dessiner(); toast('Annulé.');
+  };
+  const titre = () => { const t = $('#f-titre'); if (t) t.textContent = etat === 'avoir' ? 'À voir' : etat === 'retire' ? 'Retiré' : 'Vu'; };
+  /* en-tête : deux icônes à côté de « Fermer » */
+  const bAvoir = h('button', { class: 'f-ico', type: 'button', 'aria-label': 'Remettre à voir', title: 'Remettre à voir', on: { click: () => {
+    clearTimeout(minuteur); minuteur = null; f.statut = 'a_voir'; enregistrer(f); etat = 'avoir'; dessiner(); } } }, icone(ICO.avoir, 'À voir'));
+  const bRetirer = h('button', { class: 'f-ico', type: 'button', 'aria-label': 'Retirer de ma liste', title: 'Retirer de ma liste', 'aria-pressed': 'false', on: { click: () => {
+    confirme = !confirme; avis = false; clearTimeout(tConf); if (confirme) tConf = setTimeout(() => { confirme = false; dessiner(); }, 5000); dessiner(); } } }, icone(ICO.retirer, 'Retirer'));
+  const icones = h('div', { class: 'f-icones' }, bAvoir, peutRetirer(id) ? bRetirer : null);
+  const ligneEtat = h('div', { class: 'c-etat', role: 'status' });
+  const majEtat = () => {
+    ligneEtat.textContent = '';
+    if (!modifie) { ligneEtat.hidden = true; return; }
+    ligneEtat.hidden = false;
+    ligneEtat.append(h('span', null, minuteur ? 'Enregistrement…' : 'Enregistré'), h('button', { class: 'effacer', type: 'button', on: { click: restaurer } }, avis ? 'Annuler' : 'Annuler les changements'));
+  };
+  const ouvrirAvis = cle => { auteur = cle; avis = true; confirme = false; clearTimeout(tConf); dessiner(); const t = $('#ch-com'); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } };   // focus dans le toucher : iOS ouvre le clavier
+  const dessiner = () => {
+    corps.textContent = ''; corps.classList.toggle('avis-ouvert', avis);
+    titre(); icones.hidden = !!etat; bRetirer.setAttribute('aria-pressed', String(confirme));
+    /* après « À voir » ou « Retirer » : message et Annuler */
+    if (etat) {
+      corps.append(h('div', { class: 'c-fin' }, h('p', null, etat === 'avoir' ? 'Remis dans « à voir ». La date et la note sont effacées, les avis sont gardés.' : 'Retiré de ta liste.'),
+        h('button', { class: 'btn', type: 'button', on: { click: restaurer } }, 'Annuler'),
+        h('button', { class: 'btn fort', type: 'button', on: { click: () => F.close() } }, 'Fermer')));
+      return;
+    }
+    if (confirme) corps.append(h('div', { class: 'c-confirme', role: 'alert' }, h('p', null, 'Retirer ce titre ? La note, la date et les avis seront effacés.'),
+      h('div', { class: 'deux' },
+        h('button', { class: 'btn fort', type: 'button', on: { click: () => { clearTimeout(tConf); clearTimeout(minuteur); minuteur = null; confirme = false; retirer(id); etat = 'retire'; dessiner(); } } }, 'Confirmer le retrait'),
+        h('button', { class: 'btn', type: 'button', on: { click: () => { clearTimeout(tConf); confirme = false; dessiner(); } } }, 'Annuler'))));
+    if (avis) {
+      /* écriture : seul le champ reste, il prend toute la place visible (clavier iOS compris) */
+      const ta = h('textarea', { id: 'ch-com', maxlength: 1000, 'aria-label': auteur === 'commentaire' ? 'Avis de Simon' : 'Avis d’Oriana', on: { input: e => { f[auteur] = e.target.value; majPoints(); planifie(); majEtat(); } } }, f[auteur] || '');
+      const onglets = [['commentaire', 'Simon'], ['commentaire_oriana', 'Oriana']].map(([cle, nom]) => h('button', { type: 'button', class: 'ctab', on: { click: () => {
+        const actif = document.activeElement === ta; auteur = cle; ta.value = f[auteur] || ''; ta.setAttribute('aria-label', nom === 'Oriana' ? 'Avis d’Oriana' : 'Avis de Simon'); majPoints(); if (actif) ta.focus(); } } }, nom));
+      const majPoints = () => onglets.forEach((b, i) => { const cle = i ? 'commentaire_oriana' : 'commentaire'; b.setAttribute('aria-pressed', String(auteur === cle)); b.classList.toggle('plein-c', !!(f[cle] || '').trim()); });
+      majPoints();
+      corps.append(h('div', { class: 'champ com' }, h('div', { class: 'ctabs', role: 'group', 'aria-label': 'Avis de' }, onglets), ta),
+        h('div', { class: 'c-bas' }, ligneEtat, h('button', { class: 'btn', type: 'button', on: { click: () => { if (minuteur) sauve(); avis = false; dessiner(); } } }, 'Terminé')));
+      majEtat(); return;
+    }
+    const sans = !f.affiche;
+    corps.append(sans
+      ? h('div', { class: 'c-aff typo' }, h('span', { class: 'gh', 'aria-hidden': 'true' }, (f.titre || '?').trim().charAt(0).toUpperCase()), h('b', { class: 'c-typo' }, f.titre))
+      : h('div', { class: 'c-aff', role: 'img', 'aria-label': 'Affiche de ' + f.titre, style: `background-image:url("${IMG}w342${f.affiche}")` }));
+    corps.append(h('div', { class: 'c-info' }, sans ? null : h('h3', null, f.titre), h('p', null, infosDe(f)), f.genres && f.genres.length ? h('p', null, f.genres.join(', ')) : null));
+    /* date : un toucher ouvre le sélecteur natif */
+    const d = f.date_vu || aujourdhui(), court = new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', d.slice(0, 4) === aujourdhui().slice(0, 4) ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'long', year: 'numeric' });
+    const oeil = h('label', { class: 'c-date oeil' }, icone(ICO.oeil, d === aujourdhui() ? 'Vu aujourd’hui' : 'Vu le ' + court),
+      h('input', { type: 'date', value: d, max: aujourdhui(), 'aria-label': 'Date de visionnage, ' + fmtDate(d, true) + ' : toucher pour changer', on: { change: e => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value) && e.target.value !== f.date_vu) { f.date_vu = e.target.value; change(); } } } }));
+    corps.append(oeil);
+    /* note : un toucher par étoile ; toucher la même étoile = demi-étoile */
+    const et = etoiles(f.note || 0, 280), hit = h('div', { class: 'c-hit' });
+    for (let i = 1; i <= 5; i++) hit.append(h('button', { type: 'button', 'aria-label': i + ' sur 5', on: { click: () => { f.note = f.note === i ? i - .5 : i; change(); } } }));
+    corps.append(h('div', { class: 'champ note' }, h('div', { class: 'note-tete' }, h('span', { class: 'lib' }, f.note ? 'Ta note' : 'Pas encore de note'), h('span', { class: 'val' }, f.note ? fmtNote(f.note) + ' / 5' : ''),
+      f.note ? h('button', { class: 'effacer', type: 'button', on: { click: () => { f.note = null; change(); } } }, 'Effacer') : null), h('div', { class: 'c-stars' }, et, hit)));
+    corps.append(syn);
+    /* avis : affichés en texte courant, un toucher pour écrire */
+    corps.append(h('div', { class: 'c-avis' }, [['commentaire', 'Simon'], ['commentaire_oriana', 'Oriana']].map(([cle, nom]) => {
+      const txt = (f[cle] || '').trim();
+      return h('button', { type: 'button', 'aria-label': (txt ? 'Modifier l’avis ' : 'Écrire l’avis ') + (nom === 'Oriana' ? 'd’Oriana' : 'de Simon'), on: { click: () => ouvrirAvis(cle) } },
+        h('span', { class: 'qui' }, nom === 'Oriana' ? 'Avis d’Oriana' : 'Avis de Simon'),h('span', { class: 'txt' + (txt ? '' : ' rien') }, txt || 'Toucher pour écrire'));
+    })));
+    corps.append(ligneEtat); majEtat();
+  };
+  feuille('Vu', corps);
+  const tete = F.querySelector('.f-tete'); tete.insertBefore(icones, tete.lastChild);
+  F.classList.add('plein');
+  dessiner();
 }
 
 /* note par demi-étoile : glisser, ou boutons − / + */
