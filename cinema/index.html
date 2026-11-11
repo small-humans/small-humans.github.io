@@ -229,6 +229,7 @@ textarea.export{min-height:180px;font-size:13px}
 }
 .corps{display:grid;gap:18px}
 .champ.com{display:flex;flex-direction:column}
+.ctabs{display:flex;gap:18px}.ctab{min-height:44px;padding:0 2px;color:var(--acier);border-bottom:2px solid transparent;font-size:15px}.ctab[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--accent)}.ctab.plein-c::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-left:6px;vertical-align:middle}
 .note-tete{display:flex;align-items:center;gap:12px}
 .note-tete .lib{color:var(--acier);font-size:var(--t-small)}
 .note-tete .val{margin-left:auto;min-width:0}
@@ -296,7 +297,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.36 · 11 nov. 2026';
+const VERSION = '0.37 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -310,7 +311,7 @@ verifierVersion();
 document.addEventListener('visibilitychange', () => { if (!document.hidden) verifierVersion(); });
 const IMG = 'https://image.tmdb.org/t/p/';
 const CLE = 'sh-cine-ajouts';
-const CHAMPS = ['id','type','titre','annee','statut','date_vu','note','commentaire','envie','genres','duree_min','affiche','tmdb','ajoute_le','maj'];
+const CHAMPS = ['id','type','titre','annee','statut','date_vu','note','commentaire','commentaire_oriana','envie','genres','duree_min','affiche','tmdb','ajoute_le','maj'];
 const TYPES = { film: 'Films', serie: 'Séries', anime: 'Anime' };
 const ENVIES = { hate: 'Hâte', pourquoi_pas: 'Pourquoi pas', un_jour: 'Un jour' };
 const PAGE = 60;
@@ -574,6 +575,7 @@ function fiche(id, obj) {
     h('div', { class: 'f-haut' }, affiche(f, 'grand'), h('div', null, h('h3', null, f.titre), h('p', null, infosDe(f)), f.genres && f.genres.length ? h('p', null, f.genres.join(', ')) : null, f.envie ? h('p', null, ENVIES[f.envie]) : null)),
     syn,
     f.commentaire ? h('p', { class: 'f-com' }, f.commentaire) : null,
+    f.commentaire_oriana ? h('p', { class: 'f-com' }, h('b', null, 'Oriana : '), f.commentaire_oriana) : null,
     h('div', { class: 'f-actions' }, act));
 }
 
@@ -603,6 +605,7 @@ function formulaire(f, passerVu) {
   const syn = h('details', { class: 'syn', hidden: true }, h('summary', null, 'Synopsis'), h('p'));
   synopsis(f).then(t => { syn.lastChild.textContent = t; syn.hidden = !t; });
   const msg = h('p', { class: 'alerte', role: 'alert' });
+  let auteur = 'commentaire';   // quel commentaire on écrit : le sien ou celui d'Oriana
   const dessiner = () => {
     corps.textContent = '';
     corps.append(h('div', { class: 'f-haut petit' }, affiche(f, 'grand'), h('div', null, h('h3', null, f.titre), h('p', null, infosDe(f)), f.genres && f.genres.length ? h('p', null, f.genres.join(', ')) : null)), syn);
@@ -610,7 +613,11 @@ function formulaire(f, passerVu) {
       h('div', { class: 'choix' }, [['vu', 'Vu'], ['a_voir', 'À voir']].map(([v, t]) => h('button', { type: 'button', 'aria-pressed': String(f.statut === v), on: { click: () => { f.statut = v; if (v === 'vu' && !f.date_vu) f.date_vu = dateParDefaut(f); dessiner(); } } }, t)))));
     if (f.statut === 'vu') {
       corps.append(champNote(f.note, n => { f.note = n; }));
-      corps.append(h('div', { class: 'champ com' }, h('label', { for: 'ch-com' }, 'Commentaire (facultatif)'), h('textarea', { id: 'ch-com', maxlength: 1000, on: { input: e => { f.commentaire = e.target.value; } } }, f.commentaire || '')));
+      const ta = h('textarea', { id: 'ch-com', maxlength: 1000, 'aria-label': 'Commentaire (facultatif)', on: { input: e => { f[auteur] = e.target.value; majPoints(); } } }, f[auteur] || '');
+      const onglets = [['commentaire', 'Simon'], ['commentaire_oriana', 'Oriana']].map(([cle, nom]) => h('button', { type: 'button', class: 'ctab', on: { click: () => { auteur = cle; ta.value = f[auteur] || ''; majPoints(); ta.focus(); } } }, nom));
+      const majPoints = () => onglets.forEach((b, i) => { const cle = i ? 'commentaire_oriana' : 'commentaire'; b.setAttribute('aria-pressed', String(auteur === cle)); b.classList.toggle('plein-c', !!(f[cle] || '').trim()); });
+      majPoints();
+      corps.append(h('div', { class: 'champ com' }, h('div', { class: 'ctabs', role: 'group', 'aria-label': 'Commentaire de' }, onglets), ta));
       corps.append(h('div', { class: 'champ date' }, h('label', { for: 'ch-date' }, 'Date de visionnage'), h('input', { id: 'ch-date', type: 'date', value: f.date_vu, max: aujourdhui(), on: { change: e => { f.date_vu = e.target.value; } } })));
     } else {
       corps.append(h('div', { class: 'champ' }, h('span', { class: 'lib' }, 'Envie (facultatif)'),
