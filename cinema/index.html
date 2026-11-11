@@ -57,9 +57,9 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 @keyframes salue{0%,55%,100%{transform:rotate(0)}65%{transform:rotate(-14deg)}75%{transform:rotate(8deg)}85%{transform:rotate(-12deg)}}
 
 /* onglets : une seule rangée, icône + mini libellé ; l'actif a une pastille bleue derrière l'icône */
-.onglets{display:grid;grid-template-columns:repeat(6,1fr);max-width:640px;margin-top:28px;position:sticky;top:0;z-index:15;background:var(--bg);padding-top:env(safe-area-inset-top)}   /* reste en haut quand on descend : seuls les onglets restent affichés */
+.onglets{display:grid;grid-template-columns:repeat(6,minmax(0,106px));justify-content:start;margin:28px calc(-1 * var(--marge)) 0;padding:env(safe-area-inset-top) var(--marge) 16px;position:sticky;top:0;z-index:15;background:var(--bg)}   /* pleine largeur : rien ne dépasse à côté de la barre collée ; 16 px d'air sous la barre, identique sur tous les onglets */   /* reste en haut quand on descend : seuls les onglets restent affichés */
 .onglets button{min-height:64px;padding:4px 0 6px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--acier);font-size:13px;font-weight:600;line-height:1.3;white-space:nowrap;transition:color .18s ease}
-.onglets button:hover{color:var(--ink)}
+@media (hover:hover){.onglets button:hover{color:var(--ink)}}
 .onglets i{display:grid;place-items:center;width:48px;height:32px;border-radius:999px;transition:background-color .18s ease}
 .onglets svg{width:22px;height:22px;display:block}
 .onglets button[aria-selected="true"]{color:var(--ink)}
@@ -68,7 +68,7 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .bande{display:flex;gap:16px;overflow-x:auto;margin:0 calc(-1 * var(--marge));padding:0 var(--marge);scrollbar-width:none;overscroll-behavior-x:contain}
 .bande::-webkit-scrollbar{display:none}
 .bande::after{content:"";flex:0 0 4px}
-.genres-i{display:flex;gap:8px;margin-top:16px;margin-bottom:8px}
+.genres-i{display:flex;gap:8px;margin-bottom:8px}
 .genres-i .puce{flex:0 0 auto;white-space:nowrap}
 .idee h2{font-size:17px;font-weight:600;line-height:1.35;margin-top:28px;text-wrap:balance}
 .idee h2 span{color:var(--acier);font-weight:500}
@@ -85,7 +85,7 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .onglets button:active,.pos:active,.btn:active,.puce:active,.tuile:active{transform:scale(.97)}
 
 /* filtres */
-.outils{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:16px}
+.outils{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
 .outils>*{min-width:0}
 .puces{display:flex;flex-wrap:wrap;gap:8px}
 .puce{min-height:44px;background:var(--nuit);padding:0 18px;border-radius:999px;transition:background-color .18s ease;font-size:15px}
@@ -100,9 +100,9 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .compte{color:var(--acier);font-size:var(--t-small);margin-top:12px;min-height:1.5em}
 
 /* grille d'affiches */
-.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:18px 8px;margin-top:8px}
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:18px 8px;margin-top:0}
 .mois{grid-column:1/-1;font-size:17px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;margin-top:18px}
-.mois:first-child{margin-top:4px}
+.mois:first-child{margin-top:0}
 .tuile{display:block;align-self:start;text-align:left;transition:transform .18s var(--ease)}
 .aff{position:relative;aspect-ratio:2/3;background:var(--nuit);overflow:hidden;display:flex;align-items:flex-end;padding:8px}
 .aff[data-t="1"]{background:#16294A}.aff[data-t="2"]{background:#0F2A3A}.aff[data-t="3"]{background:#231F3F}.aff[data-t="4"]{background:#1B3358}.aff[data-t="5"]{background:#2A2A44}
@@ -121,7 +121,7 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .chiffres{display:grid;grid-template-columns:repeat(2,1fr);gap:24px 16px}
 .chiffres b{display:block;font-size:var(--t-head);font-weight:300;line-height:1;letter-spacing:.04em}
 .chiffres span{color:var(--acier);font-size:var(--t-small)}
-.an-puces{margin-top:20px}.stats .gros{font-size:clamp(64px,22vw,110px);font-weight:300;line-height:.95;letter-spacing:-.03em}
+.an-puces{margin-top:0}.stats .gros{font-size:clamp(64px,22vw,110px);font-weight:300;line-height:.95;letter-spacing:-.03em}
 .mois-barres{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;height:120px;align-items:end}.mois-barres div{display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;height:100%;gap:6px}.mois-barres i{display:block;background:var(--nuit2);min-height:2px}.mois-barres .pic i{background:var(--accent)}.mois-barres span{color:var(--acier);font-size:12px;text-align:center}
 .top-notes{list-style:none;margin:0;padding:0;display:grid;gap:2px}.top-notes li{display:flex;justify-content:space-between;gap:12px;background:var(--nuit);padding:12px 14px}.top-notes b{font-weight:500;white-space:nowrap;color:var(--accent)}
 .stats h2{font-size:17px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px}
@@ -321,7 +321,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.47 · 11 nov. 2026';
+const VERSION = '0.48 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
