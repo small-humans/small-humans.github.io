@@ -287,12 +287,6 @@ dialog.clavier .carte .cache-clavier{display:none}
 .carte.vu .c-stars{width:280px;height:56px}.carte.vu .c-hit button{height:56px}
 .c-date.oeil{gap:8px;color:var(--ink);font-size:var(--t-body);padding-right:8px;align-self:flex-start}
 .c-date.oeil svg{width:22px;height:22px;flex:none;color:var(--accent)}
-.c-tete{display:flex;gap:16px;align-items:flex-start}
-.c-poster{flex:none;width:132px;aspect-ratio:2/3;background-size:cover;background-position:50% 50%;background-color:var(--nuit)}
-.c-poster.typo{position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:12px}
-.c-poster .gh{position:absolute;right:-.06em;bottom:-.2em;font-size:130px;font-weight:700;line-height:1;color:var(--nuit2);letter-spacing:-.06em}
-.c-poster .c-typo{font-size:var(--t-small)}
-.c-tete .c-info{flex:1;min-width:0}
 .c-genres{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .c-genres .puce{padding:0 14px;font-size:var(--t-small)}
 .c-meme h2{font-size:17px;font-weight:600;margin-bottom:12px}
@@ -313,6 +307,32 @@ dialog.clavier .carte .cache-clavier{display:none}
   .plein .carte.vu.avis-ouvert{overflow:hidden;padding-bottom:8px}
   dialog.clavier.plein .carte.vu{gap:8px}
 }
+/* rideau : affiche entière, panneau qu'on tire vers le haut */
+.corps.rideau{--pk:calc(132px + env(safe-area-inset-bottom));position:relative;display:block;overflow:hidden;margin:0 calc(-1 * var(--marge));height:min(76dvh,720px);padding:0;gap:0}
+.rd-aff{position:absolute;left:0;right:0;top:0;bottom:var(--pk);background-size:contain;background-repeat:no-repeat;background-position:center;background-color:var(--nuit)}
+.rd-aff.typo{overflow:hidden}
+.rd-aff .gh{position:absolute;right:-.06em;bottom:-.18em;font-size:320px;font-weight:700;line-height:1;color:var(--nuit2);letter-spacing:-.06em}
+.rd-tt{position:absolute;left:24px;right:24px;bottom:32px;font-size:40px;font-weight:700;line-height:1.05;text-wrap:balance;overflow-wrap:anywhere}
+.rd-panneau{position:absolute;inset:0;background:var(--bg);border-radius:16px 16px 0 0;overflow:hidden;touch-action:none;transform:translateY(calc(100% - var(--pk)));transition:transform .28s var(--ease)}
+.rd-panneau.ouvert{transform:none;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+.rd-pk{height:var(--pk);padding:0 var(--marge)}
+.rd-panneau.ouvert .rd-pk{height:auto}
+.rd-panneau.ouvert .rd-pk .rd-ligne,.rd-panneau.ouvert .rd-pk .c-genres{display:none}
+.rd-poignee{display:flex;align-items:center;justify-content:center;width:100%;height:36px}
+.rd-poignee i{width:40px;height:4px;border-radius:2px;background:var(--nuit2)}
+.rd-ligne{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:32px}
+.rd-note{display:flex;align-items:center;gap:8px;font-weight:600}
+.rd-quand{display:inline-flex;align-items:center;gap:8px;color:var(--acier);white-space:nowrap}
+.rd-quand svg{width:18px;height:18px;flex:none;color:var(--accent)}
+.rd-pk .c-genres{flex-wrap:nowrap;overflow:hidden;margin-top:4px}
+.rd-lect{padding:8px var(--marge) calc(40px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:24px}
+.rd-lect>*{flex:none}
+.rideau .c-avis>button{background:none;padding:0}
+.f-tete h2.t-film{flex:1;min-width:0;text-transform:none;letter-spacing:0;font-weight:400;line-height:1.3}
+.t-film b{display:block;font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-film span{display:block;font-size:13px;color:var(--acier);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (prefers-reduced-motion:reduce){.rd-panneau{transition:none}}
+@media (max-width:759px){.plein .corps.rideau,.plein .carte.vu.rideau{height:100%;overflow:hidden;padding-bottom:0;gap:0}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
@@ -375,7 +395,7 @@ dialog.clavier .carte .cache-clavier{display:none}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.54 · 11 nov. 2026';
+const VERSION = '0.55 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -801,7 +821,7 @@ const ICO = {
 const icone = (svg, txt) => { const s = h('span'); s.innerHTML = svg; return [s.firstChild, h('span', null, txt)]; };
 function carteVu(f0) {
   const id = f0.id, avant = memoire[id];   // « avant » : état à l'ouverture, pour Annuler
-  let f = Object.assign({}, f0), auteur = 'commentaire', avis = false, modifie = false, etat = '', minuteur = null, tConf = null, confirme = false;
+  let f = Object.assign({}, f0), auteur = 'commentaire', avis = false, modifie = false, etat = '', minuteur = null, tConf = null, confirme = false, ouvert = false, pRef = null;
   const corps = h('div', { class: 'corps carte vu' });
   const syn = h('details', { class: 'syn cache-clavier', hidden: true }, h('summary', null, 'Synopsis'), h('p'));
   synopsis(f).then(t => { syn.lastChild.textContent = t; syn.hidden = !t; });
@@ -815,7 +835,7 @@ function carteVu(f0) {
     ecrire(); majBoutons(); rendre();
     f = Object.assign({}, f0); modifie = false; etat = ''; avis = false; dessiner(); toast('Annulé.');
   };
-  const titre = () => { const t = $('#f-titre'); if (t) t.textContent = etat === 'avoir' ? 'À voir' : etat === 'retire' ? 'Retiré' : 'Vu'; };
+  const titre = () => { const t = $('#f-titre'); if (!t) return; t.textContent = ''; t.className = ''; if (etat || avis || !ouvert) { t.textContent = etat === 'avoir' ? 'À voir' : etat === 'retire' ? 'Retiré' : avis ? 'Vu' : ''; return; } t.className = 't-film'; t.append(h('b', null, f.titre), h('span', null, infosDe(f))); };
   /* en-tête : deux icônes à côté de « Fermer » */
   const bAvoir = h('button', { class: 'f-ico', type: 'button', 'aria-label': 'Remettre à voir', title: 'Remettre à voir', on: { click: () => {
     clearTimeout(minuteur); minuteur = null; f.statut = 'a_voir'; enregistrer(f); etat = 'avoir'; dessiner(); } } }, icone(ICO.avoir, 'À voir'));
@@ -830,9 +850,11 @@ function carteVu(f0) {
     ligneEtat.append(h('span', null, minuteur ? 'Enregistrement…' : 'Enregistré'), h('button', { class: 'effacer', type: 'button', on: { click: restaurer } }, avis ? 'Annuler' : 'Annuler les changements'));
   };
   const ouvrirAvis = cle => { auteur = cle; avis = true; confirme = false; clearTimeout(tConf); dessiner(); const t = $('#ch-com'); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } };   // focus dans le toucher : iOS ouvre le clavier
+  const pastilles = () => f.genres && f.genres.length ? h('div', { class: 'c-genres', role: 'group', 'aria-label': 'Genres : toucher pour filtrer la liste' }, f.genres.map(g => h('button', { class: 'puce', type: 'button', on: { click: () => { F.close(); allerVue('vus'); S.genre = g; rendre(); scrollTo({ top: 0 }); } } }, g))) : null;
   const dessiner = () => {
-    corps.textContent = ''; corps.classList.toggle('avis-ouvert', avis);
-    titre(); icones.hidden = !!etat; bRetirer.setAttribute('aria-pressed', String(confirme));
+    const st = pRef ? pRef.scrollTop : 0; pRef = null;
+    corps.textContent = ''; corps.classList.toggle('avis-ouvert', avis); corps.classList.remove('rideau', 'ouvert');
+    titre(); icones.hidden = !!etat || (!ouvert && !avis); bRetirer.setAttribute('aria-pressed', String(confirme));
     /* après « À voir » ou « Retirer » : message et Annuler */
     if (etat) {
       corps.append(h('div', { class: 'c-fin' }, h('p', null, etat === 'avoir' ? 'Remis dans « à voir ». La date et la note sont effacées, les avis sont gardés.' : 'Retiré de ta liste.'),
@@ -840,7 +862,7 @@ function carteVu(f0) {
         h('button', { class: 'btn fort', type: 'button', on: { click: () => F.close() } }, 'Fermer')));
       return;
     }
-    if (confirme) corps.append(h('div', { class: 'c-confirme', role: 'alert' }, h('p', null, 'Retirer ce titre ? La note, la date et les avis seront effacés.'),
+    const blocConfirme = !confirme ? null : (h('div', { class: 'c-confirme', role: 'alert' }, h('p', null, 'Retirer ce titre ? La note, la date et les avis seront effacés.'),
       h('div', { class: 'deux' },
         h('button', { class: 'btn fort', type: 'button', on: { click: () => { clearTimeout(tConf); clearTimeout(minuteur); minuteur = null; confirme = false; retirer(id); etat = 'retire'; dessiner(); } } }, 'Confirmer le retrait'),
         h('button', { class: 'btn', type: 'button', on: { click: () => { clearTimeout(tConf); confirme = false; dessiner(); } } }, 'Annuler'))));
@@ -857,30 +879,49 @@ function carteVu(f0) {
     }
     const sans = !f.affiche;
     /* date : un toucher ouvre le sélecteur natif */
-    const d = f.date_vu || aujourdhui(), court = new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', d.slice(0, 4) === aujourdhui().slice(0, 4) ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'long', year: 'numeric' });
+    const d = f.date_vu || aujourdhui(), annee = d.slice(0, 4) === aujourdhui().slice(0, 4);
+    const court = new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', annee ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'long', year: 'numeric' });
     const oeil = h('label', { class: 'c-date oeil' }, icone(ICO.oeil, d === aujourdhui() ? 'Vu aujourd’hui' : 'Vu le ' + court),
       h('input', { type: 'date', value: d, max: aujourdhui(), 'aria-label': 'Date de visionnage, ' + fmtDate(d, true) + ' : toucher pour changer', on: { change: e => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value) && e.target.value !== f.date_vu) { f.date_vu = e.target.value; change(); } } } }));
-    /* en-tête « rideau » : affiche entière (jamais recouverte), puis titre, infos, date, genres en pastilles qui filtrent la liste */
-    const pastilles = f.genres && f.genres.length ? h('div', { class: 'c-genres', role: 'group', 'aria-label': 'Genres : toucher pour filtrer la liste' }, f.genres.map(g => h('button', { class: 'puce', type: 'button', on: { click: () => { F.close(); allerVue('vus'); S.genre = g; rendre(); scrollTo({ top: 0 }); } } }, g))) : null;
-    corps.append(h('div', { class: 'c-tete' },
-      sans
-        ? h('div', { class: 'c-poster typo' }, h('span', { class: 'gh', 'aria-hidden': 'true' }, (f.titre || '?').trim().charAt(0).toUpperCase()), h('b', { class: 'c-typo' }, f.titre))
-        : h('div', { class: 'c-poster', role: 'img', 'aria-label': 'Affiche de ' + f.titre, style: `background-image:url("${IMG}w342${f.affiche}")` }),
-      h('div', { class: 'c-info' }, sans ? null : h('h3', null, f.titre), h('p', null, infosDe(f)), oeil, pastilles)));
-    /* note : un toucher par étoile ; toucher la même étoile = demi-étoile */
+    /* « rideau » : ouverture = affiche entière, jamais recouverte, titre non répété, aperçu dessous ; on tire l'aperçu vers le haut pour lire la fiche */
+    const aff = sans
+      ? h('div', { class: 'rd-aff typo', role: 'img', 'aria-label': f.titre + ', sans affiche' }, h('span', { class: 'gh', 'aria-hidden': 'true' }, (f.titre || '?').trim().replace(/^(L’|L'|Le |La |Les )/, '').charAt(0).toUpperCase()), h('b', { class: 'rd-tt' }, f.titre))
+      : h('div', { class: 'rd-aff', role: 'img', 'aria-label': 'Affiche de ' + f.titre, style: `background-image:url("${IMG}w500${f.affiche}")` });
+    const lect = h('div', { class: 'rd-lect' });
+    const panneau = h('div', { class: 'rd-panneau' + (ouvert ? ' ouvert' : '') });
+    const bascule = o => {
+      ouvert = o; corps.classList.toggle('ouvert', o); panneau.classList.toggle('ouvert', o); lect.inert = !o;
+      poignee.setAttribute('aria-expanded', String(o)); poignee.setAttribute('aria-label', o ? 'Replier la fiche' : 'Déplier la fiche');
+      if (!o) panneau.scrollTop = 0; titre(); icones.hidden = !o;
+    };
+    const poignee = h('button', { class: 'rd-poignee', type: 'button', 'aria-expanded': String(ouvert), 'aria-label': ouvert ? 'Replier la fiche' : 'Déplier la fiche', on: { click: e => { e.stopPropagation(); bascule(!ouvert); } } }, h('i'));
+    const pk = h('div', { class: 'rd-pk', on: { click: e => { if (!ouvert && !e.target.closest('.c-genres')) bascule(true); } } }, poignee,
+      h('div', { class: 'rd-ligne' }, h('span', { class: 'rd-note' }, etoiles(f.note || 0, 100), f.note ? h('b', null, fmtNote(f.note)) : null), h('span', { class: 'rd-quand' }, icone(ICO.oeil, d === aujourdhui() ? 'aujourd’hui' : court))),
+      pastilles());
+    /* geste : tirer vers le haut déplie, tirer vers le bas (en haut de la fiche) replie */
+    let y0 = null, t0 = 0;
+    panneau.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; t0 = panneau.scrollTop; }, { passive: true });
+    panneau.addEventListener('touchend', e => { if (y0 === null) return; const dy = e.changedTouches[0].clientY - y0; y0 = null; if (!ouvert && dy < -40) bascule(true); else if (ouvert && t0 <= 0 && panneau.scrollTop <= 0 && dy > 70) bascule(false); }, { passive: true });
+    /* lecture : note (un toucher par étoile ; la même étoile = demi-étoile), date, avis, synopsis, même esprit */
     const et = etoiles(f.note || 0, 280), hit = h('div', { class: 'c-hit' });
     for (let i = 1; i <= 5; i++) hit.append(h('button', { type: 'button', 'aria-label': i + ' sur 5', on: { click: () => { f.note = f.note === i ? i - .5 : i; change(); } } }));
-    corps.append(h('div', { class: 'champ note' }, h('div', { class: 'note-tete' }, h('span', { class: 'lib' }, f.note ? 'Ta note' : 'Pas encore de note'), h('span', { class: 'val' }, f.note ? fmtNote(f.note) + ' / 5' : ''),
-      f.note ? h('button', { class: 'effacer', type: 'button', on: { click: () => { f.note = null; change(); } } }, 'Effacer') : null), h('div', { class: 'c-stars' }, et, hit)));
-    corps.append(syn);
-    /* avis : affichés en texte courant, un toucher pour écrire */
-    corps.append(h('div', { class: 'c-avis' }, [['commentaire', 'Simon'], ['commentaire_oriana', 'Oriana']].map(([cle, nom]) => {
-      const txt = (f[cle] || '').trim();
-      return h('button', { type: 'button', 'aria-label': (txt ? 'Modifier l’avis ' : 'Écrire l’avis ') + (nom === 'Oriana' ? 'd’Oriana' : 'de Simon'), on: { click: () => ouvrirAvis(cle) } },
-        h('span', { class: 'qui' }, nom === 'Oriana' ? 'Avis d’Oriana' : 'Avis de Simon'),h('span', { class: 'txt' + (txt ? '' : ' rien') }, txt || 'Toucher pour écrire'));
-    })));
-    corps.append(ligneEtat); majEtat();
-    corps.append(meme); memeRemplir();
+    if (blocConfirme) lect.append(blocConfirme);
+    lect.append(
+      h('div', { class: 'champ note' }, h('div', { class: 'note-tete' }, h('span', { class: 'lib' }, f.note ? 'Ta note' : 'Pas encore de note'), h('span', { class: 'val' }, f.note ? fmtNote(f.note) + ' / 5' : ''),
+        f.note ? h('button', { class: 'effacer', type: 'button', on: { click: () => { f.note = null; change(); } } }, 'Effacer') : null), h('div', { class: 'c-stars' }, et, hit)),
+      oeil,
+      h('div', { class: 'c-avis' }, [['commentaire', 'Simon'], ['commentaire_oriana', 'Oriana']].map(([cle, nom]) => {
+        const txt = (f[cle] || '').trim();
+        return h('button', { type: 'button', 'aria-label': (txt ? 'Modifier l’avis ' : 'Écrire l’avis ') + (nom === 'Oriana' ? 'd’Oriana' : 'de Simon'), on: { click: () => ouvrirAvis(cle) } },
+          h('span', { class: 'qui' }, nom === 'Oriana' ? 'Avis d’Oriana' : 'Avis de Simon'), h('span', { class: 'txt' + (txt ? '' : ' rien') }, txt || 'Toucher pour écrire'));
+      })),
+      syn, ligneEtat, meme);
+    lect.inert = !ouvert;
+    panneau.append(pk, lect);
+    corps.classList.add('rideau'); corps.classList.toggle('ouvert', ouvert);
+    corps.append(aff, panneau);
+    panneau.scrollTop = st; pRef = panneau;
+    majEtat(); if (!meme.firstChild) memeRemplir();
   };
   /* « Dans le même esprit » : titres du même genre pas encore dans le journal, calculés ici (base + catalogue), rien n'est envoyé */
   const meme = h('section', { class: 'c-meme', hidden: true });
@@ -910,7 +951,7 @@ function carteVu(f0) {
       vign.append(h('div', { class: 'pw' }, h('button', { class: 'pos', type: 'button', 'aria-label': g.titre + (g.annee ? ' (' + g.annee + ')' : ''), on: { click: () => fiche(g.id, g) } }, affiche(g)), ajoute), h('span', { class: 'ct' }, g.titre));
       bande.append(vign);
     });
-    meme.append(h('h2', null, 'Dans le même esprit'), bande); meme.hidden = false;
+    meme.append(h('h2', null, 'Dans le même esprit'), pastilles(), bande); meme.hidden = false;
   };
   feuille('Vu', corps);
   const tete = F.querySelector('.f-tete'); tete.insertBefore(icones, tete.lastChild);
