@@ -1,0 +1,28 @@
+{
+ "version": 1,
+ "titres": [
+  {
+   "id": "tmdb-movie-891621",
+   "type": "film",
+   "titre": "Wild Horse Nine",
+   "annee": 2026,
+   "statut": "vu",
+   "date_vu": "2026-11-04",
+   "commentaire": "Très bon film, à regarder en vostfr obligatoirement ! ",
+   "commentaire_oriana": "Dnsn",
+   "genres": [
+    "Comédie",
+    "Crime",
+    "Thriller"
+   ],
+   "duree_min": 117,
+   "affiche": "/hnBtud9vLr9arsUW8nxrzIz2uA4.jpg",
+   "tmdb": {
+    "id": 891621,
+    "type": "movie"
+   },
+   "ajoute_le": "2026-11-11",
+   "maj": "2026-11-11"
+  }
+ ]
+}
