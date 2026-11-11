@@ -296,7 +296,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.33 · 11 nov. 2026';
+const VERSION = '0.34 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -427,7 +427,7 @@ function rendre() {
   let l = listeFiltree();
   $('#compte').textContent = `${l.length} titre${l.length > 1 ? 's' : ''}`;
   const g = h('div', { class: 'grille' });
-  if (!l.length) g.append(h('p', { class: 'vide' }, S.vue === 'vus' ? 'Rien ici avec ces filtres.' : 'Rien à voir pour l’instant : ajoute un titre avec « + Ajouter ».'));
+  if (!l.length) g.append(h('p', { class: 'vide' }, S.vue === 'vus' ? 'Rien ici avec ces filtres.' : 'Rien à voir pour l’instant : ajoute un titre avec le bouton « + » en bas à droite.'));
   if (S.vue === 'avoir') {
     l = l.sort((a, b) => (b.ajoute_le || '').localeCompare(a.ajoute_le || ''));
     let n = 0;
