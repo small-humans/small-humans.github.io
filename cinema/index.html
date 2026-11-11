@@ -297,7 +297,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.40 · 11 nov. 2026';
+const VERSION = '0.41 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -763,7 +763,20 @@ function ecran() {
 }
 
 /* ---------- branchements ---------- */
-document.querySelectorAll('.onglets button').forEach(b => b.addEventListener('click', () => { S.vue = b.dataset.vue; S.montre = PAGE; S.annee = ''; S.genre = ''; S.tri = 'date-desc'; S.q = ''; $('#f-q').value = ''; rendre(); }));
+const ONGLETS = [...document.querySelectorAll('.onglets button')];
+function allerVue(v) { S.vue = v; S.montre = PAGE; S.annee = ''; S.genre = ''; S.tri = 'date-desc'; S.q = ''; $('#f-q').value = ''; rendre(); }
+ONGLETS.forEach(b => b.addEventListener('click', () => allerVue(b.dataset.vue)));
+/* glisser le pouce à gauche / à droite dans la liste : onglet suivant / précédent (mêmes seuils que le commentaire) */
+let gx = 0, gy = 0, gt = 0, gok = false;
+document.addEventListener('touchstart', e => { gok = !F.open && !e.target.closest('input, select, textarea, dialog, .actions'); gx = e.touches[0].clientX; gy = e.touches[0].clientY; gt = Date.now(); }, { passive: true });
+document.addEventListener('touchend', e => {
+  if (!gok) return; gok = false;
+  const dx = e.changedTouches[0].clientX - gx, dy = e.changedTouches[0].clientY - gy, ax = Math.abs(dx), v = ax / Math.max(1, Date.now() - gt);
+  if (!((ax > innerWidth * .1 || (ax > 25 && v > .3)) && ax > 1.5 * Math.abs(dy))) return;
+  const i = ONGLETS.findIndex(b => b.dataset.vue === S.vue), j = i + (dx < 0 ? 1 : -1);
+  if (j < 0 || j >= ONGLETS.length) return;
+  allerVue(ONGLETS[j].dataset.vue); scrollTo({ top: 0 }); ONGLETS[j].scrollIntoView({ inline: 'center', block: 'nearest' });
+}, { passive: true });
 const pc = $('.puces');
 [['', 'Tout'], ['film', 'Films'], ['serie', 'Séries'], ['anime', 'Anime']].forEach(([v, t]) => {
   const b = h('button', { class: 'puce', type: 'button', 'aria-pressed': String(v === ''), on: { click: () => { S.type = v; S.montre = PAGE; pc.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); rendre(); } } }, t);
