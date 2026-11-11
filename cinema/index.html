@@ -445,7 +445,7 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.61 · 11 nov. 2026';
+const VERSION = '0.62 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -863,7 +863,7 @@ function fiche(id, obj, retour) {   // « retour » : appelé à la fermeture de
   return carte(f, retour);   // titre pas encore vu (Non vus, recherche, À voir) : carte « Je l'ai vu »
 }
 
-/* carte « Je l'ai vu » : un toucher enregistre aussitôt (date du jour) ; note, avis et date se complètent sur la même carte.
+/* carte « Je l'ai vu » : un toucher enregistre aussitôt (date de sortie du film, v0.62) ; note, avis et date se complètent sur la même carte.
    Pas de bouton Enregistrer : tout est sauvegardé au fil de l'eau, « Annuler » défait l'ajout. */
 function carte(f0, retour) {
   const f = Object.assign({}, f0), id = f.id, avant = memoire[id];   // « avant » sert à Annuler
@@ -874,7 +874,9 @@ function carte(f0, retour) {
   F.addEventListener('close', () => { if (minuteur) sauve(); }, { once: true });
   if (retour) F.addEventListener('close', () => { retour(); const tt = $('#toast'); if (F.open && tt.classList.contains('on')) F.append(tt); }, { once: true });   // le toast (« Annulé. ») reste visible si une fiche se rouvre
   const annuler = () => { clearTimeout(minuteur); minuteur = null; if (avant === undefined) delete memoire[id]; else memoire[id] = avant; ecrire(); majBoutons(); rendre(); F.close(); toast('Annulé.'); };
-  const vu = () => { f.statut = 'vu'; delete f.envie; f.date_vu = aujourdhui(); sauve(); dessiner(); };
+  /* v0.62 : « Je l'ai vu » sans date choisie = date de sortie du film (jamais dans le futur) ; film sorti le mois en cours ou date de sortie inconnue = le jour même */
+  const dateSortie = () => { const t = aujourdhui(); const d = f.sortie || ((S.catalogue || []).find(x => x.id === id) || (S.base || []).map(x => x.f).find(x => x && x.id === id) || {}).sortie; return /^\d{4}-\d{2}-\d{2}$/.test(d || '') && d <= t && d.slice(0, 7) !== t.slice(0, 7) ? d : t; };
+  const vu = () => { f.statut = 'vu'; delete f.envie; f.date_vu = dateSortie(); sauve(); dessiner(); };
   const envie = (e, ferme) => { f.statut = 'a_voir'; f.envie = e || null; sauve(); if (ferme) { F.close(); toast('Ajouté à « à voir ».'); } else dessiner(); };
   const dessiner = () => {
     corps.textContent = ''; corps.classList.toggle('avis-ouvert', avis);
