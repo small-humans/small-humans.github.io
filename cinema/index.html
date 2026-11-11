@@ -300,7 +300,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.44 · 11 nov. 2026';
+const VERSION = '0.45 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -423,7 +423,11 @@ function rendre() {
   const tout = fusion();
   const vus = tout.filter(f => f.statut === 'vu');
   const heures = Math.round(vus.filter(f => f.type === 'film').reduce((s, f) => s + (f.duree_min || 0), 0) / 60);
-  $('#resume').textContent = `${vus.length} titres vus, ${heures} h de films, et ${tout.length - vus.length} à voir.`;
+  const nAvoir = tout.length - vus.length, pl = n => n > 1 ? 's' : '';
+  $('#resume').textContent = S.vue === 'avoir' ? (nAvoir ? `${nAvoir} titre${pl(nAvoir)} à voir.` : 'Rien dans ta liste pour l’instant.')
+    : S.vue === 'sorties' ? 'Les sorties de la semaine et des semaines passées.'
+    : S.vue === 'base' ? 'Tout ce que tu n’as pas encore vu : cherche un titre ou un genre.'
+    : `${vus.length} titres vus, ${heures} h de films, et ${nAvoir} à voir.`;
   if (stats) return rendreStats(p, vus, heures);
   if (base) return rendreBase(p, tout);
   if (sorties) return rendreSorties(p);
