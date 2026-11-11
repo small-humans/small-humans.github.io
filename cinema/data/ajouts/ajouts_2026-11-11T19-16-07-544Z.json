@@ -1,0 +1,50 @@
+{
+ "version": 1,
+ "titres": [
+  {
+   "id": "tmdb-movie-116745",
+   "type": "film",
+   "titre": "La Vie rêvée de Walter Mitty",
+   "annee": 2013,
+   "statut": "vu",
+   "date_vu": "2026-11-11",
+   "genres": [
+    "Aventure",
+    "Comédie",
+    "Drame",
+    "Fantastique"
+   ],
+   "duree_min": 114,
+   "affiche": "/1WKxLcAmM4liIaZ3aLEE123HrJG.jpg",
+   "tmdb": {
+    "id": 116745,
+    "type": "movie"
+   },
+   "ajoute_le": "2026-11-11",
+   "maj": "2026-11-11"
+  },
+  {
+   "id": "tmdb-movie-140300",
+   "type": "film",
+   "titre": "Kung Fu Panda 3",
+   "annee": 2016,
+   "statut": "vu",
+   "date_vu": "2026-11-11",
+   "genres": [
+    "Animation",
+    "Action",
+    "Aventure",
+    "Comédie",
+    "Familial"
+   ],
+   "duree_min": 95,
+   "affiche": "/qUrLaT8NLUXpP9cOmLftdKt98Ag.jpg",
+   "tmdb": {
+    "id": 140300,
+    "type": "movie"
+   },
+   "ajoute_le": "2026-11-11",
+   "maj": "2026-11-11"
+  }
+ ]
+}
