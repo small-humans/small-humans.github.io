@@ -204,8 +204,8 @@ textarea.export{min-height:180px;font-size:13px}
   dialog.haute .f-tete{position:static}
   dialog.haute .resultats{flex:1;min-height:0;overflow:auto}
   dialog.haute .feuille>.btn{flex:none}
-  dialog.clavier.haute .feuille{gap:6px;padding-top:2px;padding-bottom:6px}
-  dialog.clavier.haute .f-tete{padding:0}
+  dialog.clavier.haute .feuille{gap:12px;padding-top:6px;padding-bottom:6px}
+  dialog.clavier.haute .f-tete{padding:0 0 4px}
   dialog.clavier.haute .f-tete .btn{min-height:40px}
   dialog.clavier.haute .champ>label,dialog.clavier.haute .feuille>.btn{display:none}
   dialog.clavier.haute .champ input{min-height:44px}
@@ -296,7 +296,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.34 · 11 nov. 2026';
+const VERSION = '0.35 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
