@@ -436,7 +436,7 @@ function rendreSorties(p) {
   const deja = new Map(fusion().map(f => [f.id, f]));
   const dans = (x, y) => S.catalogue.filter(f => f.sortie >= x && f.sortie <= y && (deja.get(f.id) || {}).statut !== 'vu').sort((m, n) => m.sortie.localeCompare(n.sortie) || m.titre.localeCompare(n.titre, 'fr'));
   const g = h('div', { class: 'grille' });
-  [['Cette semaine', dans(a0, b0)], ['La semaine prochaine', dans(a1, b1)]].forEach(([titre, l]) => {
+  [['Cette semaine', dans(a0, b0)], ['La semaine prochaine', dans(a1, b1)], ['Sorties récentes (8 semaines)', dans(bornes(-8)[0], bornes(-1)[1]).reverse()]].forEach(([titre, l]) => {
     g.append(h('h2', { class: 'mois' }, titre));
     if (!l.length) { g.append(h('p', { class: 'vide' }, 'Rien de prévu.')); return; }
     let jour = '';
