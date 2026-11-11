@@ -56,13 +56,33 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .bras{transform-origin:272px 208px;animation:salue 5s ease-in-out infinite}
 @keyframes salue{0%,55%,100%{transform:rotate(0)}65%{transform:rotate(-14deg)}75%{transform:rotate(8deg)}85%{transform:rotate(-12deg)}}
 
-/* onglets */
-.onglets{display:flex;gap:clamp(14px,4vw,28px);margin-top:28px;position:sticky;top:0;z-index:15;background:var(--bg);padding-top:env(safe-area-inset-top)}   /* reste en haut quand on descend : seuls les onglets restent affichés */
-.onglets button{min-height:48px;padding:0 2px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;font-size:15px;color:var(--acier);border-bottom:3px solid transparent;transition:color .18s ease}
+/* onglets : une seule rangée, icône + mini libellé ; l'actif a une pastille bleue derrière l'icône */
+.onglets{display:grid;grid-template-columns:repeat(6,1fr);max-width:640px;margin-top:28px;position:sticky;top:0;z-index:15;background:var(--bg);padding-top:env(safe-area-inset-top)}   /* reste en haut quand on descend : seuls les onglets restent affichés */
+.onglets button{min-height:64px;padding:4px 0 6px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--acier);font-size:13px;font-weight:600;line-height:1.3;white-space:nowrap;transition:color .18s ease}
 .onglets button:hover{color:var(--ink)}
-@media (max-width:759px){.onglets{gap:12px}.onglets button{letter-spacing:.06em;font-size:13px}}
-.onglets button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
-.onglets button:active,.btn:active,.puce:active,.tuile:active{transform:scale(.97)}
+.onglets i{display:grid;place-items:center;width:48px;height:32px;border-radius:999px;transition:background-color .18s ease}
+.onglets svg{width:22px;height:22px;display:block}
+.onglets button[aria-selected="true"]{color:var(--ink)}
+.onglets button[aria-selected="true"] i{background:var(--nuit2);color:var(--accent)}
+/* idées : bandes horizontales d'affiches */
+.bande{display:flex;gap:16px;overflow-x:auto;margin:0 calc(-1 * var(--marge));padding:0 var(--marge);scrollbar-width:none;overscroll-behavior-x:contain}
+.bande::-webkit-scrollbar{display:none}
+.bande::after{content:"";flex:0 0 4px}
+.genres-i{display:flex;gap:8px;margin-top:16px;margin-bottom:8px}
+.genres-i .puce{flex:0 0 auto;white-space:nowrap}
+.idee h2{font-size:17px;font-weight:600;line-height:1.35;margin-top:28px;text-wrap:balance}
+.idee h2 span{color:var(--acier);font-weight:500}
+.idee .bande{margin-top:14px}
+.sug{flex:0 0 92px;width:92px;display:flex;flex-direction:column;gap:8px}
+.pw{position:relative}
+.pos{display:block;width:92px;padding:0;text-align:left}
+.pos .aff{padding:6px}
+.pos .aff i{font-size:10px}
+.ajoute{position:absolute;top:0;right:0;width:44px;height:44px;display:grid;place-items:center}
+.ajoute span{width:28px;height:28px;border-radius:50%;background:var(--bg);color:var(--accent);display:grid;place-items:center}
+.ajoute svg{width:16px;height:16px}
+.sug .ct{font-size:var(--t-small);font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.onglets button:active,.pos:active,.btn:active,.puce:active,.tuile:active{transform:scale(.97)}
 
 /* filtres */
 .outils{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:16px}
@@ -256,11 +276,12 @@ textarea.export{min-height:180px;font-size:13px}
   </section>
 
   <div class="onglets" role="tablist" aria-label="Vue">
-    <button role="tab" id="o-vus" aria-selected="true" data-vue="vus">Vus</button>
-    <button role="tab" id="o-sorties" aria-selected="false" data-vue="sorties">Sorties</button>
-    <button role="tab" id="o-avoir" aria-selected="false" data-vue="avoir">À voir</button>
-    <button role="tab" id="o-base" aria-selected="false" data-vue="base">Non vus</button>
-    <button role="tab" id="o-stats" aria-selected="false" data-vue="stats">Stats</button>
+    <button role="tab" id="o-vus" aria-selected="true" data-vue="vus"><i><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12c2.2-4.3 5.4-6.5 9.5-6.5s7.3 2.2 9.5 6.5c-2.2 4.3-5.4 6.5-9.5 6.5S4.7 16.3 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></i><span>Vus</span></button>
+    <button role="tab" id="o-sorties" aria-selected="false" data-vue="sorties"><i><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></i><span>Sorties</span></button>
+    <button role="tab" id="o-avoir" aria-selected="false" data-vue="avoir"><i><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10a1 1 0 0 1 1 1v16l-6-4-6 4v-16a1 1 0 0 1 1-1z"/></svg></i><span>À voir</span></button>
+    <button role="tab" id="o-base" aria-selected="false" data-vue="base"><i><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="6.5" r="1.75"/><circle cx="5.5" cy="12" r="1.75"/><circle cx="5.5" cy="17.5" r="1.75"/><path d="M10.5 6.5h10M10.5 12h10M10.5 17.5h10"/></svg></i><span>Non vus</span></button>
+    <button role="tab" id="o-idees" aria-selected="false" data-vue="idees"><i><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3.5c.6 3.9 1.9 5.9 6 6.5-4.1.6-5.4 2.6-6 6.5-.6-3.9-1.9-5.9-6-6.5 4.1-.6 5.4-2.6 6-6.5z"/><path d="M19 15.5v5M16.5 18h5"/></svg></i><span>Idées</span></button>
+    <button role="tab" id="o-stats" aria-selected="false" data-vue="stats"><i><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20.5v-6M10 20.5V9M15 20.5v-8.5M20 20.5V4"/></svg></i><span>Stats</span></button>
   </div>
 
   <div class="outils" id="outils">
@@ -300,7 +321,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.46 · 11 nov. 2026';
+const VERSION = '0.47 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -341,7 +362,7 @@ function lire() { try { const v = localStorage.getItem(CLE); memoire = v ? JSON.
 function ecrire() { try { localStorage.setItem(CLE, JSON.stringify(memoire)); } catch (e) { stockageOk = false; } }
 
 /* ---------- données ---------- */
-const S = { journal: [], exemple: false, vue: 'vus', type: '', annee: '', genre: '', tri: 'date-desc', montre: PAGE, base: null, promesse: null, q: '' };
+const S = { journal: [], exemple: false, vue: 'vus', type: '', annee: '', genre: '', tri: 'date-desc', montre: PAGE, base: null, promesse: null, q: '', gi: '' };
 
 async function chargerJournal() {
   for (const url of ['data/journal.json', 'data/journal.local.json', 'data/exemple.json']) {
@@ -418,17 +439,20 @@ function tuile(f) {
 function rendre() {
   const p = $('#panneau'); p.textContent = '';
   const stats = S.vue === 'stats', base = S.vue === 'base', sorties = S.vue === 'sorties';
-  $('#outils').hidden = stats || sorties; $('#compte').hidden = stats || sorties; $('#rech').hidden = !base; $('#f-q-x').hidden = !S.q;
-  ['vus', 'avoir', 'base', 'sorties', 'stats'].forEach(v => { const b = $('#o-' + v); b.setAttribute('aria-selected', String(v === S.vue)); });
+  const idees = S.vue === 'idees';
+  $('#outils').hidden = stats || sorties || idees; $('#compte').hidden = stats || sorties || idees; $('#rech').hidden = !base; $('#f-q-x').hidden = !S.q;
+  ['vus', 'avoir', 'base', 'idees', 'sorties', 'stats'].forEach(v => { const b = $('#o-' + v); b.setAttribute('aria-selected', String(v === S.vue)); });
   const tout = fusion();
   const vus = tout.filter(f => f.statut === 'vu');
   const heures = Math.round(vus.filter(f => f.type === 'film').reduce((s, f) => s + (f.duree_min || 0), 0) / 60);
   const nAvoir = tout.length - vus.length, pl = n => n > 1 ? 's' : '';
   $('#resume').textContent = S.vue === 'avoir' ? (nAvoir ? `${nAvoir} titre${pl(nAvoir)} à voir.` : 'Rien dans ta liste pour l’instant.')
     : S.vue === 'sorties' ? 'Les sorties de la semaine et des semaines passées.'
+    : idees ? 'Des idées tirées de tes goûts : touche « + » pour mettre un titre dans « à voir ».'
     : S.vue === 'base' ? 'Tout ce que tu n’as pas encore vu : cherche un titre ou un genre.'
     : `${vus.length} titres vus, ${heures} h de films, et ${nAvoir} à voir.`;
   if (stats) return rendreStats(p, vus, heures);
+  if (idees) return rendreIdees(p, vus, tout);
   if (base) return rendreBase(p, tout);
   if (sorties) return rendreSorties(p);
   majMenus(tout);
@@ -483,6 +507,60 @@ function rendreSorties(p) {
     });
   });
   p.append(g);
+}
+/* idées : calcul côté client à partir du journal, de la base (data/base) et du catalogue ; rien n'est envoyé nulle part.
+   Les titres déjà dans le journal (vus ou à voir) sont exclus. Pas de note publique dans la base : le tirage « au hasard » change chaque jour. */
+const ICO_PLUS = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v12M6 12h12"/></svg>';
+function rendreIdees(p, vus, tout) {
+  if (!S.base || !S.catalogue) {
+    p.append(h('p', { class: 'vide' }, 'Je cherche des idées…'));
+    const cat = S.catalogue ? Promise.resolve() : fetch('data/catalogue.json').then(r => r.ok ? r.json() : { titres: [] }).catch(() => ({ titres: [] })).then(d => { S.catalogue = d.titres || []; });
+    Promise.all([chargerBase(), cat]).then(() => { if (S.vue === 'idees') rendre(); }); return;
+  }
+  const deja = new Set(tout.map(f => f.id)), jour = aujourdhui();
+  const alea = f => [...(f.id + jour)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);   // ordre stable dans la journée
+  const compte = {}; vus.forEach(f => (f.genres || []).forEach(g => { compte[g] = (compte[g] || 0) + 1; }));
+  const aimes = Object.keys(compte).sort((a, b) => compte[b] - compte[a] || a.localeCompare(b, 'fr'));
+  const pool = S.base.map(x => x.f).filter(f => !deja.has(f.id) && f.affiche);
+  const filtre = f => !S.gi || (f.genres || []).includes(S.gi);
+  const utilises = new Set(), bandes = [];
+  const ajouter = (titre, sous, l, n) => { l = l.filter(f => !utilises.has(f.id)).slice(0, n || 16); if (l.length) { l.forEach(f => utilises.add(f.id)); bandes.push([titre, sous, l]); } };
+  const parAlea = l => l.sort((a, b) => alea(a) - alea(b));
+  /* 1. le genre le plus vu (ou le genre choisi) */
+  const g1 = S.gi || aimes[0];
+  if (g1) ajouter(S.gi ? 'Pour le genre ' : 'Parce que tu aimes ', g1.toLowerCase(), parAlea(pool.filter(f => (f.genres || []).includes(g1))));
+  /* 2. même esprit qu'un film vu bien noté, le plus récent */
+  const ref = vus.filter(f => (f.note || 0) >= 4 && (f.genres || []).length).sort((a, b) => (b.date_vu || '').localeCompare(a.date_vu || ''))[0];
+  if (ref) {
+    const sc = f => (f.genres || []).filter(g => ref.genres.includes(g)).length, mini = Math.min(2, ref.genres.length);
+    ajouter('Dans le même esprit que ', ref.titre, parAlea(pool.filter(f => f.type === ref.type && filtre(f) && sc(f) >= mini)).sort((a, b) => sc(b) - sc(a)));
+  }
+  /* 3. la pioche du jour (la base n'a pas de note publique) */
+  ajouter('La pioche du jour', '', parAlea(pool.filter(filtre)));
+  /* 4. sorties de la semaine proches de tes goûts */
+  const auj = new Date(), lundi = new Date(auj); lundi.setDate(auj.getDate() - ((auj.getDay() + 6) % 7));
+  const dim = new Date(lundi); dim.setDate(lundi.getDate() + 6);
+  const iso = d => d.toLocaleDateString('sv-SE'), top = aimes.slice(0, 4);
+  const sc4 = f => (f.genres || []).filter(g => top.includes(g)).length;
+  ajouter('Sorties de la semaine ', 'qui te ressemblent', S.catalogue.filter(f => f.sortie >= iso(lundi) && f.sortie <= iso(dim) && !deja.has(f.id) && f.affiche && filtre(f) && sc4(f) > 0).sort((a, b) => sc4(b) - sc4(a) || a.sortie.localeCompare(b.sortie)));
+  /* pastilles de genres : d'abord ceux que tu vois le plus */
+  const tous = [...new Set(pool.flatMap(f => f.genres || []))].sort((a, b) => (compte[b] || 0) - (compte[a] || 0) || a.localeCompare(b, 'fr')).slice(0, 14);
+  const rang = h('div', { class: 'genres-i bande', role: 'group', 'aria-label': 'Genre' });
+  ['', ...tous].forEach(g => rang.append(h('button', { class: 'puce', type: 'button', 'aria-pressed': String(g === S.gi), on: { click: () => { S.gi = g === S.gi ? '' : g; rendre(); } } }, g || 'Tout')));
+  p.append(rang);
+  if (!bandes.length) { p.append(h('p', { class: 'vide' }, S.gi ? `Rien de nouveau dans le genre « ${S.gi.toLowerCase()} ». Touche-le encore pour revenir à « Tout ».` : 'Pas encore d’idées : note quelques films vus (4 étoiles ou plus), les idées viennent de tes goûts.')); return; }
+  bandes.forEach(([t, s, l]) => {
+    const bande = h('div', { class: 'bande' });
+    l.forEach(f => {
+      const ajoute = h('button', { class: 'ajoute', type: 'button', 'aria-label': 'Mettre « ' + f.titre + ' » dans à voir', on: { click: () => {
+        const pos = [...p.querySelectorAll('.bande')].map(b => b.scrollLeft), y = scrollY;
+        enregistrer(Object.assign({}, f, { statut: 'a_voir', envie: null })); toast('Ajouté à « à voir ».');
+        p.querySelectorAll('.bande').forEach((b, i) => { b.scrollLeft = pos[i] || 0; }); scrollTo({ top: y });
+      } } }); ajoute.innerHTML = '<span>' + ICO_PLUS + '</span>';
+      bande.append(h('div', { class: 'sug' }, h('div', { class: 'pw' }, h('button', { class: 'pos', type: 'button', 'aria-label': f.titre + (f.annee ? ' (' + f.annee + ')' : ''), on: { click: () => fiche(f.id, f) } }, affiche(f)), ajoute), h('span', { class: 'ct' }, f.titre)));
+    });
+    p.append(h('section', { class: 'idee' }, h('h2', null, t, s ? h('span', null, s) : null), bande));
+  });
 }
 function rendreBase(p, tout) {
   if (!S.base) { $('#compte').textContent = 'Chargement de la base (2006 à 2026)…'; chargerBase().then(rendre); return; }
@@ -793,7 +871,7 @@ function ecran() {
 
 /* ---------- branchements ---------- */
 const ONGLETS = [...document.querySelectorAll('.onglets button')];
-function allerVue(v) { S.vue = v; S.montre = PAGE; S.annee = ''; S.genre = ''; S.tri = 'date-desc'; S.q = ''; $('#f-q').value = ''; rendre(); }
+function allerVue(v) { S.vue = v; S.montre = PAGE; S.annee = ''; S.genre = ''; S.gi = ''; S.tri = 'date-desc'; S.q = ''; $('#f-q').value = ''; rendre(); }
 ONGLETS.forEach(b => b.addEventListener('click', () => allerVue(b.dataset.vue)));
 /* changement d'onglet fluide : la liste glisse hors de l'écran, la nouvelle arrive du côté opposé, et on atterrit sur la liste (pas sur l'en-tête « Cinéma ») */
 let enCours = false;
@@ -814,7 +892,7 @@ function glisserVers(j, sens) {
 }
 /* glisser le pouce à gauche / à droite dans la liste : onglet suivant / précédent (mêmes seuils que le commentaire) */
 let gx = 0, gy = 0, gt = 0, gok = false;
-document.addEventListener('touchstart', e => { gok = !F.open && !e.target.closest('input, select, textarea, dialog, .actions'); gx = e.touches[0].clientX; gy = e.touches[0].clientY; gt = Date.now(); }, { passive: true });
+document.addEventListener('touchstart', e => { gok = !F.open && !e.target.closest('input, select, textarea, dialog, .actions, .bande'); gx = e.touches[0].clientX; gy = e.touches[0].clientY; gt = Date.now(); }, { passive: true });
 document.addEventListener('touchend', e => {
   if (!gok) return; gok = false;
   const dx = e.changedTouches[0].clientX - gx, dy = e.changedTouches[0].clientY - gy, ax = Math.abs(dx), v = ax / Math.max(1, Date.now() - gt);
