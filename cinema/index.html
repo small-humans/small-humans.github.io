@@ -281,6 +281,8 @@ dialog.clavier .carte .cache-clavier{display:none}
 .f-icones{display:flex;gap:4px}
 .f-ico{min-width:56px;min-height:48px;padding:2px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--acier);font-size:13px;line-height:1.2;border-radius:12px}
 .f-ico svg{width:22px;height:22px;display:block}
+.f-ico span{display:none}
+.f-ico{min-width:44px;min-height:44px}
 .f-ico[aria-pressed="true"]{color:var(--ink);background:var(--nuit2)}
 .carte.vu{gap:16px}
 .carte.vu>*{flex:none}
@@ -329,8 +331,13 @@ dialog.clavier .carte .cache-clavier{display:none}
 .rd-lect>*{flex:none}
 .rideau .c-avis>button{background:none;padding:0}
 .f-tete h2.t-film{flex:1;min-width:0;text-transform:none;letter-spacing:0;font-weight:400;line-height:1.3}
-.t-film b{display:block;font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.t-film span{display:block;font-size:13px;color:var(--acier);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.feuille{grid-template-columns:minmax(0,1fr)}
+.f-tete{min-width:0}
+.f-tete h2.t-film{display:flex;align-items:center;gap:12px}
+.t-film .vign{flex:none;width:32px;height:48px;border-radius:8px;background:var(--nuit) center/cover no-repeat;display:grid;place-items:center;font-style:normal;font-weight:700;color:var(--acier)}
+.t-film .tb{min-width:0}
+.t-film .tb b{display:block;font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-film .tb span{display:block;font-size:13px;color:var(--acier);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (prefers-reduced-motion:reduce){.rd-panneau{transition:none}}
 @media (max-width:759px){.plein .corps.rideau,.plein .carte.vu.rideau{height:100%;overflow:hidden;padding-bottom:0;gap:0}}
 @media (prefers-reduced-motion:reduce){
@@ -835,7 +842,7 @@ function carteVu(f0) {
     ecrire(); majBoutons(); rendre();
     f = Object.assign({}, f0); modifie = false; etat = ''; avis = false; dessiner(); toast('Annulé.');
   };
-  const titre = () => { const t = $('#f-titre'); if (!t) return; t.textContent = ''; t.className = ''; if (etat || avis || !ouvert) { t.textContent = etat === 'avoir' ? 'À voir' : etat === 'retire' ? 'Retiré' : avis ? 'Vu' : ''; return; } t.className = 't-film'; t.append(h('b', null, f.titre), h('span', null, infosDe(f))); };
+  const titre = () => { const t = $('#f-titre'); if (!t) return; t.textContent = ''; t.className = ''; if (etat || avis || !ouvert) { t.textContent = etat === 'avoir' ? 'À voir' : etat === 'retire' ? 'Retiré' : avis ? 'Vu' : ''; return; } t.className = 't-film'; t.append(f.affiche ? h('i', { class: 'vign', style: `background-image:url("${IMG}w185${f.affiche}")` }) : h('i', { class: 'vign typo' }, (f.titre || '?').trim().replace(/^(L’|L'|Le |La |Les )/, '').charAt(0).toUpperCase()), h('div', { class: 'tb' }, h('b', null, f.titre), h('span', null, infosDe(f)))); };
   /* en-tête : deux icônes à côté de « Fermer » */
   const bAvoir = h('button', { class: 'f-ico', type: 'button', 'aria-label': 'Remettre à voir', title: 'Remettre à voir', on: { click: () => {
     clearTimeout(minuteur); minuteur = null; f.statut = 'a_voir'; enregistrer(f); etat = 'avoir'; dessiner(); } } }, icone(ICO.avoir, 'À voir'));
@@ -887,6 +894,7 @@ function carteVu(f0) {
     const aff = sans
       ? h('div', { class: 'rd-aff typo', role: 'img', 'aria-label': f.titre + ', sans affiche' }, h('span', { class: 'gh', 'aria-hidden': 'true' }, (f.titre || '?').trim().replace(/^(L’|L'|Le |La |Les )/, '').charAt(0).toUpperCase()), h('b', { class: 'rd-tt' }, f.titre))
       : h('div', { class: 'rd-aff', role: 'img', 'aria-label': 'Affiche de ' + f.titre, style: `background-image:url("${IMG}w500${f.affiche}")` });
+    aff.addEventListener('click', () => { if (ouvert) bascule(false); });
     const lect = h('div', { class: 'rd-lect' });
     const panneau = h('div', { class: 'rd-panneau' + (ouvert ? ' ouvert' : '') });
     const bascule = o => {
