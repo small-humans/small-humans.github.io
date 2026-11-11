@@ -211,6 +211,11 @@ textarea.export{min-height:180px;font-size:13px}
   .plein .champ.com{flex:1;min-height:0}
   .plein .champ.com textarea{flex:1;min-height:64px;resize:none}
   .plein .collant{margin:auto calc(-1 * var(--marge)) 0;bottom:0}
+  /* clavier ouvert : on ne garde que le commentaire et le bouton, sinon le champ est écrasé et on ne voit pas ce qu'on tape */
+  dialog.clavier.plein .f-haut,dialog.clavier.plein .syn,dialog.clavier.plein .champ.note,dialog.clavier.plein .champ.date,dialog.clavier.plein .f-actions,dialog.clavier.plein .champ.com>label{display:none}
+  dialog.clavier.plein .feuille{gap:6px}
+  dialog.clavier.plein .corps{gap:6px}
+  dialog.clavier.plein .collant .btn{min-height:48px}
 }
 .corps{display:grid;gap:18px}
 .champ.com{display:flex;flex-direction:column}
