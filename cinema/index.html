@@ -37,6 +37,7 @@ button{background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-c
 .barre{position:fixed;top:0;left:0;right:0;z-index:10;height:var(--barre);display:flex;align-items:center;padding:0 var(--marge);background:var(--bg)}
 .barre a{text-decoration:none;text-transform:uppercase;letter-spacing:var(--suivi);font-size:16px;min-height:44px;display:inline-flex;align-items:center}
 .barre a:hover{color:var(--accent)}
+.bas .barre,.bas .version{display:none}   /* page descendue : on ne garde en haut que les onglets */
 
 /* tête : titre + écran de cinéma */
 .tete{display:grid;gap:18px;padding-top:12px}
@@ -56,7 +57,7 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 @keyframes salue{0%,55%,100%{transform:rotate(0)}65%{transform:rotate(-14deg)}75%{transform:rotate(8deg)}85%{transform:rotate(-12deg)}}
 
 /* onglets */
-.onglets{display:flex;gap:clamp(14px,4vw,28px);margin-top:28px}
+.onglets{display:flex;gap:clamp(14px,4vw,28px);margin-top:28px;position:sticky;top:0;z-index:15;background:var(--bg);padding-top:env(safe-area-inset-top)}   /* reste en haut quand on descend : seuls les onglets restent affichés */
 .onglets button{min-height:48px;padding:0 2px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;font-size:15px;color:var(--acier);border-bottom:3px solid transparent;transition:color .18s ease}
 .onglets button:hover{color:var(--ink)}
 @media (max-width:759px){.onglets{gap:12px}.onglets button{letter-spacing:.06em;font-size:13px}}
@@ -117,6 +118,8 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .btn.fort:hover{background:#8BB9FF}
 .btn:disabled{opacity:.45;cursor:default}
 .actions .btn{flex:none;padding:0 20px;font-size:15px;line-height:1.2;border-radius:999px;background:var(--nuit2);min-height:52px}.actions .btn.fort{background:var(--accent);color:var(--accent-ink)}
+.actions #b-ajout{width:64px;height:64px;min-height:64px;padding:0;font-size:38px;font-weight:300;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.actions #b-haut{width:52px;padding:0;display:inline-flex;align-items:center;justify-content:center}.actions #b-haut[hidden]{display:none}
 .actions #b-copie{position:relative;width:52px;padding:0;display:inline-flex;align-items:center;justify-content:center}
 .actions #b-copie[hidden]{display:none}
 .actions #b-copie .nb{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:600;line-height:20px;text-align:center}
@@ -274,7 +277,8 @@ textarea.export{min-height:180px;font-size:13px}
 
 <div class="actions">
   <div class="rangee">
-    <button class="btn fort" id="b-ajout" type="button">+ Ajouter</button>
+    <button class="btn" id="b-haut" type="button" aria-label="Remonter en haut" hidden><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+    <button class="btn fort" id="b-ajout" type="button" aria-label="Ajouter un titre">+</button>
     <button class="btn" id="b-copie" type="button" aria-label="Envoyer mes ajouts" hidden><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg><span class="nb" id="nb"></span></button>
   </div>
 </div>
@@ -285,7 +289,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.29 · 11 nov. 2026';
+const VERSION = '0.30 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -752,6 +756,8 @@ $('#f-annee').addEventListener('change', e => { S.annee = e.target.value; S.mont
 $('#f-genre').addEventListener('change', e => { S.genre = e.target.value; S.montre = PAGE; rendre(); });
 $('#f-tri').addEventListener('change', e => { S.tri = e.target.value; S.montre = PAGE; rendre(); });
 $('#b-ajout').addEventListener('click', ajout);
+$('#b-haut').addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
+addEventListener('scroll', () => { $('#b-haut').hidden = scrollY < 400; document.body.classList.toggle('bas', scrollY > 90); }, { passive: true });
 $('#b-copie').addEventListener('click', envoyer);
 
 (async () => {
