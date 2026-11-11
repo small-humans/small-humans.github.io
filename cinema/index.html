@@ -253,9 +253,9 @@ textarea.export{min-height:180px;font-size:13px}
 
   <div class="onglets" role="tablist" aria-label="Vue">
     <button role="tab" id="o-vus" aria-selected="true" data-vue="vus">Vus</button>
+    <button role="tab" id="o-sorties" aria-selected="false" data-vue="sorties">Sorties</button>
     <button role="tab" id="o-avoir" aria-selected="false" data-vue="avoir">À voir</button>
     <button role="tab" id="o-base" aria-selected="false" data-vue="base">Non vus</button>
-    <button role="tab" id="o-sorties" aria-selected="false" data-vue="sorties">Sorties</button>
     <button role="tab" id="o-stats" aria-selected="false" data-vue="stats">Stats</button>
   </div>
 
@@ -296,7 +296,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.35 · 11 nov. 2026';
+const VERSION = '0.36 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
