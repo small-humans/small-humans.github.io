@@ -297,7 +297,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.39 · 11 nov. 2026';
+const VERSION = '0.40 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -619,9 +619,9 @@ function formulaire(f, passerVu) {
       const choisir = cle => { auteur = cle; ta.value = f[auteur] || ''; majPoints(); };   // pas de focus : changer d'onglet pour lire n'ouvre pas le clavier
       majPoints();
       const zone = h('div', { class: 'champ com' }, h('div', { class: 'ctabs', role: 'group', 'aria-label': 'Commentaire de' }, onglets), ta);
-      let x0 = 0, y0 = 0;   // glisser le pouce à gauche / à droite pour passer de Simon à Oriana
-      zone.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
-      zone.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; if (Math.abs(dx) > 70 && Math.abs(dx) > 2 * Math.abs(dy)) { const cle = dx < 0 ? 'commentaire_oriana' : 'commentaire'; if (cle !== auteur) choisir(cle); } }, { passive: true });
+      let x0 = 0, y0 = 0, t0 = 0;   // glisser le pouce à gauche / à droite pour passer de Simon à Oriana
+      zone.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now(); }, { passive: true });
+      zone.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; const ax = Math.abs(dx), v = ax / Math.max(1, Date.now() - t0);   /* seuils usuels : distance ~10 % de l'écran, ou geste vif (> 0,3 px/ms, 25 px mini) ; axe plutôt horizontal (~40°) */ if ((ax > innerWidth * .1 || (ax > 25 && v > .3)) && ax > 1.2 * Math.abs(dy)) { const cle = dx < 0 ? 'commentaire_oriana' : 'commentaire'; if (cle !== auteur) choisir(cle); } }, { passive: true });
       corps.append(zone);
       corps.append(h('div', { class: 'champ date' }, h('label', { for: 'ch-date' }, 'Date de visionnage'), h('input', { id: 'ch-date', type: 'date', value: f.date_vu, max: aujourdhui(), on: { change: e => { f.date_vu = e.target.value; } } })));
     } else {
