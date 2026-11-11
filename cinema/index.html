@@ -321,7 +321,7 @@ textarea.export{min-height:180px;font-size:13px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.49 · 11 nov. 2026';
+const VERSION = '0.50 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -496,9 +496,11 @@ function rendreSorties(p) {
   const [a0, b0] = bornes(0), [a1, b1] = bornes(1);
   const deja = new Map(fusion().map(f => [f.id, f]));
   const dans = (x, y) => S.catalogue.filter(f => f.sortie >= x && f.sortie <= y && (deja.get(f.id) || {}).statut !== 'vu').sort((m, n) => m.sortie.localeCompare(n.sortie) || m.titre.localeCompare(n.titre, 'fr'));
+  const parts = [['Cette semaine', dans(a0, b0)], ['La semaine prochaine', dans(a1, b1)], ['Récentes (8 semaines)', dans(bornes(-8)[0], bornes(-1)[1]).reverse()]];
+  if (!parts.some(x => x[0] === S.per)) S.per = parts[0][0];   // on commence par « Cette semaine »
+  p.append(h('div', { class: 'puces', role: 'group', 'aria-label': 'Période', style: 'margin-bottom:8px' }, parts.map(([t]) => h('button', { class: 'puce', type: 'button', 'aria-pressed': String(t === S.per), on: { click: () => { S.per = t; rendre(); } } }, t))));
   const g = h('div', { class: 'grille' });
-  [['Cette semaine', dans(a0, b0)], ['La semaine prochaine', dans(a1, b1)], ['Sorties récentes (8 semaines)', dans(bornes(-8)[0], bornes(-1)[1]).reverse()]].forEach(([titre, l]) => {
-    g.append(h('h2', { class: 'mois' }, titre));
+  parts.filter(x => x[0] === S.per).forEach(([titre, l]) => {
     if (!l.length) { g.append(h('p', { class: 'vide' }, 'Rien de prévu.')); return; }
     let jour = '';
     l.forEach(f => {
@@ -871,9 +873,9 @@ function ecran() {
 
 /* ---------- branchements ---------- */
 const ONGLETS = [...document.querySelectorAll('.onglets button')];
-function allerVue(v) { S.vue = v; S.montre = PAGE; S.annee = ''; S.genre = ''; S.gi = ''; S.tri = 'date-desc'; S.q = ''; $('#f-q').value = ''; rendre(); }
+function allerVue(v) { S.vue = v; S.montre = PAGE; S.annee = ''; S.genre = ''; S.gi = ''; S.per = ''; S.tri = 'date-desc'; S.q = ''; $('#f-q').value = ''; rendre(); }
 ONGLETS.forEach(b => b.addEventListener('click', () => allerVue(b.dataset.vue)));
-/* changement d'onglet fluide : la liste glisse hors de l'écran, la nouvelle arrive du côté opposé, et on atterrit sur la liste (pas sur l'en-tête « Cinéma ») */
+/* changement d'onglet fluide : la liste glisse hors de l'écran, la nouvelle arrive du côté opposé, et on repart du haut de page (titre « Cinéma » et onglets visibles) */
 let enCours = false;
 function glisserVers(j, sens) {
   if (enCours) return; enCours = true;
@@ -884,10 +886,7 @@ function glisserVers(j, sens) {
   const anim = (de, vers, ms) => reduit ? Promise.resolve() : Promise.race([Promise.all(zone.map(e => e.animate([{ transform: `translateX(${de}px)`, opacity: de ? 0 : 1 }, { transform: `translateX(${vers}px)`, opacity: vers ? 0 : 1 }], { duration: ms, easing: 'cubic-bezier(.2,.7,.2,1)', fill: vers ? 'both' : 'backwards' }).finished)), new Promise(r => setTimeout(r, ms + 250))]);
   anim(0, -sens * 36, 110).then(() => {
     allerVue(ONGLETS[j].dataset.vue); tous.forEach(e => e && e.getAnimations().forEach(a => a.cancel())); zone = visibles();
-    const tete = document.querySelector('.tete'), cadre = document.querySelector('.cadre'); cadre.style.minHeight = '';
-    const y = tete.getBoundingClientRect().bottom + scrollY + 28, manque = y + innerHeight - document.documentElement.scrollHeight;
-    if (manque > 0) cadre.style.minHeight = (cadre.offsetHeight + manque) + 'px';   // liste courte (ex. « À voir » avec 1 titre) : on rallonge la page pour pouvoir atterrir sous l'en-tête
-    scrollTo({ top: y });
+    document.querySelector('.cadre').style.minHeight = ''; scrollTo({ top: 0 });   // on repart toujours du haut de page : titre, onglets, puis filtres et liste
     return anim(sens * 36, 0, 170).then(() => tous.forEach(e => e && e.getAnimations().forEach(a => a.cancel())));   // plus de transformation résiduelle sur la liste
   }).catch(e => console.error('glisser', e)).finally(() => { enCours = false; });
 }
