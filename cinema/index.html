@@ -609,7 +609,9 @@ function chargerBase() {
   return S.promesse || (S.promesse = (async () => {
     const ans = []; for (let a = 2026; a >= 2006; a--) ans.push(a);
     const res = await Promise.allSettled(ans.map(a => fetch(`data/base/${a}.json`).then(r => r.ok ? r.json() : Promise.reject())));
-    S.base = res.flatMap(r => r.status === 'fulfilled' ? (r.value.titres || []) : []).map(f => ({ f, n: norm(f.titre) }));
+    const cat = await fetch('data/catalogue.json').then(r => r.ok ? r.json() : { titres: [] }).catch(() => ({ titres: [] }));   // les sorties récentes ne sont pas toujours dans la base : on les ajoute
+    const tous = res.flatMap(r => r.status === 'fulfilled' ? (r.value.titres || []) : []), ids = new Set(tous.map(f => f.id));
+    S.base = tous.concat((cat.titres || []).filter(f => !ids.has(f.id))).map(f => ({ f, n: norm(f.titre) }));
   })());
 }
 function ajout() {
