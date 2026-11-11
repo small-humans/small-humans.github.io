@@ -1,0 +1,63 @@
+{
+ "version": 1,
+ "titres": [
+  {
+   "id": "tmdb-movie-1193614",
+   "type": "film",
+   "titre": "Il faut brûler maman",
+   "annee": 2026,
+   "statut": "a_voir",
+   "genres": [
+    "Comédie",
+    "Drame"
+   ],
+   "duree_min": 95,
+   "affiche": "/3KDbl3m07R9hsFgM04JetRSJWeR.jpg",
+   "tmdb": {
+    "id": 1193614,
+    "type": "movie"
+   },
+   "ajoute_le": "2026-11-11",
+   "maj": "2026-11-11"
+  },
+  {
+   "id": "tmdb-movie-1567605",
+   "type": "film",
+   "titre": "Scrooge",
+   "annee": 2026,
+   "statut": "a_voir",
+   "genres": [
+    "Fantastique",
+    "Comédie"
+   ],
+   "duree_min": 115,
+   "affiche": "/9RCnWkVOevfAVuSkYkQOg1k8QvO.jpg",
+   "tmdb": {
+    "id": 1567605,
+    "type": "movie"
+   },
+   "ajoute_le": "2026-11-11",
+   "maj": "2026-11-11"
+  },
+  {
+   "id": "tmdb-movie-1437511",
+   "type": "film",
+   "titre": "Comment braquer une banque",
+   "annee": 2026,
+   "statut": "a_voir",
+   "genres": [
+    "Action",
+    "Crime",
+    "Thriller"
+   ],
+   "duree_min": 121,
+   "affiche": "/uvTMQzEU3b4GJLVv2HD318rb1sB.jpg",
+   "tmdb": {
+    "id": 1437511,
+    "type": "movie"
+   },
+   "ajoute_le": "2026-11-11",
+   "maj": "2026-11-11"
+  }
+ ]
+}
