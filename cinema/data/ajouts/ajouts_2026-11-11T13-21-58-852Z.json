@@ -1,0 +1,26 @@
+{
+ "version": 1,
+ "titres": [
+  {
+   "id": "tmdb-movie-1281331",
+   "type": "film",
+   "titre": "The Social Reckoning",
+   "annee": 2026,
+   "statut": "vu",
+   "date_vu": "2026-10-07",
+   "commentaire": "Sympa ",
+   "genres": [
+    "Drame",
+    "Thriller"
+   ],
+   "duree_min": 113,
+   "affiche": "/tF1P9HZEBJQ8w1KyBlS3zMS2Ogp.jpg",
+   "tmdb": {
+    "id": 1281331,
+    "type": "movie"
+   },
+   "ajoute_le": "2026-11-11",
+   "maj": "2026-11-11"
+  }
+ ]
+}
