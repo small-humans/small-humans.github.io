@@ -366,7 +366,7 @@ dialog.clavier .carte .cache-clavier{display:none}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.52 · 11 nov. 2026';
+const VERSION = '0.53 · 11 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -1063,7 +1063,7 @@ function ecran() {
 const ONGLETS = [...document.querySelectorAll('.onglets button')];
 function allerVue(v) { S.vue = v; S.montre = PAGE; S.annee = ''; S.genre = ''; S.gi = ''; S.per = ''; S.tri = 'date-desc'; S.q = ''; $('#f-q').value = ''; rendre(); }
 ONGLETS.forEach(b => b.addEventListener('click', () => allerVue(b.dataset.vue)));
-/* changement d'onglet fluide : la liste glisse hors de l'écran, la nouvelle arrive du côté opposé, et on repart du haut de page (titre « Cinéma » et onglets visibles) */
+/* changement d'onglet fluide : la liste glisse hors de l'écran, la nouvelle arrive du côté opposé, et on atterrit onglets collés en haut, filtres dessous */
 let enCours = false;
 function glisserVers(j, sens) {
   if (enCours) return; enCours = true;
@@ -1074,7 +1074,10 @@ function glisserVers(j, sens) {
   const anim = (de, vers, ms) => reduit ? Promise.resolve() : Promise.race([Promise.all(zone.map(e => e.animate([{ transform: `translateX(${de}px)`, opacity: de ? 0 : 1 }, { transform: `translateX(${vers}px)`, opacity: vers ? 0 : 1 }], { duration: ms, easing: 'cubic-bezier(.2,.7,.2,1)', fill: vers ? 'both' : 'backwards' }).finished)), new Promise(r => setTimeout(r, ms + 250))]);
   anim(0, -sens * 36, 110).then(() => {
     allerVue(ONGLETS[j].dataset.vue); tous.forEach(e => e && e.getAnimations().forEach(a => a.cancel())); zone = visibles();
-    document.querySelector('.cadre').style.minHeight = ''; scrollTo({ top: 0 });   // on repart toujours du haut de page : titre, onglets, puis filtres et liste
+    const tete = document.querySelector('.tete'), cadre = document.querySelector('.cadre'); cadre.style.minHeight = '';
+    const y = tete.getBoundingClientRect().bottom + scrollY + 28;
+    cadre.style.minHeight = (y + innerHeight) + 'px';   // liste courte ou pas encore chargée : la page doit être assez haute pour atterrir sous l'en-tête (le corps a lui-même une hauteur mini, donc on ne compte pas sur scrollHeight)
+    scrollTo({ top: y });   // on atterrit toujours sur les onglets collés en haut, filtres juste dessous (jamais sur « Small Humans » / titre)
     return anim(sens * 36, 0, 170).then(() => tous.forEach(e => e && e.getAnimations().forEach(a => a.cancel())));   // plus de transformation résiduelle sur la liste
   }).catch(e => console.error('glisser', e)).finally(() => { enCours = false; });
 }
