@@ -1,0 +1,26 @@
+{
+ "version": 1,
+ "titres": [
+  {
+   "id": "tmdb-tv-126027",
+   "type": "serie",
+   "titre": "Ghosts : Fantômes à la maison",
+   "annee": 2021,
+   "statut": "vu",
+   "date_vu": "2026-10-20",
+   "note": 5,
+   "commentaire": "Bonne série bien drôle ! ",
+   "genres": [
+    "Comédie",
+    "Science-Fiction & Fantastique"
+   ],
+   "affiche": "/eeQxQnvX8RjvNLWzeaHXgLjjQsk.jpg",
+   "tmdb": {
+    "id": 126027,
+    "type": "tv"
+   },
+   "ajoute_le": "2026-10-25",
+   "maj": "2026-11-11"
+  }
+ ]
+}
