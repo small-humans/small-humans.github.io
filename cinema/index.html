@@ -503,7 +503,7 @@ details.syn summary{min-height:44px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.70 · 17 nov. 2026';
+const VERSION = '0.71 · 17 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -1336,14 +1336,14 @@ function allerVue(v) { S.vue = v; S.montre = PAGE; S.annee = ''; S.genre = ''; S
 ONGLETS.forEach(b => b.addEventListener('click', () => allerVue(b.dataset.vue)));
 /* changement d'onglet fluide : la liste glisse hors de l'écran, la nouvelle arrive du côté opposé, et on atterrit onglets collés en haut, filtres dessous */
 let enCours = false;
-function glisserVers(j, sens) {
+function glisserVers(j, sens, dep) {
   if (enCours) return; enCours = true;
   const tous = ['#outils', '#compte', '#panneau'].map(q => $(q)), visibles = () => tous.filter(e => e && !e.hidden);
   let zone = visibles();   // recalculée après le changement d'onglet : les filtres apparaissent ou disparaissent selon l'onglet
   const reduit = matchMedia('(prefers-reduced-motion: reduce)').matches;
   /* sécurité : si l'animation ne finit pas (appli en arrière-plan, iOS), on continue quand même après un délai ; sinon les glissers se bloqueraient */
-  const anim = (de, vers, ms) => reduit ? Promise.resolve() : Promise.race([Promise.all(zone.map(e => e.animate([{ transform: `translateX(${de}px)`, opacity: de ? 0 : 1 }, { transform: `translateX(${vers}px)`, opacity: vers ? 0 : 1 }], { duration: ms, easing: 'cubic-bezier(.2,.7,.2,1)', fill: vers ? 'both' : 'backwards' }).finished)), new Promise(r => setTimeout(r, ms + 250))]);
-  anim(0, -sens * 36, 110).then(() => {
+  const anim = (de, vers, ms, o0) => reduit ? Promise.resolve() : Promise.race([Promise.all(zone.map(e => e.animate([{ transform: `translateX(${de}px)`, opacity: o0 != null ? o0 : de ? 0 : 1 }, { transform: `translateX(${vers}px)`, opacity: vers ? 0 : 1 }], { duration: ms, easing: 'cubic-bezier(.2,.7,.2,1)', fill: vers ? 'both' : 'backwards' }).finished)), new Promise(r => setTimeout(r, ms + 250))]);
+  anim(dep || 0, -sens * Math.max(36, Math.abs(dep || 0) + 28), dep ? 90 : 110, dep ? 1 - Math.min(.55, Math.abs(dep) / 320) : 1).then(() => {
     allerVue(ONGLETS[j].dataset.vue); tous.forEach(e => e && e.getAnimations().forEach(a => a.cancel())); zone = visibles();
     const tete = document.querySelector('.tete'), cadre = document.querySelector('.cadre'); cadre.style.minHeight = '';
     const y = tete.getBoundingClientRect().bottom + scrollY + 28;
@@ -1354,20 +1354,38 @@ function glisserVers(j, sens) {
 }
 /* glisser le pouce à gauche / à droite dans la liste : onglet suivant / précédent (mêmes seuils que le commentaire) */
 /* dans une bande d'affiches (Idées) : la bande défile ; elle ne passe la main à l'onglet voisin que si elle est déjà au bout dans le sens du geste */
-let gx = 0, gy = 0, gt = 0, gok = false, gbande = null;
+let gx = 0, gy = 0, gt = 0, gok = false, gbande = null, gmode = '', gdx = 0;
+/* v0.71 : la liste SUIT le doigt pendant le glissé (le sens est décidé dès ~10 px : horizontal = on suit, vertical = défilement normal) ;
+   au relâchement, au-delà du seuil elle part et l'onglet change à partir de la position du doigt, sinon elle revient. Aux extrémités (pas d'onglet voisin) : résistance. */
+const zoneGlisse = () => ['#outils', '#compte', '#panneau'].map(q => $(q)).filter(e => e && !e.hidden);
+const posGlisse = dx => { const z = zoneGlisse(), t = `translateX(${dx.toFixed(1)}px)`, o = 1 - Math.min(.55, Math.abs(dx) / 320); z.forEach(e => { e.style.transform = t; e.style.opacity = o; }); };
+const finGlisse = () => zoneGlisse().forEach(e => { e.style.transform = ''; e.style.opacity = ''; });
 document.addEventListener('touchstart', e => {
-  gok = !F.open && !e.target.closest('input, select, textarea, dialog, .actions'); gx = e.touches[0].clientX; gy = e.touches[0].clientY; gt = Date.now();
+  gok = !F.open && !e.target.closest('input, select, textarea, dialog, .actions'); gx = e.touches[0].clientX; gy = e.touches[0].clientY; gt = Date.now(); gmode = ''; gdx = 0;
   const b = gok && e.target.closest('.bande');
   gbande = b ? { debut: b.scrollLeft <= 1, fin: b.scrollLeft + b.clientWidth >= b.scrollWidth - 2 } : null;
 }, { passive: true });
+document.addEventListener('touchmove', e => {
+  if (!gok || enCours || reduit) return;
+  const dx = e.touches[0].clientX - gx, dy = e.touches[0].clientY - gy;
+  if (!gmode) {
+    if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+    gmode = Math.abs(dx) > 1.5 * Math.abs(dy) && !(gbande && !(dx > 0 ? gbande.debut : gbande.fin)) ? 'h' : 'v';
+  }
+  if (gmode !== 'h') return;
+  const i = ONGLETS.findIndex(b => b.dataset.vue === S.vue), j = i + (dx < 0 ? 1 : -1), bout = j < 0 || j >= ONGLETS.length;
+  gdx = dx * (bout ? .2 : .75); posGlisse(gdx);
+}, { passive: true });
+document.addEventListener('touchcancel', () => { if (gmode === 'h') finGlisse(); gok = false; gmode = ''; }, { passive: true });
 document.addEventListener('touchend', e => {
-  if (!gok) return; gok = false;
+  const suivait = gmode === 'h', dep = gdx; gmode = ''; gdx = 0;
+  if (!gok) { if (suivait) finGlisse(); return; } gok = false;
   const dx = e.changedTouches[0].clientX - gx, dy = e.changedTouches[0].clientY - gy, ax = Math.abs(dx), v = ax / Math.max(1, Date.now() - gt);
-  if (!((ax > innerWidth * .1 || (ax > 25 && v > .3)) && ax > 1.5 * Math.abs(dy))) return;
-  if (gbande && !(dx > 0 ? gbande.debut : gbande.fin)) return;   // la bande avait encore de quoi défiler : c'est elle qui a bougé
   const i = ONGLETS.findIndex(b => b.dataset.vue === S.vue), j = i + (dx < 0 ? 1 : -1);
-  if (j < 0 || j >= ONGLETS.length) return;
-  glisserVers(j, dx < 0 ? 1 : -1);
+  const ok = ((ax > innerWidth * .1 || (ax > 25 && v > .3)) && ax > 1.5 * Math.abs(dy)) && !(gbande && !(dx > 0 ? gbande.debut : gbande.fin)) && j >= 0 && j < ONGLETS.length;
+  if (ok) { finGlisse(); glisserVers(j, dx < 0 ? 1 : -1, dep); return; }
+  if (suivait && dep) { const z = zoneGlisse(); finGlisse(); z.forEach(el => el.animate([{ transform: `translateX(${dep}px)`, opacity: 1 - Math.min(.55, Math.abs(dep) / 320) }, { transform: 'none', opacity: 1 }], { duration: 140, easing: 'ease-out' })); }
+  else finGlisse();
 }, { passive: true });
 const pc = $('.puces');
 [['', 'Tout'], ['film', 'Films'], ['serie', 'Séries'], ['anime', 'Anime']].forEach(([v, t]) => {
