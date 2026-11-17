@@ -503,7 +503,7 @@ details.syn summary{min-height:44px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.67 · 17 nov. 2026';
+const VERSION = '0.68 · 17 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -647,7 +647,23 @@ function tuile(f) {
   if (f.plateforme === 'Netflix') aff.insertAdjacentHTML('beforeend', '<svg class="nf" viewBox="0 0 24 24" role="img" aria-label="Netflix"><path d="M7 4h3.2l3.6 9.6V4H17v16h-3.1l-3.7-9.8V20H7z" fill="#E50914"/></svg>');
   return h('button', { class: 'tuile', type: 'button', 'aria-label': f.titre + (f.annee ? ' (' + f.annee + ')' : '') + (f.plateforme ? ' sur ' + f.plateforme : ''), on: { click: () => fiche(f.id, f) } }, aff, h('span', { class: 't' }, f.titre), meta);
 }
+/* v0.68 : défilement continu. Une sentinelle sous la grille ; quand elle approche de l'écran (1000 px), on ajoute PAGE tuiles à la suite, sans reconstruire la liste.
+   Sans IntersectionObserver (très vieux navigateur) : le bouton « Afficher plus » reste. */
+function suite(p, reste, charge) {
+  if (!reste()) return;
+  if (!('IntersectionObserver' in window)) { const b = h('button', { class: 'btn plus', type: 'button', on: { click: () => { charge(); if (!reste()) b.remove(); } } }, 'Afficher plus'); p.append(b); return; }
+  const sent = h('div', { class: 'sentinelle', 'aria-hidden': 'true', style: 'height:1px' });
+  p.append(sent);
+  const io = S.io = new IntersectionObserver(es => {
+    if (!es.some(e => e.isIntersecting)) return;
+    charge();
+    if (!reste()) { io.disconnect(); sent.remove(); return; }
+    io.unobserve(sent); io.observe(sent);   // encore visible après l'ajout : on redemande
+  }, { rootMargin: '1000px 0px' });
+  io.observe(sent);
+}
 function rendre() {
+  if (S.io) { S.io.disconnect(); S.io = null; }
   const p = $('#panneau'); p.textContent = '';
   const stats = S.vue === 'stats', base = S.vue === 'base', sorties = S.vue === 'sorties';
   const idees = S.vue === 'idees';
@@ -679,18 +695,20 @@ function rendre() {
     ['hate', 'pourquoi_pas', 'un_jour', ''].forEach(e => {
       const gr = l.filter(f => (f.envie || '') === e); if (!gr.length) return;
       g.append(h('h2', { class: 'mois' }, e ? ENVIES[e] : 'Sans envie précisée'));
-      gr.forEach(f => { if (n++ < S.montre) g.append(tuile(f)); });
+      gr.forEach(f => g.append(tuile(f)));
     });
   } else {
     trier(l);
-    let mois = '';
-    l.slice(0, S.montre).forEach(f => {
+    let mois = '', i = 0;
+    const ajoute = n => l.slice(i, i + n).forEach(f => {
       if (S.tri.startsWith('date')) { const m = f.date_vu.slice(0, 7); if (m !== mois) { mois = m; g.append(h('h2', { class: 'mois' }, new Date(m + '-15').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }))); } }
       g.append(tuile(f));
-    });
+    }) || (i = Math.min(l.length, i + n), S.montre = Math.max(S.montre, i));
+    ajoute(S.montre); p.append(g);
+    suite(p, () => i < l.length, () => ajoute(PAGE));
+    return;
   }
   p.append(g);
-  if (l.length > S.montre) p.append(h('button', { class: 'btn plus', type: 'button', on: { click: () => { S.montre += PAGE; rendre(); } } }, `Afficher plus (${l.length - S.montre})`));
 }
 const TRIS = { vus: [['date-desc', 'Récents'], ['date-asc', 'Anciens'], ['note', 'Notes'], ['titre', 'A → Z']], base: [['date-desc', 'Récents'], ['date-asc', 'Anciens'], ['titre', 'A → Z']] };
 function menusBase(items) {
@@ -798,10 +816,10 @@ function rendreBase(p, tout) {
   $('#compte').textContent = `${l.length} titre${l.length > 1 ? 's' : ''} pas encore vus`;
   const g = h('div', { class: 'grille' });
   if (!l.length) g.append(h('div', { class: 'vide' }, 'Rien avec ces filtres.', S.type || S.annee || S.genre || S.q ? boutonEffacer() : null));
-  let an = '';
-  l.slice(0, S.montre).forEach(f => { if (!cherche && S.tri.startsWith('date') && f.annee !== an) { an = f.annee; g.append(h('h2', { class: 'mois' }, String(an))); } g.append(tuile(f)); });
-  p.append(g);
-  if (l.length > S.montre) p.append(h('button', { class: 'btn plus', type: 'button', on: { click: () => { S.montre += PAGE; rendre(); } } }, `Afficher plus (${l.length - S.montre})`));
+  let an = '', i = 0;
+  const ajoute = n => l.slice(i, i + n).forEach(f => { if (!cherche && S.tri.startsWith('date') && f.annee !== an) { an = f.annee; g.append(h('h2', { class: 'mois' }, String(an))); } g.append(tuile(f)); }) || (i = Math.min(l.length, i + n), S.montre = Math.max(S.montre, i));
+  ajoute(S.montre); p.append(g);
+  suite(p, () => i < l.length, () => ajoute(PAGE));
 }
 function majMenus(tout) {
   const garde = (sel, items, vide, val) => {
