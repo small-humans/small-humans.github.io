@@ -386,6 +386,43 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
+/* v0.63 (décisions de Simon du 2026-11-14) : menus et puces sans pastille pleine ni trait ; repos = gris, actif = blanc gras + halo doux sur l'icône */
+:root{--repos:#8C9EAF;--actif:#F2F5FF;--halo:drop-shadow(0 0 6px rgba(242,245,255,.4))}
+.onglets button{color:var(--repos);font-weight:500;height:64px;transition:height .18s ease,min-height .18s ease,color .18s ease;overflow:hidden}
+.onglets button[aria-selected="true"]{color:var(--actif);font-weight:700}
+.onglets button[aria-selected="true"] i{background:none;color:var(--actif)}
+.onglets i{border-radius:0}
+.onglets button span{transition:opacity .18s ease}
+.onglets button svg{transition:transform .25s ease,opacity .2s ease}
+.onglets button[aria-selected="true"] svg{filter:var(--halo)}
+.sc .onglets{padding-bottom:6px}
+.sc .onglets button{min-height:46px;height:46px}
+.sc .onglets button span{opacity:0}
+.sc .onglets button:not([aria-selected="true"]) svg{opacity:.45}
+.puces .puce,.genres-i .puce,.corps.carte .choix button,.c-genres .puce{position:relative;background:none;box-shadow:none;border-radius:0;color:var(--repos);font-weight:500;min-height:44px;padding:0 14px;font-size:15px;transition:color .15s ease}
+.puces .puce[aria-pressed="true"],.genres-i .puce[aria-pressed="true"],.corps.carte .choix button[aria-pressed="true"],.c-genres .puce[aria-pressed="true"]{background:none;color:var(--actif);font-weight:700}
+.puces,.genres-i{gap:2px}
+.an-puces .puce{padding:0 10px}
+.puces[aria-label="Période"]:not(.an-puces){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.puces[aria-label="Période"]:not(.an-puces) .puce{white-space:normal;line-height:1.2;padding:4px 8px;font-size:14px;min-height:52px}
+.menus select{background-color:transparent;box-shadow:none;border-radius:0;color:var(--repos);font-weight:500}
+.menus select:has(option:first-child:not(:checked)){color:var(--actif);font-weight:700}
+.recherche{background:transparent;border-radius:0;box-shadow:inset 0 -1px 0 rgba(186,187,207,.30)}
+.rech-x::before{background:transparent}
+/* puces de type : pleine largeur, icône au-dessus du mot (variante 6 du soir du 14/11, choix du haut à confirmer) */
+.puces[aria-label="Type"]{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:0}
+.puces[aria-label="Type"] .puce{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0 4px;height:56px;min-height:56px;font-size:12.5px}
+.puces[aria-label="Type"] .puce svg{display:block;width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.puces[aria-label="Type"] .puce[aria-pressed="true"] svg{filter:var(--halo)}
+/* barre de type en bas, visible quand on remonte, à gauche de la capsule remonter / + */
+.sc .puces[aria-label="Type"]{display:none}
+.ebas{position:fixed;left:var(--marge);right:var(--ed,126px);bottom:calc(12px + env(safe-area-inset-bottom));height:54px;z-index:18;display:none;grid-template-columns:repeat(4,minmax(0,1fr));background:rgba(5,8,15,.92);border-radius:999px;border:1px solid rgba(186,187,207,.35);overflow:hidden}
+.sc.up .ebas{display:grid}
+.ebas button{height:52px;min-height:52px;display:flex;align-items:center;justify-content:center;color:var(--repos)}
+.ebas button[aria-pressed="true"]{color:var(--actif)}
+.ebas svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.ebas button[aria-pressed="true"] svg{filter:var(--halo)}
+@media (prefers-reduced-motion:reduce){.onglets button,.onglets button span,.onglets button svg{transition:none}}
 </style>
 </head>
 <body>
@@ -445,7 +482,7 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.62 · 11 nov. 2026';
+const VERSION = '0.63 · 17 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -1291,6 +1328,33 @@ $('#b-copie').addEventListener('click', envoyer);
   $('#pied').textContent = stockageOk ? '' : 'Ce navigateur ne garde pas mes ajouts : pense à les copier.';
   ecran(); rendre();
 })();
+})();
+</script>
+<script>
+/* v0.63 : icônes des puces de type, barre de type en bas, état de défilement (.sc / .up) */
+(() => {
+  const ICO = {
+    Tout: '<rect x="4" y="4" width="6.5" height="6.5" rx="1.2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.2"/>',
+    Films: '<rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M8 5v14M16 5v14M3.5 9.5H8M16 9.5h4.5M3.5 14.5H8M16 14.5h4.5"/>',
+    Séries: '<rect x="3.5" y="7" width="17" height="12" rx="2"/><path d="M9 3.5l3 3.5 3-3.5"/>',
+    Anime: '<path d="M3 6.5c3 1.3 15 1.3 18 0M5.5 10.5h13M7.5 6.5v13M16.5 6.5v13M12 7.7v2.8"/>' };
+  const svg = k => { const x = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); x.setAttribute('viewBox', '0 0 24 24'); x.setAttribute('aria-hidden', 'true'); x.innerHTML = ICO[k]; return x; };
+  const root = document.documentElement, P = '.puces[aria-label="Type"] .puce';
+  const orig = () => [...document.querySelectorAll(P)];
+  const bas = document.createElement('div'); bas.className = 'ebas'; document.body.append(bas);
+  const put = () => orig().forEach(b => { const k = b.textContent.trim(); if (!b.querySelector('svg') && ICO[k]) b.prepend(svg(k)); });
+  const build = () => { bas.textContent = ''; orig().forEach(o => { const k = o.textContent.trim(); const b = document.createElement('button'); b.type = 'button'; b.dataset.k = k; b.setAttribute('aria-label', k); b.setAttribute('aria-pressed', o.getAttribute('aria-pressed')); b.append(svg(k)); b.onclick = () => o.click(); bas.append(b); }); };
+  const sync = () => orig().forEach(o => { const b = bas.querySelector('[data-k="' + o.textContent.trim() + '"]'); if (b) b.setAttribute('aria-pressed', o.getAttribute('aria-pressed')); });
+  const fit = () => { const r = [...document.querySelectorAll('.actions .rangee > *, .actions .capsule > *')].filter(e => e.offsetWidth).map(e => e.getBoundingClientRect().left); if (r.length) bas.style.setProperty('--ed', Math.round(innerWidth - Math.min(...r) + 8) + 'px'); };
+  const o = document.querySelector('#outils');
+  put(); build(); fit();
+  new MutationObserver(sync).observe(o, { attributes: true, subtree: true, attributeFilter: ['aria-pressed'] });
+  new MutationObserver(put).observe(o, { childList: true, subtree: true });
+  new MutationObserver(fit).observe(document.querySelector('.actions'), { attributes: true, subtree: true, attributeFilter: ['hidden'] });
+  addEventListener('resize', fit);
+  let y = scrollY;
+  addEventListener('scroll', () => { const n = scrollY; root.classList.toggle('sc', n > 60); if (Math.abs(n - y) > 6) { root.classList.toggle('up', n < y); y = n; } fit(); }, { passive: true });
+  const s = document.querySelector('#o-avoir svg'); if (s) s.innerHTML = '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>';
 })();
 </script>
 </body>
