@@ -343,6 +343,8 @@ dialog.clavier .carte .cache-clavier{display:none}
 .rd-quand{display:inline-flex;align-items:center;gap:8px;color:var(--acier);white-space:nowrap}
 .rd-quand svg{width:18px;height:18px;flex:none;color:var(--accent)}
 .rd-pk .c-genres{flex-wrap:nowrap;overflow:hidden;margin-top:4px}
+.rd-resume{margin:0;color:var(--acier);font-size:14px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rd-panneau.ouvert .rd-pk .rd-resume{display:none}
 .rd-lect{padding:8px var(--marge) calc(40px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:24px}
 .rd-lect>*{flex:none}
 .rideau .c-avis>button{background:none;padding:0}
@@ -501,7 +503,7 @@ details.syn summary{min-height:44px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.65 · 17 nov. 2026';
+const VERSION = '0.66 · 17 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -546,10 +548,11 @@ function ecrire() { try { localStorage.setItem(CLE, JSON.stringify(memoire)); } 
 const S = { journal: [], exemple: false, vue: 'vus', type: '', annee: '', genre: '', tri: 'date-desc', montre: PAGE, base: null, promesse: null, q: '', gi: '' };
 
 async function chargerJournal() {
+  S.erreur = false;   // v0.66 : faux « Rien ici » quand le réseau est coupé → vrai message + Réessayer
   for (const url of ['data/journal.json', 'data/journal.local.json', 'data/exemple.json']) {
     try { const r = await fetch(url, { cache: 'no-cache' }); if (!r.ok) continue; const d = await r.json(); S.journal = d.titres || d; S.exemple = !!d.exemple; return; } catch (e) { /* suivant */ }
   }
-  S.journal = [];
+  S.journal = []; S.erreur = true;
 }
 function fusion() {
   const m = new Map(S.journal.map(f => [f.id, f]));
@@ -643,7 +646,7 @@ function rendre() {
   const vus = tout.filter(f => f.statut === 'vu');
   const heures = Math.round(vus.filter(f => f.type === 'film').reduce((s, f) => s + (f.duree_min || 0), 0) / 60);
   const nAvoir = tout.length - vus.length, pl = n => n > 1 ? 's' : '';
-  $('#resume').textContent = S.vue === 'avoir' ? (nAvoir ? `${nAvoir} titre${pl(nAvoir)} à voir.` : 'Rien dans ta liste pour l’instant.')
+  $('#resume').textContent = S.erreur && (S.vue === 'vus' || S.vue === 'avoir') ? 'Tes titres ne se sont pas chargés.' : S.vue === 'avoir' ? (nAvoir ? `${nAvoir} titre${pl(nAvoir)} à voir.` : 'Rien dans ta liste pour l’instant.')
     : S.vue === 'sorties' ? 'Les sorties de la semaine et des semaines passées.'
     : idees ? 'Des idées tirées de tes goûts : « + » met un titre dans « à voir », l’œil le note comme déjà vu.'
     : S.vue === 'base' ? 'Tout ce que tu n’as ni vu ni mis « à voir » : cherche un titre ou un genre.'
@@ -656,7 +659,8 @@ function rendre() {
   let l = listeFiltree();
   $('#compte').textContent = `${l.length} titre${l.length > 1 ? 's' : ''}`;
   const g = h('div', { class: 'grille' });
-  if (!l.length) g.append(h('p', { class: 'vide' }, S.vue === 'vus' ? 'Rien ici avec ces filtres.' : 'Rien à voir pour l’instant : ajoute un titre avec le bouton « + » en bas à droite.'));
+  if (!l.length && S.erreur) g.append(h('div', { class: 'vide' }, 'Impossible de charger tes titres : la connexion semble coupée.', h('button', { class: 'btn', type: 'button', style: 'display:block;margin-top:12px', on: { click: async () => { await chargerJournal(); majBoutons(); rendre(); } } }, 'Réessayer')));
+  else if (!l.length) g.append(h('p', { class: 'vide' }, S.vue === 'vus' ? 'Rien ici avec ces filtres.' : 'Rien à voir pour l’instant : ajoute un titre avec le bouton « + » en bas à droite.'));
   if (S.vue === 'avoir') {
     l = l.sort((a, b) => (b.ajoute_le || '').localeCompare(a.ajoute_le || ''));
     let n = 0;
@@ -686,7 +690,7 @@ function menusBase(items) {
 }
 /* sorties de la semaine : data/catalogue.json (mis à jour chaque lundi par le robot GitHub) */
 function rendreSorties(p) {
-  if (!S.catalogue) { p.append(h('p', { class: 'vide' }, 'Chargement des sorties…')); fetch('data/catalogue.json').then(r => r.ok ? r.json() : { titres: [] }).catch(() => ({ titres: [] })).then(d => { S.catalogue = d.titres || []; rendre(); }); return; }
+  if (!S.catalogue) { p.append(h('p', { class: 'vide' }, 'Chargement des sorties…')); fetch('data/catalogue.json').then(r => r.ok ? r.json() : Promise.reject()).catch(() => { S.catErreur = true; return { titres: [] }; }).then(d => { S.catalogue = d.titres || []; rendre(); }); return; }
   const iso = d => d.toLocaleDateString('sv-SE'), auj = new Date(), lundi = new Date(auj);
   lundi.setDate(auj.getDate() - ((auj.getDay() + 6) % 7));
   const bornes = n => { const a = new Date(lundi), b = new Date(lundi); a.setDate(a.getDate() + 7 * n); b.setDate(b.getDate() + 7 * n + 6); return [iso(a), iso(b)]; };
@@ -698,7 +702,7 @@ function rendreSorties(p) {
   p.append(h('div', { class: 'puces', role: 'group', 'aria-label': 'Période', style: 'margin-bottom:8px' }, parts.map(([t]) => h('button', { class: 'puce', type: 'button', 'aria-pressed': String(t === S.per), on: { click: () => { S.per = t; rendre(); } } }, t))));
   const g = h('div', { class: 'grille' });
   parts.filter(x => x[0] === S.per).forEach(([titre, l]) => {
-    if (!l.length) { g.append(h('p', { class: 'vide' }, 'Rien de prévu.')); return; }
+    if (!l.length) { g.append(h('p', { class: 'vide' }, S.catErreur && !S.catalogue.length ? 'Impossible de charger les sorties : la connexion semble coupée.' : 'Rien de prévu.')); return; }
     let jour = '';
     l.forEach(f => {
       if (f.sortie !== jour) { jour = f.sortie; g.append(h('h3', { class: 'jour' }, new Date(jour + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))); }
@@ -1000,7 +1004,9 @@ function carteVu(f0, init) {   // init (v0.59, retour depuis l'œil de « Dans l
   let stInit = init ? init.st || 0 : 0, bxInit = init ? init.bx || 0 : 0;
   const corps = h('div', { class: 'corps carte vu' });
   const syn = h('details', { class: 'syn cache-clavier', hidden: true }, h('summary', null, 'Synopsis'), h('p'));
-  synopsis(f).then(t => { syn.lastChild.textContent = t; syn.hidden = !t; });
+  const resume = h('p', { class: 'rd-resume', hidden: true });   // v0.66 : état 1, le vide sous les genres reçoit le début du synopsis (masqué s'il ne tient pas)
+  const ajuste = () => requestAnimationFrame(() => { const pk = resume.parentNode; resume.hidden = !resume.textContent; if (!pk || ouvert || resume.hidden) return; if (resume.offsetTop + resume.offsetHeight > pk.clientHeight - 12) resume.hidden = true; });
+  synopsis(f).then(t => { syn.lastChild.textContent = t; syn.hidden = !t; resume.textContent = t || ''; ajuste(); });
   const sauve = () => { clearTimeout(minuteur); minuteur = null; enregistrer(f); };
   const change = (dessine) => { modifie = true; sauve(); if (dessine !== false) dessiner(); else majEtat(); pulse(); };
   const planifie = () => { modifie = true; clearTimeout(minuteur); minuteur = setTimeout(() => { sauve(); majEtat(); pulse(); }, 500); };
@@ -1020,7 +1026,7 @@ function carteVu(f0, init) {   // init (v0.59, retour depuis l'œil de « Dans l
   const icones = h('div', { class: 'f-icones' }, bAvoir, peutRetirer(id) ? bRetirer : null);
   const bRetour = h('button', { class: 'f-retour', type: 'button', 'aria-label': 'Fermer la fiche', on: { click: () => F.close() } }); bRetour.innerHTML = ICO.retour;
   /* rideau fermé : pas d'en-tête (flèche posée sur l'affiche) ; fiche dépliée : flèche retour à gauche du titre, sans « Fermer » */
-  const majTete = () => { const lecture = !etat && !avis; F.classList.toggle('rd-ferme', lecture && !ouvert); bRetour.hidden = !(lecture && ouvert); const fe = F.querySelector('.f-tete > .btn:last-child'); if (fe) fe.hidden = lecture && ouvert; };
+  const majTete = () => { const lecture = !etat && !avis; F.classList.toggle('rd-ferme', lecture && !ouvert); bRetour.hidden = !(lecture && ouvert); const fe = F.querySelector('.f-tete > .btn:last-child'); if (fe) fe.hidden = (lecture && ouvert) || !!etat; };   // v0.66 : après « Retiré » / « À voir », un seul Fermer (celui du corps)
   /* icône « annuler » : une dans l'en-tête (fiche dépliée, écriture d'avis), une posée sur l'affiche à côté de la flèche (rideau fermé) */
   const bAnnuler = h('button', { class: 'ico-annuler', type: 'button', 'aria-label': 'Annuler les changements', title: 'Annuler les changements', on: { click: () => restaurer() } }); bAnnuler.innerHTML = ICO.annuler;
   const bAnnulerAff = h('button', { class: 'ico-annuler rd-annuler', type: 'button', 'aria-label': 'Annuler les changements', title: 'Annuler les changements', on: { click: () => restaurer() } }); bAnnulerAff.innerHTML = ICO.annuler;
@@ -1075,7 +1081,7 @@ function carteVu(f0, init) {   // init (v0.59, retour depuis l'œil de « Dans l
     const poignee = h('button', { class: 'rd-poignee', type: 'button', 'aria-expanded': String(ouvert), 'aria-label': ouvert ? 'Replier la fiche' : 'Déplier la fiche', on: { click: e => { e.stopPropagation(); bascule(!ouvert); } } }, h('i'));
     const pk = h('div', { class: 'rd-pk', on: { click: e => { if (!ouvert && !e.target.closest('.c-genres')) bascule(true); } } }, poignee,
       h('div', { class: 'rd-ligne' }, h('span', { class: 'rd-note' }, etoiles(f.note || 0, 100), f.note ? h('b', null, fmtNote(f.note)) : null), h('span', { class: 'rd-quand' }, icone(ICO.oeil, d === aujourdhui() ? 'aujourd’hui' : court))),
-      pastilles());
+      pastilles(), resume);
     /* geste : tirer vers le haut depuis n'importe où (affiche, flèche, aperçu) déplie ; tirer vers le bas (en haut de la fiche) replie */
     /* v0.58 : tirer vers le bas (depuis n'importe où) = retour : état 2 en haut du panneau → état 1, état 1 → liste ; jamais depuis les étoiles, une bande ou un champ ; un glissé horizontal net est laissé à la fermeture commune (voir fermerGlisse) */
     let y0 = null, t0 = 0, x0 = 0, libre = true;
@@ -1109,7 +1115,7 @@ function carteVu(f0, init) {   // init (v0.59, retour depuis l'œil de « Dans l
     retour.addEventListener('touchstart', debut, { passive: true }); retour.addEventListener('touchend', fin, { passive: true });
     corps.append(aff, retour, bAnnulerAff, panneau);
     panneau.scrollTop = st; pRef = panneau;
-    majEtat(); if (!meme.firstChild) memeRemplir();
+    majEtat(); ajuste(); if (!meme.firstChild) memeRemplir();
     if (st) panneau.scrollTop = st;   // une fois « Dans le même esprit » rempli
   };
   /* « Dans le même esprit » : titres du même genre pas encore dans le journal, calculés ici (base + catalogue), rien n'est envoyé */
