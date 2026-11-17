@@ -503,7 +503,7 @@ details.syn summary{min-height:44px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.68 · 17 nov. 2026';
+const VERSION = '0.69 · 17 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -924,6 +924,8 @@ function fermerGlisse(sx, sy) {
   }, { passive: true });
   F.addEventListener('touchcancel', () => { g = null; }, { passive: true });
 })();
+/* v0.68 : fermer la fiche ouverte depuis « Ajouter » ramène à la recherche, saisie et résultats gardés */
+F.addEventListener('close', () => { const r = S.retourRecherche; S.retourRecherche = null; if (r) setTimeout(() => ajout(r), 0); });
 F.addEventListener('close', () => { F.classList.remove('rd-ferme'); const tt = $('#toast'); if (tt.parentNode === F) document.body.append(tt); });
 /* iPhone : le clavier ne redimensionne pas la page, on suit la zone réellement visible */
 if (window.visualViewport) {
@@ -947,7 +949,7 @@ function retirer(id) {   // titre du journal : marqué « retire » ; ajout loca
 }
 function retirerBouton(id) {
   if (!peutRetirer(id)) return null;
-  return h('button', { class: 'btn', type: 'button', on: { click: () => { const avant = memoire[id]; retirer(id); F.close(); toast('Retiré.', () => { if (avant === undefined) delete memoire[id]; else memoire[id] = avant; ecrire(); majBoutons(); rendre(); }); } } }, 'Retirer');   // v0.67 : Annuler pendant 3 s
+  return h('button', { class: 'btn', type: 'button', on: { click: () => { const avant = memoire[id]; S.retourRecherche = null; retirer(id); F.close(); toast('Retiré.', () => { if (avant === undefined) delete memoire[id]; else memoire[id] = avant; ecrire(); majBoutons(); rendre(); }); } } }, 'Retirer');   // v0.67 : Annuler pendant 3 s
 }
 function fiche(id, obj, retour) {   // « retour » : appelé à la fermeture de la carte « Je l'ai vu » (v0.59, œil des bandes)
   const f = fusion().find(x => x.id === id) || obj; if (!f) return;
@@ -1065,7 +1067,7 @@ function carteVu(f0, init) {   // init (v0.59, retour depuis l'œil de « Dans l
   const majEtat = () => { bAnnuler.hidden = !!etat; [bAnnuler, bAnnulerAff].forEach(b => b.classList.toggle('vis', modifie && !etat)); };
   const pulse = () => { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; [bAnnuler, bAnnulerAff].forEach(b => { if (b.isConnected && b.animate) b.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.18)' }, { transform: 'scale(1)' }], { duration: 320, easing: 'ease-out' }); }); };   // retour discret : la sauvegarde est faite
   const ouvrirAvis = cle => { auteur = cle; avis = true; confirme = false; clearTimeout(tConf); dessiner(); const t = $('#ch-com'); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } };   // focus dans le toucher : iOS ouvre le clavier
-  const pastilles = () => f.genres && f.genres.length ? h('div', { class: 'c-genres', role: 'group', 'aria-label': 'Genres : toucher pour filtrer la liste' }, f.genres.map(g => h('button', { class: 'puce', type: 'button', on: { click: () => { F.close(); allerVue('vus'); S.genre = g; rendre(); scrollTo({ top: 0 }); } } }, g))) : null;
+  const pastilles = () => f.genres && f.genres.length ? h('div', { class: 'c-genres', role: 'group', 'aria-label': 'Genres : toucher pour filtrer la liste' }, f.genres.map(g => h('button', { class: 'puce', type: 'button', on: { click: () => { S.retourRecherche = null; F.close(); allerVue('vus'); S.genre = g; rendre(); scrollTo({ top: 0 }); } } }, g))) : null;
   const dessiner = () => {
     const st = pRef ? pRef.scrollTop : stInit; pRef = null; stInit = 0;
     corps.textContent = ''; corps.classList.toggle('avis-ouvert', avis); corps.classList.remove('rideau', 'ouvert');
@@ -1206,7 +1208,7 @@ function chargerBase() {
     if (S.baseErreur) S.promesse = null;
   })());
 }
-function ajout() {
+function ajout(depart) {   // v0.68 : « depart » = saisie à retrouver quand on revient d'une fiche
   const liste = h('ul', { class: 'resultats' });
   const etat = h('p', { class: 'compte', role: 'status' });
   const q = h('input', { id: 'ch-q', type: 'search', placeholder: 'Titre du film, de la série, de l’anime', autocomplete: 'off', enterkeyhint: 'search', style: 'padding-right:48px' });
@@ -1221,14 +1223,14 @@ function ajout() {
     const deja = new Set(fusion().map(x => x.id));
     const qn = mots.join(' '), r = (S.base || []).filter(x => mots.every(m => x.n.includes(m))).map(x => [x, rangRech(x.n, qn, mots)]).sort((a, b) => a[1] - b[1]).map(a => a[0]).slice(0, 40);
     etat.textContent = r.length ? `${r.length}${r.length === 40 ? '+' : ''} résultat${r.length > 1 ? 's' : ''}` : 'Rien dans la base. Tu peux le saisir à la main ci-dessous.';
-    r.forEach(({ f }) => liste.append(h('li', null, h('button', { type: 'button', on: { click: () => fiche(f.id, f) } },
+    r.forEach(({ f }) => liste.append(h('li', null, h('button', { type: 'button', on: { click: () => { S.retourRecherche = q.value; fiche(f.id, f); } } },
       affiche(f), h('div', { style: 'min-width:0' }, h('b', null, f.titre), h('span', null, [TYPES[f.type] ? TYPES[f.type].replace(/s$/, '') : '', f.annee, deja.has(f.id) ? 'déjà dans ta liste' : ''].filter(Boolean).join(' · ')))))));
   };
   let t; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(chercher, 180); });
   feuille('Ajouter', h('div', { class: 'champ' }, h('label', { for: 'ch-q' }, 'Chercher dans la base'), h('div', { class: 'rech' }, q, croix)), etat, liste,
     h('button', { class: 'btn', type: 'button', on: { click: manuel } }, 'Saisir à la main'));
   F.classList.add('haute');
-  setTimeout(() => { chargerBase(); q.focus(); }, 60);
+  setTimeout(() => { chargerBase(); if (depart) { q.value = depart; chercher(); } else q.focus(); }, 60);
 }
 function manuel() {
   const f = { type: 'film', genres: [] };
@@ -1377,7 +1379,7 @@ $('#f-q-x').addEventListener('click', () => { S.q = ''; $('#f-q').value = ''; S.
 $('#f-annee').addEventListener('change', e => { S.annee = e.target.value; S.montre = PAGE; rendre(); });
 $('#f-genre').addEventListener('change', e => { S.genre = e.target.value; S.montre = PAGE; rendre(); });
 $('#f-tri').addEventListener('change', e => { S.tri = e.target.value; S.montre = PAGE; rendre(); });
-$('#b-ajout').addEventListener('click', ajout);
+$('#b-ajout').addEventListener('click', () => { S.retourRecherche = null; ajout(); });
 $('#b-haut').addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
 addEventListener('scroll', () => { $('#b-haut').hidden = scrollY < 400; document.body.classList.toggle('bas', scrollY > 90); }, { passive: true });
 $('#b-copie').addEventListener('click', envoyer);
