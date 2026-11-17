@@ -503,7 +503,7 @@ details.syn summary{min-height:44px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.69 · 17 nov. 2026';
+const VERSION = '0.70 · 17 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -1419,5 +1419,6 @@ $('#b-copie').addEventListener('click', envoyer);
   const s = document.querySelector('#o-avoir svg'); if (s) s.innerHTML = '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>';
 })();
 </script>
+<script src="filtres.js"></script>
 </body>
 </html>
