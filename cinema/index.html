@@ -436,6 +436,12 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 .actions .capsule,.ebas{box-shadow:0 8px 24px rgba(2,6,20,.75),0 2px 6px rgba(2,6,20,.6)}
 #feuille{box-shadow:0 24px 64px rgba(2,6,20,.85),0 4px 12px rgba(2,6,20,.6)}
 @media (min-width:760px){.grille{gap:24px 16px}}
+
+/* v0.65 étalon tour 2 : résultats d'« Ajouter » groupés en haut, jours en majuscule à l'initiale seulement, zone tactile du synopsis à 44 px */
+.resultats{align-content:start}
+.grille .jour{text-transform:none}
+.grille .jour::first-letter{text-transform:uppercase}
+details.syn summary{min-height:44px}
 </style>
 </head>
 <body>
@@ -495,7 +501,7 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.64 · 17 nov. 2026';
+const VERSION = '0.65 · 17 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
