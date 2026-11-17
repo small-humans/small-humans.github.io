@@ -423,6 +423,19 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 .ebas svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
 .ebas button[aria-pressed="true"] svg{filter:var(--halo)}
 @media (prefers-reduced-motion:reduce){.onglets button,.onglets button span,.onglets button svg{transition:none}}
+/* v0.64 étalon UI/UX tour 1 : (1) fond sombre derrière l'affiche, (2) étoiles vides lisibles, (3) genres : bord en fondu, (4) grille 8 px + échelle ×1,25 (14 / 17,5 / 22), (5) ombres teintées bleu nuit */
+.rd-aff,.c-aff{background-color:var(--bg)}
+.etoiles .fond{fill:rgba(186,187,207,.38)}
+.genres-i{overflow-x:auto;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent);scrollbar-width:none}
+.genres-i::-webkit-scrollbar{display:none}
+.grille{gap:16px 8px}
+.mois{font-size:17.5px;margin-top:16px}
+.tete{gap:16px}
+.compte{margin-top:8px}
+.onglets button,.ctab,.puces .puce,.genres-i .puce,.c-genres .puce,.puces[aria-label="Type"] .puce{font-size:14px}
+.actions .capsule,.ebas{box-shadow:0 8px 24px rgba(2,6,20,.75),0 2px 6px rgba(2,6,20,.6)}
+#feuille{box-shadow:0 24px 64px rgba(2,6,20,.85),0 4px 12px rgba(2,6,20,.6)}
+@media (min-width:760px){.grille{gap:24px 16px}}
 </style>
 </head>
 <body>
@@ -482,7 +495,7 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.63 · 17 nov. 2026';
+const VERSION = '0.64 · 17 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
