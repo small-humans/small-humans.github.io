@@ -342,8 +342,8 @@ dialog.clavier .carte .cache-clavier{display:none}
 .rd-note{display:flex;align-items:center;gap:8px;font-weight:600}
 .rd-quand{display:inline-flex;align-items:center;gap:8px;color:var(--acier);white-space:nowrap}
 .rd-quand svg{width:18px;height:18px;flex:none;color:var(--accent)}
-.rd-pk .c-genres{flex-wrap:nowrap;overflow:hidden;margin-top:4px}
-.rd-resume{margin:0;color:var(--acier);font-size:14px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rd-pk .c-genres{flex-wrap:nowrap;overflow:hidden;margin-top:4px;flex:none}   /* v0.67 : ne s'écrase plus quand le synopsis déborde (bureau) */
+.rd-resume{flex:none;margin:0;color:var(--acier);font-size:14px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .rd-panneau.ouvert .rd-pk .rd-resume{display:none}
 .rd-lect{padding:8px var(--marge) calc(40px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:24px}
 .rd-lect>*{flex:none}
@@ -503,7 +503,7 @@ details.syn summary{min-height:44px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.66 · 17 nov. 2026';
+const VERSION = '0.67 · 17 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -543,6 +543,17 @@ const fmtDate = (d, long) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR
 let stockageOk = true, memoire = {};
 function lire() { try { const v = localStorage.getItem(CLE); memoire = v ? JSON.parse(v) : {}; } catch (e) { stockageOk = false; memoire = {}; } }
 function ecrire() { try { localStorage.setItem(CLE, JSON.stringify(memoire)); } catch (e) { stockageOk = false; } }
+
+/* v0.67 : message d'erreur réseau commun (avec Réessayer) et remise à zéro des filtres quand une liste filtrée est vide */
+const videReseau = (msg, rejouer) => h('div', { class: 'vide' }, msg, h('button', { class: 'btn', type: 'button', style: 'display:block;margin-top:12px', on: { click: rejouer } }, 'Réessayer'));
+function effacerFiltres() {
+  S.type = ''; S.annee = ''; S.genre = ''; S.q = ''; S.montre = PAGE; $('#f-q').value = '';
+  document.querySelectorAll('.puces[aria-label="Type"] .puce').forEach((b, i) => b.setAttribute('aria-pressed', String(i === 0)));
+  rendre();
+}
+const boutonEffacer = () => h('button', { class: 'btn', type: 'button', style: 'display:block;margin-top:12px', on: { click: effacerFiltres } }, 'Effacer les filtres');
+const relanceJournal = async () => { await chargerJournal(); majBoutons(); rendre(); };
+const relanceBase = () => { S.base = null; S.baseErreur = false; if (S.catErreur) { S.catalogue = null; S.catErreur = false; } rendre(); };
 
 /* ---------- données ---------- */
 const S = { journal: [], exemple: false, vue: 'vus', type: '', annee: '', genre: '', tri: 'date-desc', montre: PAGE, base: null, promesse: null, q: '', gi: '' };
@@ -646,11 +657,12 @@ function rendre() {
   const vus = tout.filter(f => f.statut === 'vu');
   const heures = Math.round(vus.filter(f => f.type === 'film').reduce((s, f) => s + (f.duree_min || 0), 0) / 60);
   const nAvoir = tout.length - vus.length, pl = n => n > 1 ? 's' : '';
-  $('#resume').textContent = S.erreur && (S.vue === 'vus' || S.vue === 'avoir') ? 'Tes titres ne se sont pas chargés.' : S.vue === 'avoir' ? (nAvoir ? `${nAvoir} titre${pl(nAvoir)} à voir.` : 'Rien dans ta liste pour l’instant.')
+  $('#resume').textContent = S.erreur && ['vus', 'avoir', 'stats', 'idees'].includes(S.vue) ? 'Tes titres ne se sont pas chargés.' : S.vue === 'avoir' ? (nAvoir ? `${nAvoir} titre${pl(nAvoir)} à voir.` : 'Rien dans ta liste pour l’instant.')
     : S.vue === 'sorties' ? 'Les sorties de la semaine et des semaines passées.'
     : idees ? 'Des idées tirées de tes goûts : « + » met un titre dans « à voir », l’œil le note comme déjà vu.'
     : S.vue === 'base' ? 'Tout ce que tu n’as ni vu ni mis « à voir » : cherche un titre ou un genre.'
     : `${vus.length} titres vus, ${heures} h de films, et ${nAvoir} à voir.`;
+  if ((stats || idees) && S.erreur) { $('#compte').textContent = ''; p.append(videReseau('Impossible de charger tes titres : la connexion semble coupée.', relanceJournal)); return; }
   if (stats) return rendreStats(p, vus, heures);
   if (idees) return rendreIdees(p, vus, tout);
   if (base) return rendreBase(p, tout);
@@ -659,8 +671,8 @@ function rendre() {
   let l = listeFiltree();
   $('#compte').textContent = `${l.length} titre${l.length > 1 ? 's' : ''}`;
   const g = h('div', { class: 'grille' });
-  if (!l.length && S.erreur) g.append(h('div', { class: 'vide' }, 'Impossible de charger tes titres : la connexion semble coupée.', h('button', { class: 'btn', type: 'button', style: 'display:block;margin-top:12px', on: { click: async () => { await chargerJournal(); majBoutons(); rendre(); } } }, 'Réessayer')));
-  else if (!l.length) g.append(h('p', { class: 'vide' }, S.vue === 'vus' ? 'Rien ici avec ces filtres.' : 'Rien à voir pour l’instant : ajoute un titre avec le bouton « + » en bas à droite.'));
+  if (!l.length && S.erreur) g.append(videReseau('Impossible de charger tes titres : la connexion semble coupée.', relanceJournal));
+  else if (!l.length) { const filtre = S.type || S.annee || S.genre; g.append(h('div', { class: 'vide' }, S.vue === 'vus' ? 'Rien ici avec ces filtres.' : filtre ? 'Rien à voir avec ces filtres.' : 'Rien à voir pour l’instant : ajoute un titre avec le bouton « + » en bas à droite.', filtre ? boutonEffacer() : null)); }
   if (S.vue === 'avoir') {
     l = l.sort((a, b) => (b.ajoute_le || '').localeCompare(a.ajoute_le || ''));
     let n = 0;
@@ -702,7 +714,7 @@ function rendreSorties(p) {
   p.append(h('div', { class: 'puces', role: 'group', 'aria-label': 'Période', style: 'margin-bottom:8px' }, parts.map(([t]) => h('button', { class: 'puce', type: 'button', 'aria-pressed': String(t === S.per), on: { click: () => { S.per = t; rendre(); } } }, t))));
   const g = h('div', { class: 'grille' });
   parts.filter(x => x[0] === S.per).forEach(([titre, l]) => {
-    if (!l.length) { g.append(h('p', { class: 'vide' }, S.catErreur && !S.catalogue.length ? 'Impossible de charger les sorties : la connexion semble coupée.' : 'Rien de prévu.')); return; }
+    if (!l.length) { g.append(S.catErreur && !S.catalogue.length ? videReseau('Impossible de charger les sorties : la connexion semble coupée.', relanceBase) : h('p', { class: 'vide' }, 'Rien de prévu.')); return; }
     let jour = '';
     l.forEach(f => {
       if (f.sortie !== jour) { jour = f.sortie; g.append(h('h3', { class: 'jour' }, new Date(jour + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))); }
@@ -720,6 +732,7 @@ function rendreIdees(p, vus, tout) {
     const cat = S.catalogue ? Promise.resolve() : fetch('data/catalogue.json').then(r => r.ok ? r.json() : { titres: [] }).catch(() => ({ titres: [] })).then(d => { S.catalogue = d.titres || []; });
     Promise.all([chargerBase(), cat]).then(() => { if (S.vue === 'idees') rendre(); }); return;
   }
+  if (S.baseErreur) { p.append(videReseau('Impossible de charger les idées : la connexion semble coupée.', relanceBase)); return; }
   const deja = new Set(tout.map(f => f.id)), jour = aujourdhui();
   const alea = f => [...(f.id + jour)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);   // ordre stable dans la journée
   const compte = {}; vus.forEach(f => (f.genres || []).forEach(g => { compte[g] = (compte[g] || 0) + 1; }));
@@ -772,6 +785,7 @@ function rendreIdees(p, vus, tout) {
 }
 function rendreBase(p, tout) {
   if (!S.base) { $('#compte').textContent = 'Chargement de la base (2006 à 2026)…'; chargerBase().then(rendre); return; }
+  if (S.baseErreur) { $('#compte').textContent = ''; ['#f-annee', '#f-genre', '#f-tri'].forEach(q => { $(q).hidden = true; }); p.append(videReseau('Impossible de charger la base : la connexion semble coupée.', relanceBase)); return; }
   const vus = new Set(tout.filter(f => f.statut === 'vu' || f.statut === 'a_voir').map(f => f.id));   // v0.59 : Non vus = ni vu ni à voir
   const items = S.base.filter(x => !vus.has(x.f.id));
   menusBase(items.map(x => x.f));
@@ -783,7 +797,7 @@ function rendreBase(p, tout) {
   const l = sel.map(x => x.f);
   $('#compte').textContent = `${l.length} titre${l.length > 1 ? 's' : ''} pas encore vus`;
   const g = h('div', { class: 'grille' });
-  if (!l.length) g.append(h('p', { class: 'vide' }, 'Rien avec ces filtres.'));
+  if (!l.length) g.append(h('div', { class: 'vide' }, 'Rien avec ces filtres.', S.type || S.annee || S.genre || S.q ? boutonEffacer() : null));
   let an = '';
   l.slice(0, S.montre).forEach(f => { if (!cherche && S.tri.startsWith('date') && f.annee !== an) { an = f.annee; g.append(h('h2', { class: 'mois' }, String(an))); } g.append(tuile(f)); });
   p.append(g);
@@ -915,7 +929,7 @@ function retirer(id) {   // titre du journal : marqué « retire » ; ajout loca
 }
 function retirerBouton(id) {
   if (!peutRetirer(id)) return null;
-  return h('button', { class: 'btn', type: 'button', on: { click: () => { retirer(id); F.close(); toast('Retiré.'); } } }, 'Retirer');
+  return h('button', { class: 'btn', type: 'button', on: { click: () => { const avant = memoire[id]; retirer(id); F.close(); toast('Retiré.', () => { if (avant === undefined) delete memoire[id]; else memoire[id] = avant; ecrire(); majBoutons(); rendre(); }); } } }, 'Retirer');   // v0.67 : Annuler pendant 3 s
 }
 function fiche(id, obj, retour) {   // « retour » : appelé à la fermeture de la carte « Je l'ai vu » (v0.59, œil des bandes)
   const f = fusion().find(x => x.id === id) || obj; if (!f) return;
@@ -1170,6 +1184,8 @@ function chargerBase() {
     const cat = await fetch('data/catalogue.json').then(r => r.ok ? r.json() : { titres: [] }).catch(() => ({ titres: [] }));   // les sorties récentes ne sont pas toujours dans la base : on les ajoute
     const tous = res.flatMap(r => r.status === 'fulfilled' ? (r.value.titres || []) : []), ids = new Set(tous.map(f => f.id));
     S.base = tous.concat((cat.titres || []).filter(f => !ids.has(f.id))).map(f => ({ f, n: norm(f.titre) }));
+    S.baseErreur = !tous.length;   // v0.67 : aucune année chargée = réseau coupé, pas « base vide » ; on pourra réessayer
+    if (S.baseErreur) S.promesse = null;
   })());
 }
 function ajout() {
@@ -1183,6 +1199,7 @@ function ajout() {
     const mots = norm(q.value.trim()).split(/\s+/).filter(Boolean);
     if (q.value.trim().length < 2) { etat.textContent = ''; return; }
     if (!S.base) { etat.textContent = 'Chargement de la base…'; await chargerBase(); }
+    if (S.baseErreur) { etat.textContent = 'Base indisponible : la connexion semble coupée. Réessaie, ou saisis le titre à la main ci-dessous.'; S.base = null; return; }
     const deja = new Set(fusion().map(x => x.id));
     const qn = mots.join(' '), r = (S.base || []).filter(x => mots.every(m => x.n.includes(m))).map(x => [x, rangRech(x.n, qn, mots)]).sort((a, b) => a[1] - b[1]).map(a => a[0]).slice(0, 40);
     etat.textContent = r.length ? `${r.length}${r.length === 40 ? '+' : ''} résultat${r.length > 1 ? 's' : ''}` : 'Rien dans la base. Tu peux le saisir à la main ci-dessous.';
