@@ -13,9 +13,10 @@
 /* Raleway (licence SIL OFL 1.1, voir OFL.txt), même police que l'intro */
 @font-face{font-family:"Raleway";src:url("Raleway.woff2") format("woff2");font-weight:300 600;font-style:normal;font-display:swap}
 :root{
-  --bg:#05080F; --nuit:#111F38; --nuit2:#1A2B4A; --coque:#55596C; --acier:#BABBCF; --ink:#F2F5FF; --accent:#6FA8FF; --accent-ink:#05080F;
+  --bg:#05080F; --nuit:#111F38; --nuit2:#1A2B4A; --coque:#55596C; --acier:#BABBCF; --ink:#F2F5FF; --bleu:#6FA8FF; --bleu-doux:#4F79B3; --accent:#F2F5FF; --accent-ink:#05080F;
   --marge:clamp(16px,2.4vw,44px);
   --t-small:14px; --t-body:clamp(16px,15px + .25vw,19px); --t-lead:clamp(18px,15px + .6vw,26px); --t-head:clamp(30px,16px + 2.6vw,64px);
+  --note:var(--bleu); --etoile:var(--note);
   --suivi:.25em; --ease:cubic-bezier(.22,1,.36,1);
   --barre:60px; --actions:64px;
   color-scheme:dark;
@@ -91,12 +92,12 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .outils>*{min-width:0}
 .puces{display:flex;flex-wrap:wrap;gap:8px}
 .puce{min-height:44px;background:var(--nuit);padding:0 18px;border-radius:999px;transition:background-color .18s ease;font-size:15px}
-.puce:hover{background:var(--nuit2)}
+.puce:hover{background:rgba(186,187,207,.12)}
 .puce[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .recherche{width:100%;min-height:44px;background:var(--nuit);border:0;border-radius:999px;padding:0 48px 0 18px}
 .rech{position:relative}.recherche::-webkit-search-cancel-button,.rech input::-webkit-search-cancel-button{-webkit-appearance:none}   /* v0.82 : une seule croix d'effacement (la nôtre) */
 .rech-x{position:absolute;right:0;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;border-radius:50%;background:none;z-index:0;color:var(--ink);font-size:22px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center}.rech-x[hidden]{display:none}
-.rech-x::before{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--nuit2);z-index:-1}   /* zone tactile 44 px, rond visible 34 px */
+.rech-x::before{content:"";position:absolute;inset:5px;border-radius:50%;background:rgba(186,187,207,.16);z-index:-1}   /* zone tactile 44 px, rond visible 34 px */
 .menus{display:flex;gap:8px}
 .menus select{flex:1 1 0;width:0;min-width:0;min-height:44px;background:var(--nuit);border:0;border-radius:0;padding:0 26px 0 12px;border-radius:999px;appearance:none;-webkit-appearance:none;text-overflow:ellipsis;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23BABBCF' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
 .menus select[hidden]{display:none}
@@ -114,9 +115,9 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .aff img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .tuile .t{display:block;margin-top:8px;font-size:var(--t-small);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tuile .m{display:block;margin-top:2px;font-size:var(--t-small);color:var(--acier)}
-.tuile .m b{color:var(--accent);font-weight:500}
+.tuile .m b{color:var(--etoile);font-weight:500}
 .plus{display:block;margin:28px auto 0;min-height:48px;padding:0 28px;background:var(--nuit)}
-.plus:hover{background:var(--nuit2)}
+.plus:hover{background:rgba(186,187,207,.12)}
 .vide{grid-column:1/-1;color:var(--acier);padding:24px 0;max-width:46ch}
 
 /* statistiques */
@@ -126,7 +127,7 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .chiffres span{color:var(--acier);font-size:var(--t-small)}
 .an-puces{margin-top:0}.stats .gros{font-size:clamp(64px,22vw,110px);font-weight:300;line-height:.95;letter-spacing:-.03em}
 .mois-barres{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;height:120px;align-items:end}.mois-barres div{display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;height:100%;gap:6px}.mois-barres i{display:block;background:var(--nuit2);min-height:2px}.mois-barres .pic i{background:var(--accent)}.mois-barres span{color:var(--acier);font-size:12px;text-align:center}
-.top-notes{list-style:none;margin:0;padding:0;display:grid;gap:2px}.top-notes li{display:flex;justify-content:space-between;gap:12px;background:var(--nuit);padding:12px 14px}.top-notes b{font-weight:500;white-space:nowrap;color:var(--accent)}
+.top-notes{list-style:none;margin:0;padding:0;display:grid;gap:2px}.top-notes li{display:flex;justify-content:space-between;gap:12px;background:var(--nuit);padding:12px 14px}.top-notes b{font-weight:500;white-space:nowrap;color:var(--note)}
 .stats h2{font-size:17px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px}
 .barres{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .barres li{display:grid;grid-template-columns:5.5ch minmax(0,1fr) 4ch;align-items:center;gap:12px;min-height:28px}
@@ -144,7 +145,7 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .btn.fort:hover{background:#8BB9FF}
 .btn:disabled{opacity:.45;cursor:default}
 .actions .btn{flex:none;padding:0 20px;font-size:15px;line-height:1.2;border-radius:999px;background:var(--nuit2);min-height:52px}.actions .btn.fort{background:var(--accent);color:var(--accent-ink)}
-.actions .capsule{display:flex;align-items:center;padding:4px;border-radius:999px;background:rgba(5,8,15,.92);border:1px solid rgba(111,168,255,.55);pointer-events:auto}
+.actions .capsule{display:flex;align-items:center;padding:4px;border-radius:999px;background:rgba(5,8,15,.92);border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);pointer-events:auto}
 .actions .capsule .btn{width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;background:transparent;color:var(--accent);display:inline-flex;align-items:center;justify-content:center}
 .actions .capsule #b-haut{position:relative;color:var(--acier);border-radius:50% 0 0 50%}
 .actions .capsule #b-haut::after{content:"";position:absolute;right:0;top:10px;bottom:10px;width:1px;background:rgba(255,255,255,.2)}
@@ -202,7 +203,7 @@ details.syn p{margin:4px 0 0;line-height:1.5;max-height:28dvh;overflow:auto}
 .choix button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .resultats{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 .resultats button{display:grid;grid-template-columns:48px minmax(0,1fr);gap:12px;width:100%;text-align:left;align-items:center;padding:6px;background:var(--nuit);min-height:72px}
-.resultats button:hover{background:var(--nuit2)}
+.resultats button:hover{background:rgba(186,187,207,.12)}
 .resultats .aff{width:48px;padding:4px}.resultats .aff i{font-size:9px}
 .resultats b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .resultats span{color:var(--acier);font-size:var(--t-small)}
@@ -210,7 +211,7 @@ details.syn p{margin:4px 0 0;line-height:1.5;max-height:28dvh;overflow:auto}
 .etoiles svg{position:absolute;left:0;top:0;width:var(--w,200px);height:100%;display:block}
 .etoiles .fond{fill:var(--nuit2)}
 .etoiles .clip{position:absolute;left:0;top:0;height:100%;overflow:hidden}
-.etoiles .plein{fill:var(--accent)}
+.etoiles .plein{fill:var(--etoile)}
 .etoiles.lect{cursor:default}
 .val{min-width:5ch;font-variant-numeric:tabular-nums}
 .alerte{color:#FFB86B;font-size:var(--t-small)}
@@ -288,7 +289,7 @@ dialog.clavier .carte .cache-clavier{display:none}
 .f-ico svg{width:22px;height:22px;display:block}
 .f-ico span{display:none}
 .f-ico{min-width:44px;min-height:44px}
-.f-ico[aria-pressed="true"]{color:var(--ink);background:var(--nuit2)}
+.f-ico[aria-pressed="true"]{color:var(--ink);background:rgba(186,187,207,.14)}
 .carte.vu{gap:16px}
 .carte.vu>*{flex:none}
 .carte.vu .c-stars{width:280px;height:56px}
@@ -402,7 +403,7 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
 /* v0.63 (décisions de Simon du 2026-11-14) : menus et puces sans pastille pleine ni trait ; repos = gris, actif = blanc gras + halo doux sur l'icône */
-:root{--repos:#8C9EAF;--actif:#F2F5FF;--halo:drop-shadow(0 0 6px rgba(242,245,255,.4))}
+:root{--repos:#9A9CA4;--actif:#F2F5FF;--halo:drop-shadow(0 0 6px rgba(242,245,255,.4))}
 .onglets button{color:var(--repos);font-weight:500;height:64px;transition:height .18s ease,min-height .18s ease,color .18s ease;overflow:hidden}
 .onglets button[aria-selected="true"]{color:var(--actif);font-weight:700}
 .onglets button[aria-selected="true"] i{background:none;color:var(--actif)}
@@ -442,7 +443,7 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 .rd-aff,.c-aff{background-color:var(--bg)}
 /* v0.126 DA Cinéma (choix de Simon) : étoiles « lueur douce » : vides très effacées, pleines avec un léger halo (porté par le cadre découpé pour que la demi-étoile ne soit pas coupée net) ; premier bord aligné sur le texte */
 .etoiles .fond{fill:rgba(186,187,207,.16)}
-.etoiles .clip{filter:drop-shadow(0 0 4px rgba(111,168,255,.5))}
+.etoiles .clip{filter:drop-shadow(0 0 4px color-mix(in srgb,var(--etoile) 50%,transparent))}
 .etoiles{margin-left:calc(var(--w) / 5 * -.055)}
 .genres-i{overflow-x:auto;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent);scrollbar-width:none}
 .genres-i::-webkit-scrollbar{display:none}
@@ -590,6 +591,7 @@ html .chiffres span{color:var(--repos)}
 html .barres li{min-height:36px;color:var(--acier)}
 html .barres .r{height:2px;background:rgba(186,187,207,.16)}
 html .barres .n{color:var(--repos)}
+html{accent-color:var(--actif)}
 html .mois-barres i{background:rgba(186,187,207,.22)}
 html .mois-barres .pic i{background:var(--accent)}
 html .mois-barres span{color:var(--repos)}
@@ -597,12 +599,18 @@ html .frise{margin:6px 0 4px}
 html .top-notes{gap:0}
 html .top-notes li{background:none;padding:12px 0;border-top:1px solid rgba(186,187,207,.16)}
 html .plus{background:none;border:1px solid rgba(186,187,207,.32);color:var(--acier);border-radius:999px}
-html .actions #b-copie{background:var(--bg);border:1px solid rgba(111,168,255,.55);color:var(--accent)}
-html .actions #b-copie:active{background:rgba(111,168,255,.14)}
+html .actions #b-copie{background:var(--bg);border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);color:var(--accent)}
+html .actions #b-copie:active{background:color-mix(in srgb,var(--accent) 14%,transparent)}
 html .actions .capsule #essai-d.prs,html .actions .capsule .btn:active{background:rgba(186,187,207,.14)!important;color:var(--actif)}
 /* v0.140 : Idées figé (6 genres + Plus…) */
 .genres-w{flex-wrap:wrap;overflow:visible;-webkit-mask-image:none;mask-image:none;margin-bottom:8px}
 .puce.voirplus{color:var(--acier)}
+/* v0.152 : bleu à deux niveaux (choix de Simon, design/BLEU_CINEMA.md). Bleu vif = la note (étoiles, chiffres) et l'action principale seule (« + », « Je l'ai vu », « Envoyer ») ; le reste de l'action en encre ; comptage (barres, pic) en bleu doux. */
+.rd-note b,.note-tete .val,.compte .moy{color:var(--note)}
+.compte .moy{font-weight:500}
+.barres .r i,.mois-barres .pic i,html .mois-barres .pic i{background:var(--bleu-doux)}
+html .actions .capsule,html .actions #b-copie{border-color:rgba(186,187,207,.32)}
+html .actions #b-ajout,html .carte .btn.fort,html dialog .feuille .btn.fort{color:var(--bleu);border-color:var(--bleu)}
 </style>
 </head>
 <body>
@@ -659,11 +667,11 @@ html .actions .capsule #essai-d.prs,html .actions .capsule .btn:active{backgroun
 <div class="toast" id="toast" role="status"></div>
 <dialog id="feuille" aria-labelledby="f-titre"></dialog>
 
-<script src="variantes.js?v=0.142"></script>
+<script src="variantes.js?v=0.153"></script>
 <script>
 (() => {
 'use strict';
-const VERSION = '0.142 · 18 nov. 2026';
+const VERSION = '0.154 · 18 nov. 2026';
 document.documentElement.dataset.version = VERSION;   // v0.137 : lu par le bandeau « ^ » (variantes.js)
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
@@ -1156,7 +1164,7 @@ function rendreStats(p, tous, heures0) {
       h('p', null, h('b', null, n('anime')), h('span', null, 'anime')),
       h('p', null, h('b', null, heures + ' h'), h('span', null, 'de films vus'))),
     variante,
-    h('div', null, h('h2', null, 'Genres les plus vus'), barres(gens, 'genres'), notes.length ? h('p', { class: 'compte' }, `Note moyenne : ${moy} sur 5 (${notes.length} notés)`) : h('p', { class: 'compte' }, 'Aucune note pour l’instant.'))));
+    h('div', null, h('h2', null, 'Genres les plus vus'), barres(gens, 'genres'), notes.length ? h('p', { class: 'compte' }, 'Note moyenne : ', h('b', { class: 'moy' }, moy), ` sur 5 (${notes.length} notés)`) : h('p', { class: 'compte' }, 'Aucune note pour l’instant.'))));
 }
 
 /* ---------- feuille ---------- */
@@ -1724,6 +1732,6 @@ $('#b-copie').addEventListener('click', envoyer);
   const s = document.querySelector('#o-avoir svg'); if (s) s.innerHTML = '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>';
 })();
 </script>
-<script src="filtres.js?v=0.142"></script>
+<script src="filtres.js?v=0.154"></script>
 </body>
 </html>

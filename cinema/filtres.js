@@ -4,7 +4,7 @@
   const root = document.documentElement;
   const css = `
 html.nv #outils{display:none}
-html.nv.fo #outils{display:grid;position:fixed;left:var(--marge);right:var(--marge);bottom:calc(84px + env(safe-area-inset-bottom));z-index:40;background:#0A1120;padding:12px;border:1px solid rgba(186,187,207,.22);border-radius:16px;box-shadow:0 18px 40px rgba(2,6,20,.8),0 2px 8px rgba(2,6,20,.6);gap:4px}
+html.nv.fo #outils{display:grid;position:fixed;left:var(--marge);right:var(--marge);bottom:calc(84px + env(safe-area-inset-bottom));z-index:40;background:#0D0E11;padding:12px;border:1px solid rgba(186,187,207,.22);border-radius:16px;box-shadow:0 18px 40px rgba(2,6,20,.8),0 2px 8px rgba(2,6,20,.6);gap:4px}
 html.nv.fo #outils .puces[aria-label="Type"]{display:grid!important}
 html.nv .ebas,html.nv.sc.up .ebas{display:none!important}
 html.nv{--barre:44px}
@@ -20,10 +20,10 @@ html.sf #essai-d{display:none!important}
 #essai-m{display:none!important}   /* v0.121 : titre de mois de l'ancien essai « haut 4 », inutilisé : il s'affichait en double au-dessus de la liste */
 .actions .capsule #essai-d{position:relative;color:var(--acier)}
 .actions .capsule #essai-d::before{content:"";position:absolute;right:0;top:10px;bottom:10px;width:1px;background:rgba(255,255,255,.2)}
-.essai-t.fa::after{content:"";position:absolute;right:7px;top:7px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 9px 3px rgba(111,168,255,.6)}
+.essai-t.fa::after{content:"";position:absolute;right:7px;top:7px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 9px 3px rgba(242,245,255,.6)}
 html.fo .essai-t,.essai-t.prs{color:var(--actif)}
 #essai-d.prs{background:var(--nuit2)!important}
-@keyframes essai-pls{0%,100%{box-shadow:0 0 0 0 rgba(111,168,255,0)}40%{box-shadow:0 0 0 9px rgba(111,168,255,.35)}}
+@keyframes essai-pls{0%,100%{box-shadow:0 0 0 0 rgba(242,245,255,0)}40%{box-shadow:0 0 0 9px rgba(242,245,255,.35)}}
 #essai-d.ind,#essai-f.ind{animation:essai-pls 1.1s ease-out 3;border-radius:50%}
 #essai-rad{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;transition:opacity .16s;-webkit-user-select:none;user-select:none}
 #essai-rad.on{opacity:1;background:radial-gradient(circle at var(--cx) var(--cy),rgba(2,6,20,.8),rgba(2,6,20,.5) 55%,rgba(2,6,20,.25))}
@@ -35,24 +35,24 @@ html.fo .essai-t,.essai-t.prs{color:var(--actif)}
 #essai-rad .lab{display:none;position:absolute;transform:translate(-50%,-50%);font-size:14px;color:var(--ink);text-shadow:0 1px 8px #000;white-space:nowrap}
 #essai-rad.hint .lab{display:block}
 /* r1 : ronds espacés, le mot à l'extérieur de l'arc (loin du pouce) */
-#essai-rad[data-r=r1] .it{width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:#0A1120;border:1px solid rgba(186,187,207,.4);display:grid;place-items:center;color:var(--repos);transform:scale(.3);opacity:0;transition:transform .2s cubic-bezier(.2,.9,.3,1.25),opacity .14s,background-color .12s,color .12s;box-shadow:0 8px 20px rgba(2,6,20,.7)}
+#essai-rad[data-r=r1] .it{width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:#0D0E11;border:1px solid rgba(186,187,207,.4);display:grid;place-items:center;color:var(--repos);transform:scale(.3);opacity:0;transition:transform .2s cubic-bezier(.2,.9,.3,1.25),opacity .14s,background-color .12s,color .12s;box-shadow:0 8px 20px rgba(2,6,20,.7)}
 #essai-rad.on[data-r=r1] .it,#essai-rad.hint[data-r=r1] .it{transform:scale(1);opacity:1;transition-delay:calc(var(--i)*30ms),calc(var(--i)*30ms),0s,0s}
 #essai-rad[data-r=r1] .it.cur{border-color:var(--accent);color:var(--actif)}
-#essai-rad.on[data-r=r1] .it.sel{transform:scale(1.25);background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 0 22px 4px rgba(111,168,255,.5);transition-delay:0s}
+#essai-rad.on[data-r=r1] .it.sel{transform:scale(1.25);background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 0 22px 4px rgba(242,245,255,.5);transition-delay:0s}
 #essai-rad[data-r=r1] .it.sel span{color:var(--accent);font-weight:600;font-size:17px}
 /* r2 : icônes nues, le mot à l'extérieur */
 #essai-rad[data-r=r2] .it{width:56px;height:56px;margin:-28px 0 0 -28px;display:grid;place-items:center;opacity:0;transform:scale(.4);transition:transform .2s cubic-bezier(.2,.9,.3,1.25),opacity .14s,color .1s;filter:drop-shadow(0 2px 6px #000)}
 #essai-rad[data-r=r2] .it svg{width:30px;height:30px;stroke-width:2}
 #essai-rad.on[data-r=r2] .it,#essai-rad.hint[data-r=r2] .it{opacity:.9;transform:scale(1);transition-delay:calc(var(--i)*30ms),calc(var(--i)*30ms),0s}
-#essai-rad.on[data-r=r2] .it.sel{opacity:1;color:var(--accent);transform:scale(1.5);filter:drop-shadow(0 0 10px rgba(111,168,255,.9)) drop-shadow(0 2px 6px #000);transition-delay:0s}
+#essai-rad.on[data-r=r2] .it.sel{opacity:1;color:var(--accent);transform:scale(1.5);filter:drop-shadow(0 0 10px rgba(242,245,255,.9)) drop-shadow(0 2px 6px #000);transition-delay:0s}
 #essai-rad[data-r=r2] .it.sel span{color:var(--accent);font-weight:600;font-size:16px}
 /* r3 : cadran retravaillé, grand arc en segments, icône + mot, segment visé allumé */
 /* r4 : grandes bulles, le mot dedans */
-#essai-rad[data-r=r4] .it{width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;background:#0A1120;border:1px solid rgba(186,187,207,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--repos);transform:scale(.3);opacity:0;transition:transform .2s cubic-bezier(.2,.9,.3,1.25),opacity .14s,background-color .12s,color .12s;box-shadow:0 8px 20px rgba(2,6,20,.7)}
+#essai-rad[data-r=r4] .it{width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;background:#0D0E11;border:1px solid rgba(186,187,207,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--repos);transform:scale(.3);opacity:0;transition:transform .2s cubic-bezier(.2,.9,.3,1.25),opacity .14s,background-color .12s,color .12s;box-shadow:0 8px 20px rgba(2,6,20,.7)}
 #essai-rad[data-r=r4] .it span{position:static;transform:none;font-size:12.5px;color:inherit;text-shadow:none}
 #essai-rad.on[data-r=r4] .it,#essai-rad.hint[data-r=r4] .it{transform:scale(1);opacity:1;transition-delay:calc(var(--i)*30ms),calc(var(--i)*30ms),0s,0s}
 #essai-rad[data-r=r4] .it.cur{border-color:var(--accent);color:var(--actif)}
-#essai-rad.on[data-r=r4] .it.sel{transform:scale(1.18);background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 0 22px 4px rgba(111,168,255,.5);transition-delay:0s}
+#essai-rad.on[data-r=r4] .it.sel{transform:scale(1.18);background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 0 22px 4px rgba(242,245,255,.5);transition-delay:0s}
 /* famille r3 : l'arc lumineux (trait, bande, repère), un seul surlignage qui GLISSE d'un choix à l'autre ; choix serrés (20°) */
 #essai-rad[class] .it3{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--ink);opacity:0;transition:opacity .16s,color .1s,transform .14s}
 #essai-rad.on .it3,#essai-rad.hint .it3{opacity:.78}
@@ -74,7 +74,7 @@ html.fo .essai-t,.essai-t.prs{color:var(--actif)}
 #essai-rad .hg{opacity:0;transform-origin:var(--cx) var(--cy);transition:opacity .1s;will-change:transform}
 #essai-rad .hg.on{opacity:1}
 #essai-rad .hg path,#essai-rad .hg line{fill:none;stroke-linecap:round}
-#essai-rad .hg .ha{stroke:rgba(111,168,255,.28)}
+#essai-rad .hg .ha{stroke:rgba(242,245,255,.28)}
 #essai-rad .hg .hc{stroke:var(--accent)}
 #essai-rad .tr{fill:none;stroke-linecap:round}
 #essai-rad .gd{stroke:rgba(234,242,255,.55);stroke-width:2;stroke-linecap:round}
@@ -82,7 +82,7 @@ html.fo .essai-t,.essai-t.prs{color:var(--actif)}
 #essai-rad .arc{fill:none;stroke:rgba(234,242,255,.4);stroke-width:2;stroke-linecap:round}
 #essai-rad .nd{fill:rgba(234,242,255,.55);transition:fill .1s}
 #essai-rad .nd.sel{fill:var(--accent)}
-#essai-rad .cu{fill:var(--accent);filter:drop-shadow(0 0 8px rgba(111,168,255,.9))}
+#essai-rad .cu{fill:var(--accent);filter:drop-shadow(0 0 8px rgba(242,245,255,.9))}
 #essai-rad[data-r=r3] .it{width:64px;height:52px;margin:-26px 0 0 -32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--ink);opacity:0;transition:opacity .16s,color .1s,transform .14s;text-shadow:0 1px 8px #000}
 #essai-rad[data-r=r3] .it span{position:static;transform:none;font-size:12.5px}
 #essai-rad.on[data-r=r3] .it,#essai-rad.hint[data-r=r3] .it{opacity:.7}
@@ -90,10 +90,10 @@ html.fo .essai-t,.essai-t.prs{color:var(--actif)}
 /* famille r5 : UNE courbe d'horizon (grand rayon, comme la courbure d'une planète), fine ; le repère glisse dessus en continu ; mots à l'extérieur de la courbe ; transform/opacity seulement */
 #essai-rad.on[data-r^=r5]{background:rgba(2,6,20,.84)}
 #essai-rad[data-r^=r5] .hg{transform-origin:0 0}
-#essai-rad[data-r^=r5] .it3{width:64px;height:46px;margin:-23px 0 0 -32px;color:#C9D8EE;gap:2px}
+#essai-rad[data-r^=r5] .it3{width:64px;height:46px;margin:-23px 0 0 -32px;color:#C8CBD8;gap:2px}
 #essai-rad.on[data-r^=r5] .it3,#essai-rad.hint[data-r^=r5] .it3{opacity:.62}
 #essai-rad[data-r^=r5] .it3 span{font-size:13px;letter-spacing:.02em}
-#essai-rad[data-r^=r5] .it3.sel{opacity:1;color:#EAF2FF;transform:scale(1.1)}
+#essai-rad[data-r^=r5] .it3.sel{opacity:1;color:#F2F5FF;transform:scale(1.1)}
 #essai-rad[data-r^=r5] .it3.sel span{color:var(--accent)}
 #essai-rad[data-r=r5a] .it3 svg,#essai-rad[data-r=r5c] .it3 span{display:none}
 #essai-rad[data-r=r5c] .it3.sel span{display:block;position:absolute;bottom:100%;white-space:nowrap}
@@ -181,12 +181,12 @@ html.fo .essai-t,.essai-t.prs{color:var(--actif)}
       const A = posOn(-8), B = posOn(100), arc = `M${A} A${Rp} ${Rp} 0 0 ${up ? 1 : 0} ${B}`;
       const s2 = E('svg', {}, 'sv'), df = E('defs', {});
       const lg = E('linearGradient', { id: 'essai-g', gradientUnits: 'userSpaceOnUse', x1: A[0], y1: A[1], x2: B[0], y2: B[1] });
-      [[0, 0], [.3, .8], [.7, .8], [1, 0]].forEach(([o, a2]) => lg.append(E('stop', { offset: o, 'stop-color': '#CFE0F8', 'stop-opacity': a2 })));
-      const bl = E('radialGradient', { id: 'essai-sg' }); [[0, .7], [.45, .28], [1, 0]].forEach(([o, a2]) => bl.append(E('stop', { offset: o, 'stop-color': '#BCD3F5', 'stop-opacity': a2 })));
+      [[0, 0], [.3, .8], [.7, .8], [1, 0]].forEach(([o, a2]) => lg.append(E('stop', { offset: o, 'stop-color': '#E4E6F0', 'stop-opacity': a2 })));
+      const bl = E('radialGradient', { id: 'essai-sg' }); [[0, .7], [.45, .28], [1, 0]].forEach(([o, a2]) => bl.append(E('stop', { offset: o, 'stop-color': '#D5D8E6', 'stop-opacity': a2 })));
       df.append(lg, bl); s2.append(df);
       /* voile très léger côté planète, halo fin côté espace, filet */
       [[40, -20, .05], [8, 3, .08], [1.4, 0, 1]].forEach(([w, d, o]) => { const r = Rp + d, p1 = E('path', { d: arc.replace(/A\S+ \S+/, `A${r} ${r}`), fill: 'none', stroke: 'url(#essai-g)', 'stroke-width': w, 'stroke-linecap': 'round', opacity: o }); s2.append(p1); });
-      ts.forEach((_, i) => { const P = posOn(ang(i, n)), q = nor(P); s2.append(E('line', { x1: P[0] - q[0] * 5, y1: P[1] - q[1] * 5, x2: P[0] + q[0] * 5, y2: P[1] + q[1] * 5, stroke: '#CFE0F8', 'stroke-width': 1.2, opacity: .5 })); });
+      ts.forEach((_, i) => { const P = posOn(ang(i, n)), q = nor(P); s2.append(E('line', { x1: P[0] - q[0] * 5, y1: P[1] - q[1] * 5, x2: P[0] + q[0] * 5, y2: P[1] + q[1] * 5, stroke: '#E4E6F0', 'stroke-width': 1.2, opacity: .5 })); });
       hl = E('g', {}, 'hg'); hl.append(E('circle', { cx: 0, cy: 0, r: 34, fill: 'url(#essai-sg)' }));
       s2.append(hl); rad.append(s2);
       const off = { r5a: 30, r5b: 40, r5c: 24, r5d: 42 }[ret];
@@ -202,7 +202,7 @@ html.fo .essai-t,.essai-t.prs{color:var(--actif)}
       const s2 = document.createElementNS(NS, 'svg'); s2.setAttribute('class', 'sv');
       const A = pt(RA, T0), B = pt(RA, T1), df = document.createElementNS(NS, 'defs'), lg = document.createElementNS(NS, 'linearGradient');
       lg.setAttribute('id', 'essai-g'); lg.setAttribute('gradientUnits', 'userSpaceOnUse'); lg.setAttribute('x1', A[0]); lg.setAttribute('y1', A[1]); lg.setAttribute('x2', B[0]); lg.setAttribute('y2', B[1]);
-      [[0, .0], [.22, .6], [.78, .6], [1, 0]].forEach(([o, a2]) => { const st2 = document.createElementNS(NS, 'stop'); st2.setAttribute('offset', o); st2.setAttribute('stop-color', '#EAF2FF'); st2.setAttribute('stop-opacity', a2); lg.append(st2); });
+      [[0, .0], [.22, .6], [.78, .6], [1, 0]].forEach(([o, a2]) => { const st2 = document.createElementNS(NS, 'stop'); st2.setAttribute('offset', o); st2.setAttribute('stop-color', '#F2F5FF'); st2.setAttribute('stop-opacity', a2); lg.append(st2); });
       df.append(lg); s2.append(df);
       const step = ang(1, n) - ang(0, n);
       if (ret === 'r3b') { s2.append(mkp('bd', arc(RA, T0, T1), 46)); const g0 = mkp('tr', arc(RA, T0, T1), 46); g0.setAttribute('stroke', 'url(#essai-g)'); g0.style.opacity = .18; s2.append(g0); }
