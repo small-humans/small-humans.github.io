@@ -1,13 +1,13 @@
 // Sélecteur de variantes « ^ » (installé le 2026-11-18 avec l'accord de Simon, v0.137).
 // But : comparer des concepts sur la VRAIE page, à l'URL unique, sur l'iPhone de Simon, sans paramètre d'URL.
-// Actif seulement sur un hôte local ou privé (192.168.x, 10.x, 172.16-31.x, 127.0.0.1, localhost) : invisible sur le site public.
+// Actif partout sauf sur l'hôte public du site (github.io) : invisible en ligne, présent sur le serveur de test.
 // Usage dans index.html (après ce script) :
 //   Variantes.groupe('stat', 'Stats', [['1','Récent + décennies'],['2','Frise'],['3','Actuel']], '1');
 //   CSS : html[data-v-stat="2"] .stats { ... }   JS : Variantes.valeur('stat') === '2'
 // Le bandeau suit les <dialog> ouverts (fiche comprise) : il reste touchable partout.
 (function () {
   const h = location.hostname;
-  const local = h === 'localhost' || h === '127.0.0.1' || /^(192\.168|10)\./.test(h) || /^172\.(1[6-9]|2\d|3[01])\./.test(h);
+  const local = !/github\.io$/.test(h);
   const G = {};
   const lire = () => { try { return JSON.parse(localStorage.getItem('variantes') || '{}'); } catch (e) { return {}; } };
   const ecrire = v => { try { localStorage.setItem('variantes', JSON.stringify(v)); } catch (e) { /* mémoire indisponible : choix non gardé */ } };
