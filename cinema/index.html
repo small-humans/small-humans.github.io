@@ -463,6 +463,52 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 .grille .jour{text-transform:none}
 .grille .jour::first-letter{text-transform:uppercase}
 details.syn summary{min-height:44px}
+
+/* v0.129 DA Cinéma : portage ORDINATEUR (souris, écran large ≥ 1100 px). Rien ne change sur téléphone ni sur tablette.
+   Principes : colonne large alignée sur un même bord (titre, onglets, liste, capsule), affiches plus grandes, rien de permanent qui ne serve qu'au pouce
+   (arc de démonstration, boutons œil/+ toujours posés sur les affiches), fiche en deux colonnes (affiche | lecture) toujours dépliée. */
+@media (min-width:1100px) and (hover:hover) and (pointer:fine){
+  :root{--colonne:1640px;--gx:calc((100vw - min(var(--colonne),100vw - 2 * var(--marge))) / 2)}
+  .cadre{max-width:var(--colonne)}
+  .barre{padding:0 var(--gx)}
+  html.nv h1{right:var(--gx)!important;font-size:24px}
+  html.nv .version{left:var(--gx)!important}
+  .actions .rangee{max-width:var(--colonne)}
+  .onglets{grid-template-columns:repeat(6,minmax(0,124px))}
+  .onglets button,.ctab,.puces .puce,.genres-i .puce{font-size:15px}
+  .grille{grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:34px 22px}
+  .mois{font-size:19px;margin-top:26px}
+  .pos{transition:transform .22s var(--ease)}
+  .pos:hover{transform:translateY(-3px)}
+  .pos:hover .aff{box-shadow:0 10px 28px rgba(2,6,20,.7)}
+  /* œil « déjà vu » et « + » : visibles au survol de l'affiche (ou au clavier), pas posés en permanence */
+  .pw .vu-deja,.pw .ajoute{opacity:0;transition:opacity .16s ease}
+  .pw:hover .vu-deja,.pw:hover .ajoute,.pw:focus-within .vu-deja,.pw:focus-within .ajoute{opacity:1}
+  .bande{gap:22px}
+  .sug{flex:0 0 136px;width:136px}
+  .sug .pos{width:136px}
+  .sug .ct{font-size:15px}
+  dialog.plein .sug{flex-basis:108px;width:108px}
+  dialog.plein .sug .pos{width:108px}
+  /* l'indice de l'arc (appui long) n'a de sens qu'au toucher */
+  #essai-rad.hint{display:none}
+  #essai-d.ind,#essai-f.ind{animation:none}
+
+  /* fiche : deux colonnes, affiche à gauche entière, lecture à droite, toujours dépliée (plus de poignée, de rideau ni de glissé) */
+  dialog.plein{width:min(1180px,92vw);height:min(86vh,800px);max-height:none;margin:auto;overflow:hidden;border-radius:20px;border:1px solid var(--nuit2)}
+  dialog.plein .feuille{max-width:none;height:100%;margin:0;padding:6px 32px 28px;grid-template-rows:auto minmax(0,1fr);gap:12px}
+  dialog.plein .f-tete{position:static}
+  dialog.plein .corps.rideau{display:grid;grid-template-columns:minmax(280px,36%) minmax(0,1fr);gap:44px;height:100%;min-height:0;margin:0;overflow:hidden}
+  dialog.plein .corps.rideau::before,dialog.plein .corps.rideau::after{display:none}
+  dialog.plein .rd-aff{position:relative;inset:auto;visibility:visible!important;min-height:0;background-position:center top;background-color:transparent;cursor:default}
+  dialog.plein .rd-aff.typo{background:var(--nuit)}
+  dialog.plein .rd-retour,dialog.plein .rd-poignee{display:none}
+  dialog.plein .rd-panneau{position:relative;inset:auto;transform:none!important;overflow-y:auto;border-radius:0;touch-action:auto;transition:none;min-height:0;padding-right:8px}
+  dialog.plein .rd-pk,dialog.plein .rd-panneau .rd-pk{padding:0;height:auto}
+  dialog.plein .rd-lect{padding:8px 0 8px;gap:28px}
+  dialog.plein .c-stars{width:320px}
+  dialog.plein .f-tete h2.t-film .tb b{font-size:20px}
+}
 </style>
 </head>
 <body>
@@ -522,7 +568,7 @@ details.syn summary{min-height:44px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.128 · 18 nov. 2026';
+const VERSION = '0.129 · 18 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -1155,7 +1201,7 @@ const ICO = {
 const icone = (svg, txt) => { const s = h('span'); s.innerHTML = svg; return [s.firstChild, h('span', null, txt)]; };
 function carteVu(f0, init) {   // init (v0.59, retour depuis l'œil de « Dans le même esprit ») : { ouvert, st : défilement du panneau, bx : position de la bande }
   const id = f0.id, avant = memoire[id];   // « avant » : état à l'ouverture, pour Annuler
-  let f = Object.assign({}, f0), auteur = 'commentaire', avis = false, modifie = false, etat = '', minuteur = null, tConf = null, confirme = false, ouvert = !!(init && init.ouvert), pRef = null;
+  let f = Object.assign({}, f0), auteur = 'commentaire', avis = false, modifie = false, etat = '', minuteur = null, tConf = null, confirme = false, ouvert = !!(init && init.ouvert) || matchMedia('(min-width:1100px) and (hover:hover) and (pointer:fine)').matches, pRef = null;   /* ordinateur : fiche toujours dépliée (deux colonnes) */
   let stInit = init ? init.st || 0 : 0, bxInit = init ? init.bx || 0 : 0;
   const corps = h('div', { class: 'corps carte vu' });
   const syn = h('details', { class: 'syn cache-clavier', hidden: true }, h('summary', null, 'Synopsis'), h('p'));
@@ -1225,7 +1271,7 @@ function carteVu(f0, init) {   // init (v0.59, retour depuis l'œil de « Dans l
     const aff = sans
       ? h('div', { class: 'rd-aff typo', role: 'img', 'aria-label': f.titre + ', sans affiche' }, h('span', { class: 'gh', 'aria-hidden': 'true' }, (f.titre || '?').trim().replace(/^(L’|L'|Le |La |Les )/, '').charAt(0).toUpperCase()), h('b', { class: 'rd-tt' }, f.titre))
       : h('div', { class: 'rd-aff', role: 'img', 'aria-label': 'Affiche de ' + f.titre, style: `background-image:url("${IMG}w500${f.affiche}")` });
-    aff.addEventListener('click', () => { if (ouvert) bascule(false); });
+    aff.addEventListener('click', () => { if (ouvert && !matchMedia('(min-width:1100px) and (hover:hover) and (pointer:fine)').matches) bascule(false); });
     const lect = h('div', { class: 'rd-lect' });
     const panneau = h('div', { class: 'rd-panneau' + (ouvert ? ' ouvert' : '') });
     const bascule = o => {
@@ -1260,7 +1306,7 @@ function carteVu(f0, init) {   // init (v0.59, retour depuis l'œil de « Dans l
       h('div', { class: 'c-avis' }, [['commentaire', 'Simon'], ['commentaire_oriana', 'Oriana']].map(([cle, nom]) => {
         const txt = (f[cle] || '').trim();
         return h('button', { type: 'button', 'aria-label': (txt ? 'Modifier l’avis ' : 'Écrire l’avis ') + (nom === 'Oriana' ? 'd’Oriana' : 'de Simon'), on: { click: () => ouvrirAvis(cle) } },
-          h('span', { class: 'qui' }, nom === 'Oriana' ? 'Avis d’Oriana' : 'Avis de Simon'), h('span', { class: 'txt' + (txt ? '' : ' rien') }, txt || 'Toucher pour écrire'));
+          h('span', { class: 'qui' }, nom === 'Oriana' ? 'Avis d’Oriana' : 'Avis de Simon'), h('span', { class: 'txt' + (txt ? '' : ' rien') }, txt || (matchMedia('(hover:hover) and (pointer:fine)').matches ? 'Cliquer pour écrire' : 'Toucher pour écrire')));
       })),
       syn, meme);
     lect.inert = !ouvert;
@@ -1563,6 +1609,6 @@ $('#b-copie').addEventListener('click', envoyer);
   const s = document.querySelector('#o-avoir svg'); if (s) s.innerHTML = '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>';
 })();
 </script>
-<script src="filtres.js?v=0.128"></script>
+<script src="filtres.js?v=0.129"></script>
 </body>
 </html>
