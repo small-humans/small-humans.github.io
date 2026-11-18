@@ -12,10 +12,12 @@ html.nv .tete{display:block;padding:0}
 html.nv h1{z-index:11;position:absolute;top:0;right:var(--marge);height:var(--barre);display:flex;align-items:center;font-size:22px;line-height:1;pointer-events:none}
 html.nv .resume{font-size:13.5px;margin:0;line-height:1.4}
 html.nv .onglets{margin-top:4px}
-html.nv .version{display:none}
+html.nv .version{display:block!important;position:fixed;right:auto;top:auto;left:var(--marge);bottom:calc(6px + env(safe-area-inset-bottom));height:auto;z-index:11;font-size:10px;letter-spacing:.06em;opacity:.55;text-shadow:0 0 4px #000,0 0 2px #000}
 .essai-t{display:none;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 .essai-t svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 html.pld #essai-d,html.plg #essai-d{display:inline-flex}
+html.sf #essai-d{display:none!important}
+#essai-m{display:none!important}   /* v0.121 : titre de mois de l'ancien essai « haut 4 », inutilisé : il s'affichait en double au-dessus de la liste */
 .actions .capsule #essai-d{position:relative;color:var(--acier)}
 .actions .capsule #essai-d::before{content:"";position:absolute;right:0;top:10px;bottom:10px;width:1px;background:rgba(255,255,255,.2)}
 .essai-t.fa::after{content:"";position:absolute;right:7px;top:7px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 9px 3px rgba(111,168,255,.6)}
@@ -240,7 +242,7 @@ html.fo .essai-t,.essai-t.prs{color:var(--actif)}
         d.append(w); items.push(d); rad.append(d);
       });
     }
-    lab = document.createElement('div'); lab.className = 'lab'; lab.textContent = 'Appui long, glisse, relâche'; lab.style.left = Math.max(110, Math.min(innerWidth - 110, cx - 110)) + 'px'; lab.style.top = Math.max(40, cy - 250) + 'px'; rad.append(lab);
+    lab = document.createElement('div'); lab.className = 'lab'; lab.textContent = 'Appui long, glisse, relâche'; lab.style.left = Math.max(110, Math.min(innerWidth - 110, cx - 110)) + 'px'; lab.style.top = Math.max(40, cy - 250) + 'px'; if (matchMedia('(pointer: coarse)').matches) rad.append(lab);   /* indice d'appui long : seulement au toucher */
   };
   const pick = (px, py) => {
     const n = items.length; let k = -1;

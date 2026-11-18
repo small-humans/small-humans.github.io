@@ -94,7 +94,7 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .puce:hover{background:var(--nuit2)}
 .puce[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .recherche{width:100%;min-height:44px;background:var(--nuit);border:0;border-radius:999px;padding:0 48px 0 18px}
-.rech{position:relative}.recherche::-webkit-search-cancel-button{-webkit-appearance:none}
+.rech{position:relative}.recherche::-webkit-search-cancel-button,.rech input::-webkit-search-cancel-button{-webkit-appearance:none}   /* v0.82 : une seule croix d'effacement (la nôtre) */
 .rech-x{position:absolute;right:0;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;border-radius:50%;background:none;z-index:0;color:var(--ink);font-size:22px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center}.rech-x[hidden]{display:none}
 .rech-x::before{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--nuit2);z-index:-1}   /* zone tactile 44 px, rond visible 34 px */
 .menus{display:flex;gap:8px}
@@ -357,6 +357,19 @@ dialog.clavier .carte .cache-clavier{display:none}
 .rd-panneau:not(.ouvert) .rd-pk>.rd-ligne{margin-top:auto}
 .rd-panneau:not(.ouvert) .rd-pk::after{content:"";margin-top:auto}
 .rd-panneau:not(.ouvert) .rd-poignee{margin-bottom:-16px}   /* l'espace se compte depuis la barre de la poignée, pas depuis sa zone tactile */
+/* v0.128 DA Cinéma (choix de Simon, 2026-11-18) : poignée « respire », 3 gestes, 3 signes, un seul rythme de 13,5 s décalés de 4,5 s (jamais deux à la fois).
+   fiche repliée : barre qui monte (haut = déplier) puis trait en haut qui descend (bas = fermer) puis « < » qui recule (droite → gauche = fermer) ;
+   fiche dépliée : barre qui plonge (bas = replier) puis « < » qui recule. Mouvement seulement, rien de permanent ; coupé par « Réduire les animations ». */
+.rd-poignee i{width:28px;height:3px;background:rgba(186,187,207,.3)}
+.rd-panneau:not(.ouvert) .rd-poignee i{animation:rd-resp 13.5s ease-in-out .7s infinite}
+.rd-panneau.ouvert .rd-poignee i{animation:rd-plonge 13.5s ease-in-out .9s infinite}
+.corps.rideau:not(.ouvert)::after{content:"";position:absolute;left:50%;top:max(12px,env(safe-area-inset-top));width:34px;height:6px;margin-left:-17px;border-radius:3px;background:rgba(5,8,15,.62);box-shadow:0 0 0 1px rgba(255,255,255,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);z-index:3;pointer-events:none;opacity:0;animation:rd-tire 13.5s ease-in-out 5.2s infinite}
+.rd-retour svg,.f-retour svg{animation:rd-recul 13.5s ease-in-out 9.7s infinite}
+@keyframes rd-resp{0%,10%,100%{transform:none;background:rgba(186,187,207,.3)}5%{transform:translateY(-6px);background:rgba(242,245,255,.75)}}
+@keyframes rd-plonge{0%,10%,100%{transform:none;background:rgba(186,187,207,.3)}5%{transform:translateY(6px);background:rgba(242,245,255,.75)}}
+@keyframes rd-tire{0%,10%,100%{opacity:0;transform:none}3%{opacity:.8}9%{opacity:0;transform:translateY(12px)}}
+@keyframes rd-recul{0%,10%,100%{transform:none}5%{transform:translateX(-6px)}}
+@media (prefers-reduced-motion:reduce){.rd-poignee i,.corps.rideau::after,.rd-retour svg,.f-retour svg{animation:none!important}}
 .corps.rideau:not(.ouvert) .rd-aff{touch-action:none}   /* état 1 : tirer vers le haut sur l'affiche déplie la fiche, rien ne défile */
 /* v0.58 : « Annuler les changements » = icône en haut à gauche, à côté de la flèche retour ; sa place est réservée (pas de saut du titre), elle apparaît en fondu */
 .ico-annuler{flex:none;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .2s,visibility 0s .2s}
@@ -427,7 +440,10 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 @media (prefers-reduced-motion:reduce){.onglets button,.onglets button span,.onglets button svg{transition:none}}
 /* v0.64 étalon UI/UX tour 1 : (1) fond sombre derrière l'affiche, (2) étoiles vides lisibles, (3) genres : bord en fondu, (4) grille 8 px + échelle ×1,25 (14 / 17,5 / 22), (5) ombres teintées bleu nuit */
 .rd-aff,.c-aff{background-color:var(--bg)}
-.etoiles .fond{fill:rgba(186,187,207,.38)}
+/* v0.126 DA Cinéma (choix de Simon) : étoiles « lueur douce » : vides très effacées, pleines avec un léger halo (porté par le cadre découpé pour que la demi-étoile ne soit pas coupée net) ; premier bord aligné sur le texte */
+.etoiles .fond{fill:rgba(186,187,207,.16)}
+.etoiles .clip{filter:drop-shadow(0 0 4px rgba(111,168,255,.5))}
+.etoiles{margin-left:calc(var(--w) / 5 * -.055)}
 .genres-i{overflow-x:auto;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent);scrollbar-width:none}
 .genres-i::-webkit-scrollbar{display:none}
 .grille{gap:16px 8px}
@@ -435,6 +451,9 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 .tete{gap:16px}
 .compte{margin-top:8px}
 .onglets button,.ctab,.puces .puce,.genres-i .puce,.c-genres .puce,.puces[aria-label="Type"] .puce{font-size:14px}
+/* v0.122 DA Cinéma (choix de Simon, 2026-11-18) : puces « retrait » : les inactives s'effacent, l'active reste nette (poids constant, plus de saut de largeur) */
+.puces .puce,.genres-i .puce,.c-genres .puce{opacity:.62}
+.puces .puce[aria-pressed="true"],.genres-i .puce[aria-pressed="true"],.c-genres .puce[aria-pressed="true"]{opacity:1;font-weight:500;color:var(--actif)}
 .actions .capsule,.ebas{box-shadow:0 8px 24px rgba(2,6,20,.75),0 2px 6px rgba(2,6,20,.6)}
 #feuille{box-shadow:0 24px 64px rgba(2,6,20,.85),0 4px 12px rgba(2,6,20,.6)}
 @media (min-width:760px){.grille{gap:24px 16px}}
@@ -503,7 +522,7 @@ details.syn summary{min-height:44px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.71 · 17 nov. 2026';
+const VERSION = '0.128 · 18 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -514,6 +533,107 @@ function verifierVersion() {
   }).catch(() => {});
 }
 verifierVersion();
+/* v0.110 : indices de glissé entre onglets (DA du Cinéma, variante « F Souffle + D3 poussière » choisie par Simon le 2026-11-18). Fiche : design/DA_CINEMA.md (dépôt atelier).
+   1) PENDANT un glissé horizontal : la lumière de l'icône quittée se vide par le haut, celle de l'icône d'arrivée se remplit par le bas, entre elles une poussière de grains minuscules (canvas) au rythme du doigt.
+   2) SOUFFLE : quelques grains quasi invisibles glissent de l'icône active vers le(s) voisin(s) ; rejoué à l'arrivée sur un onglet, à la fermeture d'une fiche, après un défilement (1er au lever du doigt, 2e quand la liste ralentit), puis toutes les 8 s au repos.
+   Rien n'est écrit sur l'appareil ; « Réduire les animations » d'iOS coupe tout. */
+try {
+  const ongs = () => [...document.querySelectorAll('.onglets button[role=tab]')];
+  const reduit = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const feuilleOuverte = () => typeof F !== 'undefined' && F.open;
+  const R = (a, b) => a + Math.random() * (b - a);
+  const centre = b => { const el = b.querySelector('svg') || b, r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2, r.height]; };
+  const stSw = document.createElement('style'); stSw.textContent = '.sw-on .onglets button[aria-selected="true"] svg{filter:none!important;transition:none!important;color:var(--repos)}'; document.head.append(stSw);
+
+  /* ---- 1) glissé : sablier de lumière + poussière ---- */
+  let sw = null;
+  const swDessiner = p => { if (sw.dep) { sw.dep.firstChild.style.clipPath = `inset(${(p * 100).toFixed(1)}% 0 0 0)`; sw.arr.firstChild.style.clipPath = `inset(${((1 - p) * 100).toFixed(1)}% 0 0 0)`; sw.dep.style.opacity = sw.arr.style.opacity = Math.min(1, p * 6).toFixed(2); } };
+  const swFin = ok => {
+    if (!sw) return; const S0 = sw; sw = null; setTimeout(() => document.documentElement.classList.remove('sw-on'), ok ? 0 : 180);
+    [S0.dep, S0.arr].forEach(e => { if (!e) return; const a = e.animate([{ opacity: e.style.opacity }, { opacity: 0 }], { duration: ok ? 380 : 180, easing: 'ease-out', fill: 'both' }); a.onfinish = () => e.remove(); });
+    S0.pts.forEach(e => { const a = e.animate([{ opacity: 1 }, { opacity: 0 }], { duration: ok ? 320 : 200, easing: 'ease-out', fill: 'both' }); a.onfinish = () => e.remove(); });
+  };
+  document.addEventListener('touchstart', e => {
+    if (sw) swFin(false); document.querySelectorAll('body>canvas[style*="z-index:60"],body>div[style*="z-index:59"]').forEach(x => x.remove()); document.documentElement.classList.remove('sw-on');
+    if (reduit() || feuilleOuverte() || e.target.closest('input, select, textarea, dialog, .actions, .bande') || e.touches[0].clientX < 28 || e.touches[0].clientX > innerWidth - 28) { sw = null; return; }
+    sw = { gx: e.touches[0].clientX, gy: e.touches[0].clientY, pts: null, j: -1, p: 0 };
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (!sw) return; const dx = e.touches[0].clientX - sw.gx, dy = e.touches[0].clientY - sw.gy;
+    if (sw.pts && Math.abs(dy) > 45 && Math.abs(dy) > Math.abs(dx) * 1.2) { swFin(false); return; }   // le geste devient vertical (défilement) : l'effet s'annule, la page garde la main
+    if (!sw.pts) {
+      if (Math.abs(dx) < 14 || Math.abs(dx) < 2 * Math.abs(dy)) return;
+      const L = ongs(), i = L.findIndex(b => b.getAttribute('aria-selected') === 'true'), j = i + (dx < 0 ? 1 : -1); if (i < 0 || j < 0 || j >= L.length) { sw = null; return; }
+      [sw.x0, sw.y0] = centre(L[i]); [sw.x1, sw.y1] = centre(L[j]); sw.j = j;
+      const clone = b => { const sv = b.querySelector('svg'); if (!sv) return null; const r = sv.getBoundingClientRect(), w = document.createElement('div'); w.style.cssText = `position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;color:#eaf0ff;filter:drop-shadow(0 0 5px rgba(157,184,255,.95)) drop-shadow(0 0 12px rgba(157,184,255,.55));pointer-events:none;z-index:59;opacity:0`; const in_ = document.createElement('div'), cv = sv.cloneNode(true); cv.setAttribute('width', r.width); cv.setAttribute('height', r.height); in_.append(cv); w.append(in_); document.body.append(w); return w; };
+      sw.dep = clone(L[i]); sw.arr = clone(L[j]); document.documentElement.classList.add('sw-on');
+      const S1 = sw, H = 120, dpr = Math.min(2, devicePixelRatio || 1), ih = S1.dep ? S1.dep.getBoundingClientRect().height : 22, oy = Math.max(0, S1.y0 - 50);
+      const cv = document.createElement('canvas'); cv.width = innerWidth * dpr; cv.height = H * dpr; cv.style.cssText = `position:fixed;left:0;top:${oy}px;width:${innerWidth}px;height:${H}px;pointer-events:none;z-index:60;opacity:1`; document.body.append(cv);
+      const cx = cv.getContext('2d'); cx.scale(dpr, dpr); cx.globalCompositeOperation = 'lighter';
+      /* poussière : 170 points qui scintillent, restent près de l'icône quittée puis partent (u^1,8), au niveau où la lumière descend, et se posent au niveau du remplissage */
+      const nv = g => { g.t0 = performance.now() + R(0, 450); g.vie = R(800, 1500); g.sx = R(-ih * .45, ih * .45); g.ex = R(-ih * .4, ih * .4); g.c = R(-5, 5); g.f = R(.7, 1.4); g.k = R(.35, 1); g.dy = R(-.5, .5); g.dye = R(-.5, .5); };
+      const G = Array.from({ length: 170 }, () => { const g = {}; nv(g); return g; }); sw.pts = [cv];
+      const pos = (g, u, p) => { const m = Math.pow(u, 1.8), ys = S1.y0 - ih / 2 + p * ih + g.dy * ih * .5, ye = S1.y1 + ih / 2 - p * ih + g.dye * ih * .5; return [S1.x0 + g.sx + (S1.x1 + g.ex - S1.x0 - g.sx) * m, ys + (ye - ys) * m - oy + g.c * Math.sin(Math.PI * u)]; };
+      const boucle = now => { if (sw !== S1) return; const p = S1.p, fo = Math.min(1, p * 6); cx.clearRect(0, 0, innerWidth, H);
+        G.forEach(g => { const u = (now - g.t0) / g.vie; if (u < 0) return; if (u >= 1) { nv(g); return; }
+          const al = Math.sin(Math.PI * Math.pow(u, .75)) * g.k * fo, [x, y] = pos(g, u, p), tw = .6 + .4 * Math.sin(now / 90 + g.sx * 3);
+          cx.fillStyle = `rgba(225,236,255,${(al * tw).toFixed(2)})`; cx.beginPath(); cx.arc(x, y, g.f * .5, 0, 6.3); cx.fill(); });
+        requestAnimationFrame(boucle); };
+      requestAnimationFrame(boucle);
+    }
+    if ((dx < 0 ? 1 : -1) !== (sw.j > ongs().findIndex(b => b.getAttribute('aria-selected') === 'true') ? 1 : -1)) return;
+    sw.p = Math.min(1, Math.abs(dx) / (innerWidth * .2)); swDessiner(sw.p);
+  }, { passive: true });
+  document.addEventListener('touchend', () => { if (sw && sw.pts) swFin(sw.p >= .98); else sw = null; }, { passive: true });
+  document.addEventListener('touchcancel', () => { if (sw && sw.pts) swFin(false); else sw = null; }, { passive: true });
+
+  /* ---- 2) souffle ---- */
+  let souffleCv = null, dernierSouffle = 0, dernierToucher = 0, scrollDebut = 0, attenteArret = false, yPrev = 0, tPrev = 0, vLis = 9, doigtLeve = false;
+  const souffle = (retard = 450) => {
+    dernierSouffle = Date.now(); if (reduit()) return;
+    const L = ongs(), i = L.findIndex(b => b.getAttribute('aria-selected') === 'true'); if (i < 0) return;
+    const cibles = []; if (i < L.length - 1) cibles.push(i + 1); if (i > 0) cibles.push(i - 1);   // 1er onglet : à droite ; dernier : à gauche ; milieu : les deux, l'un après l'autre
+    setTimeout(() => {
+      if (souffleCv) souffleCv.remove(); if (L.findIndex(b => b.getAttribute('aria-selected') === 'true') !== i) return;
+      const [x0, y0, ih] = centre(L[i]), H = 90, oy = Math.max(0, y0 - 45), dpr = Math.min(2, devicePixelRatio || 1);
+      const cv = document.createElement('canvas'); cv.width = innerWidth * dpr; cv.height = H * dpr; cv.style.cssText = `position:fixed;left:0;top:${oy}px;width:${innerWidth}px;height:${H}px;pointer-events:none;z-index:60`; document.body.append(cv); souffleCv = cv;
+      const cx = cv.getContext('2d'); cx.scale(dpr, dpr); cx.globalCompositeOperation = 'lighter';
+      const T0 = performance.now(), PAS = 1100, G = [];
+      cibles.forEach((j, n) => { const [x1, y1] = centre(L[j]); for (let k = 0; k < 20; k++) G.push({ x1, y1, d: n * PAS + R(0, 250), vie: R(1000, 1600), sx: R(-ih * .4, ih * .4), ex: R(-ih * .35, ih * .35), dy: R(-ih * .35, ih * .35), dye: R(-ih * .35, ih * .35), wob: R(-4, 4), ph: R(0, 6.3), f: R(.7, 1.3), k: R(.4, 1) }); });
+      const fin = T0 + (cibles.length - 1) * PAS + 250 + 1600;
+      const boucle = now => { if (souffleCv !== cv) return; cx.clearRect(0, 0, innerWidth, H);
+        G.forEach(g => { const u = (now - T0 - g.d) / g.vie; if (u <= 0 || u >= 1) return; const m = Math.pow(u, 1.8),
+          x = x0 + g.sx + (g.x1 + g.ex - x0 - g.sx) * m, y = y0 + g.dy + (g.y1 + g.dye - y0 - g.dy) * m - oy + Math.sin(u * 3 + g.ph) * g.wob * Math.sin(Math.PI * u),
+          al = Math.sin(Math.PI * Math.pow(u, .8)) * g.k * .32 * (.65 + .35 * Math.sin(now / 110 + g.ph * 4));   // 32 % d'opacité au plus : capte l'œil sans déranger
+          cx.fillStyle = `rgba(225,236,255,${al.toFixed(3)})`; cx.beginPath(); cx.arc(x, y, g.f * .6, 0, 6.3); cx.fill(); });
+        if (now > fin) { cv.remove(); souffleCv = null; return; } requestAnimationFrame(boucle); };
+      requestAnimationFrame(boucle);
+    }, retard);
+  };
+  const lancerQuandLibre = () => { let essais = 0; const iv = setInterval(() => { if (document.hidden || (Date.now() - dernierToucher < 400 && !doigtLeve) || ++essais > 16) { clearInterval(iv); return; } if (!souffleCv) { clearInterval(iv); souffle(0); } }, 200); };
+  document.addEventListener('touchstart', () => { dernierToucher = Date.now(); scrollDebut = scrollY; doigtLeve = false; vLis = 9; if (souffleCv) { souffleCv.remove(); souffleCv = null; } }, { passive: true });
+  /* lever du doigt après un défilement vertical (> 40 px) : 1er souffle tout de suite, pendant que la liste glisse encore par inertie */
+  const finToucher = () => { dernierToucher = Date.now(); doigtLeve = true; vLis = 9; yPrev = scrollY; tPrev = performance.now();
+    setTimeout(() => { try { if (Math.abs(scrollY - scrollDebut) > 40 && !document.hidden && !souffleCv && Date.now() - dernierSouffle > 1200 && !feuilleOuverte()) { attenteArret = true; souffle(0); } } catch (e) { /* tant pis */ } }, 120); };
+  document.addEventListener('touchend', finToucher, { passive: true }); document.addEventListener('touchcancel', finToucher, { passive: true });
+  /* 2e souffle calé sur le ralentissement : vitesse de défilement (px/ms) sous 0,6 = la liste ralentit, le regard se libère ; l'arrêt complet reste un filet de sécurité */
+  addEventListener('scroll', () => { const t = performance.now(), y = scrollY, dt = t - tPrev; if (dt > 0 && tPrev) vLis = vLis * .5 + (Math.abs(y - yPrev) / dt) * .5; yPrev = y; tPrev = t;
+    if (attenteArret && doigtLeve && vLis < .6 && !feuilleOuverte()) { attenteArret = false; lancerQuandLibre(); } }, { passive: true });
+  let tDef = 0; addEventListener('scroll', () => { clearTimeout(tDef); tDef = setTimeout(() => { try {
+    if (document.hidden || feuilleOuverte()) { attenteArret = false; return; }
+    if (attenteArret) { attenteArret = false; lancerQuandLibre(); return; }
+    if (!souffleCv && Date.now() - dernierSouffle > 6000) souffle(0); } catch (e) { /* tant pis */ } }, 350); }, { passive: true });
+  /* repos : toutes les 8 s (pas pendant un toucher ni 2,5 s après, ni fiche ouverte, ni page cachée) */
+  setInterval(() => { try { if (document.hidden || souffleCv || Date.now() - dernierToucher < 2500 || feuilleOuverte()) return; souffle(); } catch (e) { /* tant pis */ } }, 8000);
+  addEventListener('DOMContentLoaded', () => {
+    const o = document.querySelector('.onglets'); if (!o) return;
+    const fe = document.getElementById('feuille');   // fermeture d'une fiche : le regard remonte vers le menu
+    if (fe) { let ouv = fe.open; new MutationObserver(() => { const n = fe.open; if (ouv && !n) setTimeout(() => { try { if (!document.hidden) souffle(0); } catch (e) { /* tant pis */ } }, 120); ouv = n; }).observe(fe, { attributes: true, attributeFilter: ['open'] }); }
+    new MutationObserver(() => { try { souffle(); } catch (e) { /* tant pis */ } setTimeout(() => { try { if (!souffleCv && Date.now() - dernierToucher > 1500) souffle(); } catch (e) { /* tant pis */ } }, 3700); }).observe(o, { subtree: true, attributes: true, attributeFilter: ['aria-selected'] });   // arrivée sur un onglet : 2 passes
+  });
+} catch (e) { /* tant pis */ }
+/* v0.75 : le glissé « retour » de Safari (bord gauche) ne quitte plus le Cinéma : une entrée d'historique factice est remise après chaque retour ; s'il y a une fiche ouverte, le retour la ferme. Sortie : lien « Small Humans » en haut à gauche. */
+try { history.pushState({ cine: 1 }, ''); addEventListener('popstate', () => { try { if (typeof F !== 'undefined' && F.open) F.close(); } catch (e) { /* tant pis */ } history.pushState({ cine: 1 }, ''); }); } catch (e) { /* pas d'historique : on laisse faire Safari */ }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) verifierVersion(); });
 const IMG = 'https://image.tmdb.org/t/p/';
 const CLE = 'sh-cine-ajouts';
@@ -667,6 +787,7 @@ function rendre() {
   const p = $('#panneau'); p.textContent = '';
   const stats = S.vue === 'stats', base = S.vue === 'base', sorties = S.vue === 'sorties';
   const idees = S.vue === 'idees';
+  document.documentElement.classList.toggle('sf', stats || sorties || idees);   // v0.80 : pas de bouton filtre là où il n'y a rien à filtrer
   $('#outils').hidden = stats || sorties || idees; $('#compte').hidden = stats || sorties || idees; $('#rech').hidden = !base; $('#f-q-x').hidden = !S.q;
   ['vus', 'avoir', 'base', 'idees', 'sorties', 'stats'].forEach(v => { const b = $('#o-' + v); b.setAttribute('aria-selected', String(v === S.vue)); });
   const tout = fusion();
@@ -1017,7 +1138,7 @@ function carte(f0, retour) {
       h('button', { class: 'btn', type: 'button', on: { click: () => { sauve(); avis = false; dessiner(); } } }, 'Fermer l’avis'));
   };
   dessiner();
-  feuille(f.statut === 'vu' ? 'Vu' : 'Titre', corps);
+  feuille(f.statut === 'vu' ? 'Vu' : 'Fiche', corps);   // v0.82 : plus de titre générique « Titre »
   F.classList.add('plein');
 }
 
@@ -1332,8 +1453,16 @@ function ecran() {
 
 /* ---------- branchements ---------- */
 const ONGLETS = [...document.querySelectorAll('.onglets button')];
-function allerVue(v) { S.vue = v; S.montre = PAGE; S.annee = ''; S.genre = ''; S.gi = ''; S.per = ''; S.tri = 'date-desc'; S.q = ''; $('#f-q').value = ''; rendre(); }
-ONGLETS.forEach(b => b.addEventListener('click', () => allerVue(b.dataset.vue)));
+/* v0.81 : atterrissage commun (glissé ET toucher d'un onglet) : les onglets sont collés en haut, le contenu commence juste dessous, jamais caché derrière eux ni coupé */
+function atterrir() {
+  const tete = document.querySelector('.tete'), cadre = document.querySelector('.cadre'), on = document.querySelector('.onglets'); cadre.style.minHeight = '';
+  const y = Math.round(tete.getBoundingClientRect().bottom + scrollY + (parseFloat(getComputedStyle(on).marginTop) || 0));   // position naturelle des onglets dans la page = ils se collent exactement en haut
+  cadre.style.minHeight = (y + innerHeight) + 'px';   // liste courte ou pas encore chargée : la page doit être assez haute pour atterrir (le corps a lui-même une hauteur mini)
+  scrollTo({ top: y });
+}
+function allerVue(v) { S.vue = v; S.montre = PAGE; S.type = ''; document.querySelectorAll('.puces[aria-label="Type"] .puce').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0))); const fa = document.querySelector('#essai-d'); if (fa) fa.classList.remove('fa');   /* v0.82 : le type se remet à zéro comme l'année et le genre */
+  S.annee = ''; S.genre = ''; S.gi = ''; S.per = ''; S.tri = 'date-desc'; S.q = ''; $('#f-q').value = ''; rendre(); }
+ONGLETS.forEach(b => b.addEventListener('click', () => { const change = b.dataset.vue !== S.vue; allerVue(b.dataset.vue); if (change) atterrir(); }));
 /* changement d'onglet fluide : la liste glisse hors de l'écran, la nouvelle arrive du côté opposé, et on atterrit onglets collés en haut, filtres dessous */
 let enCours = false;
 function glisserVers(j, sens, dep) {
@@ -1345,10 +1474,7 @@ function glisserVers(j, sens, dep) {
   const anim = (de, vers, ms, o0) => reduit ? Promise.resolve() : Promise.race([Promise.all(zone.map(e => e.animate([{ transform: `translateX(${de}px)`, opacity: o0 != null ? o0 : de ? 0 : 1 }, { transform: `translateX(${vers}px)`, opacity: vers ? 0 : 1 }], { duration: ms, easing: 'cubic-bezier(.2,.7,.2,1)', fill: vers ? 'both' : 'backwards' }).finished)), new Promise(r => setTimeout(r, ms + 250))]);
   anim(dep || 0, -sens * Math.max(36, Math.abs(dep || 0) + 28), dep ? 90 : 110, dep ? 1 - Math.min(.55, Math.abs(dep) / 320) : 1).then(() => {
     allerVue(ONGLETS[j].dataset.vue); tous.forEach(e => e && e.getAnimations().forEach(a => a.cancel())); zone = visibles();
-    const tete = document.querySelector('.tete'), cadre = document.querySelector('.cadre'); cadre.style.minHeight = '';
-    const y = tete.getBoundingClientRect().bottom + scrollY + 28;
-    cadre.style.minHeight = (y + innerHeight) + 'px';   // liste courte ou pas encore chargée : la page doit être assez haute pour atterrir sous l'en-tête (le corps a lui-même une hauteur mini, donc on ne compte pas sur scrollHeight)
-    scrollTo({ top: y });   // on atterrit toujours sur les onglets collés en haut, filtres juste dessous (jamais sur « Small Humans » / titre)
+    atterrir();   // v0.81 : même atterrissage que le toucher d'un onglet
     return anim(sens * 36, 0, 170).then(() => tous.forEach(e => e && e.getAnimations().forEach(a => a.cancel())));   // plus de transformation résiduelle sur la liste
   }).catch(e => console.error('glisser', e)).finally(() => { enCours = false; });
 }
@@ -1361,16 +1487,16 @@ const zoneGlisse = () => ['#outils', '#compte', '#panneau'].map(q => $(q)).filte
 const posGlisse = dx => { const z = zoneGlisse(), t = `translateX(${dx.toFixed(1)}px)`, o = 1 - Math.min(.55, Math.abs(dx) / 320); z.forEach(e => { e.style.transform = t; e.style.opacity = o; }); };
 const finGlisse = () => zoneGlisse().forEach(e => { e.style.transform = ''; e.style.opacity = ''; });
 document.addEventListener('touchstart', e => {
-  gok = !F.open && !e.target.closest('input, select, textarea, dialog, .actions'); gx = e.touches[0].clientX; gy = e.touches[0].clientY; gt = Date.now(); gmode = ''; gdx = 0;
+  gok = !F.open && !e.target.closest('input, select, textarea, dialog, .actions') && e.touches[0].clientX > 28 && e.touches[0].clientX < innerWidth - 28; gx = e.touches[0].clientX; gy = e.touches[0].clientY; gt = Date.now(); gmode = ''; gdx = 0;
   const b = gok && e.target.closest('.bande');
   gbande = b ? { debut: b.scrollLeft <= 1, fin: b.scrollLeft + b.clientWidth >= b.scrollWidth - 2 } : null;
 }, { passive: true });
 document.addEventListener('touchmove', e => {
-  if (!gok || enCours || reduit) return;
+  if (!gok || enCours || reduit || !/[?&]suivi/.test(location.search)) return;   // v0.77 : la liste ne suit PLUS le doigt par défaut (le déplacement de la page déclenchait le retour arrière de Safari, test de Simon 2026-11-17) ; ?suivi = ancien comportement pour essais
   const dx = e.touches[0].clientX - gx, dy = e.touches[0].clientY - gy;
   if (!gmode) {
-    if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
-    gmode = Math.abs(dx) > 1.5 * Math.abs(dy) && !(gbande && !(dx > 0 ? gbande.debut : gbande.fin)) ? 'h' : 'v';
+    if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return;
+    gmode = Math.abs(dx) > 2 * Math.abs(dy) && !(gbande && !(dx > 0 ? gbande.debut : gbande.fin)) ? 'h' : 'v';
   }
   if (gmode !== 'h') return;
   const i = ONGLETS.findIndex(b => b.dataset.vue === S.vue), j = i + (dx < 0 ? 1 : -1), bout = j < 0 || j >= ONGLETS.length;
@@ -1382,7 +1508,7 @@ document.addEventListener('touchend', e => {
   if (!gok) { if (suivait) finGlisse(); return; } gok = false;
   const dx = e.changedTouches[0].clientX - gx, dy = e.changedTouches[0].clientY - gy, ax = Math.abs(dx), v = ax / Math.max(1, Date.now() - gt);
   const i = ONGLETS.findIndex(b => b.dataset.vue === S.vue), j = i + (dx < 0 ? 1 : -1);
-  const ok = ((ax > innerWidth * .1 || (ax > 25 && v > .3)) && ax > 1.5 * Math.abs(dy)) && !(gbande && !(dx > 0 ? gbande.debut : gbande.fin)) && j >= 0 && j < ONGLETS.length;
+  const ok = ((ax > innerWidth * .2 || (ax > 50 && v > .4)) && ax > 2 * Math.abs(dy)) && !(gbande && !(dx > 0 ? gbande.debut : gbande.fin)) && j >= 0 && j < ONGLETS.length;
   if (ok) { finGlisse(); glisserVers(j, dx < 0 ? 1 : -1, dep); return; }
   if (suivait && dep) { const z = zoneGlisse(); finGlisse(); z.forEach(el => el.animate([{ transform: `translateX(${dep}px)`, opacity: 1 - Math.min(.55, Math.abs(dep) / 320) }, { transform: 'none', opacity: 1 }], { duration: 140, easing: 'ease-out' })); }
   else finGlisse();
@@ -1437,6 +1563,6 @@ $('#b-copie').addEventListener('click', envoyer);
   const s = document.querySelector('#o-avoir svg'); if (s) s.innerHTML = '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>';
 })();
 </script>
-<script src="filtres.js"></script>
+<script src="filtres.js?v=0.128"></script>
 </body>
 </html>
