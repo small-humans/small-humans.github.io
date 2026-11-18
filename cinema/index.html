@@ -153,7 +153,7 @@ h1{font-size:var(--t-head);font-weight:300;letter-spacing:var(--suivi);text-tran
 .actions #b-haut[hidden]{display:none}
 .actions #b-copie{position:relative;width:52px;padding:0;display:inline-flex;align-items:center;justify-content:center}
 .actions #b-copie[hidden]{display:none}
-.actions #b-copie .nb{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:600;line-height:20px;text-align:center}
+.actions #b-copie .nb{position:absolute;top:-4px;right:-4px;box-sizing:border-box;min-width:20px;height:20px;padding:1px 5px 0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:600;line-height:19px;text-align:center;font-variant-numeric:lining-nums tabular-nums}   /* v0.142 : Raleway a des chiffres à l'ancienne (3 et 7 descendent) : chiffres alignés, donc centrés */
 .version{position:fixed;right:var(--marge);top:0;height:var(--barre);display:flex;align-items:center;z-index:11;font-size:13px;color:var(--acier);pointer-events:none;margin:0}
 .pied{margin-top:56px;color:var(--acier);font-size:var(--t-small)}
 .toast{position:fixed;left:var(--marge);right:var(--marge);bottom:calc(var(--actions) + 20px + env(safe-area-inset-bottom));z-index:30;background:var(--ink);color:var(--accent-ink);padding:12px 20px;border-radius:999px;text-align:center;max-width:520px;margin:0 auto;transform:translateY(90px) scale(.92);opacity:0;pointer-events:none;transition:opacity .18s ease-in,transform .22s cubic-bezier(.4,0,1,1)}
@@ -527,6 +527,82 @@ details.syn summary{min-height:44px}
   @media (max-height:860px){main.cadre .onglets{top:80px}main.cadre .onglets button{height:40px!important;min-height:40px!important}html #outils{top:330px;max-height:calc(100vh - 346px);padding-top:12px!important;gap:8px}html #outils .puces[aria-label="Type"] .puce{height:36px;min-height:36px}}
   .ebas,.sc.up .ebas{display:none!important}
 }
+
+/* v0.132 DA Cinéma (choix de Simon, 2026-11-18) : Ajouter, carte « Je l’ai vu » / « À voir », avis : style « calme » : traits fins, affiche entière, boutons en contour, gris au repos / blanc en actif */
+
+html dialog .f-tete h2{font-weight:400;letter-spacing:.22em;font-size:15px;color:var(--acier)}
+html dialog .f-tete>.btn{background:none;border:1px solid rgba(186,187,207,.32);border-radius:999px;color:var(--acier);min-height:40px;padding:0 16px;font-size:15px;font-weight:500}
+/* Ajouter : recherche en trait fin, résultats en lignes */
+html dialog.haute .champ>label{font-size:13px;color:var(--repos)}
+html dialog .champ input,html dialog .champ textarea,html dialog .champ select{background:none;box-shadow:inset 0 -1px 0 rgba(186,187,207,.32);padding:10px 0;font-size:18px;min-height:52px}
+html dialog .champ input:focus,html dialog .champ textarea:focus{outline:0;box-shadow:inset 0 -2px 0 var(--actif)}
+html .resultats{gap:0}
+html .resultats li+li button{border-top:1px solid rgba(186,187,207,.16)}
+html .resultats button{background:none;padding:12px 0;grid-template-columns:56px minmax(0,1fr);gap:16px;min-height:92px}
+html .resultats .aff{width:56px;padding:0;border-radius:4px;overflow:hidden}
+html .resultats b{font-size:17px;font-weight:600;color:var(--ink);white-space:normal;line-height:1.25}
+html .resultats span{font-size:14px;color:var(--repos)}
+html dialog.haute .feuille>.btn{background:none;border:1px solid rgba(186,187,207,.32);border-radius:999px;color:var(--acier);min-height:52px;font-size:16px;font-weight:500}
+/* carte : affiche entière centrée, titre sobre centré, actions en contour */
+html .carte .c-aff{height:250px;background-size:contain;background-position:center;background-repeat:no-repeat;background-color:transparent}
+html .carte .c-aff.typo{background:var(--nuit)}
+html .carte .c-info{text-align:center}
+html .carte .c-info h3{font-size:22px;font-weight:600;letter-spacing:.01em;text-transform:none;line-height:1.2}
+html .carte .c-info p{font-size:14px;color:var(--repos);margin-top:6px}
+html .carte .btn.fort{background:none;border:1px solid var(--accent);color:var(--accent);border-radius:999px;font-weight:500}
+html .carte .c-vu{min-height:56px;font-size:17px}
+html .carte .btn:not(.fort):not(.c-vu){background:none;border:1px solid rgba(186,187,207,.32);border-radius:999px;color:var(--acier);font-weight:500}
+html .carte .champ>.lib,html .carte .champ>label,html .carte .note-tete .lib{font-size:13px;color:var(--repos)}
+html .carte .choix{gap:0;border-top:1px solid rgba(186,187,207,.16);border-bottom:1px solid rgba(186,187,207,.16)}
+html .carte .choix button{background:none;color:var(--repos);font-weight:500;min-height:52px;box-shadow:none}
+html .carte .choix button+button{border-left:1px solid rgba(186,187,207,.16)}
+html .carte .choix button[aria-pressed="true"]{background:none;color:var(--actif);font-weight:700;box-shadow:inset 0 -2px 0 var(--actif)}
+html .carte .c-ok b{font-size:17px;font-weight:600}
+html .carte .c-ok .effacer,html .carte .c-ok button{color:var(--repos)}
+/* avis (commentaire) */
+html .c-avis{gap:0}
+html .c-avis>button{background:none;padding:14px 0;border-top:1px solid rgba(186,187,207,.16)}
+html .c-avis .qui{font-size:13px;color:var(--repos)}
+html .c-avis .txt{font-size:17px;line-height:1.45}
+html .c-confirme{background:none;border-top:1px solid rgba(186,187,207,.16);border-bottom:1px solid rgba(186,187,207,.16);padding:14px 0}
+html .ctab{font-size:15px;color:var(--repos)}
+html .ctab[aria-pressed="true"]{color:var(--actif);font-weight:700;border-bottom-color:var(--actif)}
+html .ctab.plein-c::after{background:var(--actif)}
+
+/* v0.132 : même style pour toutes les autres feuilles (Saisir à la main, Envoi des ajouts, Mes ajouts) */
+html dialog .feuille .btn.fort{background:none;border:1px solid var(--accent);color:var(--accent);border-radius:999px;font-weight:500}
+html dialog .feuille>.btn:not(.fort),html dialog .feuille .btn.neutre{background:none;border:1px solid rgba(186,187,207,.32);border-radius:999px;color:var(--acier);font-weight:500}
+html dialog .choix{gap:0;border-top:1px solid rgba(186,187,207,.16);border-bottom:1px solid rgba(186,187,207,.16)}
+html dialog .choix button{background:none;color:var(--repos);font-weight:500;min-height:52px;box-shadow:none}
+html dialog .choix button+button{border-left:1px solid rgba(186,187,207,.16)}
+html dialog .choix button[aria-pressed="true"]{background:none;color:var(--actif);font-weight:700;box-shadow:inset 0 -2px 0 var(--actif)}
+html dialog .champ>label,html dialog .champ>.lib{font-size:13px;color:var(--repos)}
+html dialog textarea.export{background:none;box-shadow:inset 0 0 0 1px rgba(186,187,207,.32);padding:12px}
+/* v0.133 : Idées, Stats, boutons ronds, « voir plus » au même style calme (traits fins, gris au repos, blanc en actif) */
+html .idee h2{font-size:16px;font-weight:400;color:var(--repos);letter-spacing:.01em}
+html .idee h2 span{color:var(--ink);font-weight:500}
+html .sug .ct{font-weight:500;color:var(--acier)}
+html .vu-deja span,html .ajoute span{background:rgba(5,8,15,.16);box-shadow:inset 0 0 0 1px rgba(255,255,255,.8),0 0 0 1px rgba(5,8,15,.3);color:#fff}
+html .vu-deja svg,html .ajoute svg{filter:drop-shadow(0 0 2px rgba(5,8,15,.9))}
+html .stats h2{font-size:15px;font-weight:400;letter-spacing:.22em;color:var(--acier)}
+html .chiffres b{font-weight:200}
+html .chiffres span{color:var(--repos)}
+html .barres li{min-height:36px;color:var(--acier)}
+html .barres .r{height:2px;background:rgba(186,187,207,.16)}
+html .barres .n{color:var(--repos)}
+html .mois-barres i{background:rgba(186,187,207,.22)}
+html .mois-barres .pic i{background:var(--accent)}
+html .mois-barres span{color:var(--repos)}
+html .frise{margin:6px 0 4px}
+html .top-notes{gap:0}
+html .top-notes li{background:none;padding:12px 0;border-top:1px solid rgba(186,187,207,.16)}
+html .plus{background:none;border:1px solid rgba(186,187,207,.32);color:var(--acier);border-radius:999px}
+html .actions #b-copie{background:var(--bg);border:1px solid rgba(111,168,255,.55);color:var(--accent)}
+html .actions #b-copie:active{background:rgba(111,168,255,.14)}
+html .actions .capsule #essai-d.prs,html .actions .capsule .btn:active{background:rgba(186,187,207,.14)!important;color:var(--actif)}
+/* v0.140 : Idées figé (6 genres + Plus…) */
+.genres-w{flex-wrap:wrap;overflow:visible;-webkit-mask-image:none;mask-image:none;margin-bottom:8px}
+.puce.voirplus{color:var(--acier)}
 </style>
 </head>
 <body>
@@ -583,10 +659,12 @@ details.syn summary{min-height:44px}
 <div class="toast" id="toast" role="status"></div>
 <dialog id="feuille" aria-labelledby="f-titre"></dialog>
 
+<script src="variantes.js?v=0.142"></script>
 <script>
 (() => {
 'use strict';
-const VERSION = '0.131 · 18 nov. 2026';
+const VERSION = '0.142 · 18 nov. 2026';
+document.documentElement.dataset.version = VERSION;   // v0.137 : lu par le bandeau « ^ » (variantes.js)
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -938,11 +1016,17 @@ function rendreIdees(p, vus, tout) {
   if (S.baseErreur) { p.append(videReseau('Impossible de charger les idées : la connexion semble coupée.', relanceBase)); return; }
   const deja = new Set(tout.map(f => f.id)), jour = aujourdhui();
   const alea = f => [...(f.id + jour)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);   // ordre stable dans la journée
-  const compte = {}; vus.forEach(f => (f.genres || []).forEach(g => { compte[g] = (compte[g] || 0) + 1; }));
+  /* v0.140 : score de goût par genre = somme sur les titres vus de (poids de la note x poids de la fraîcheur) ; note absente = 1, 3 étoiles = 1, 5 étoiles = 3, 1-2 étoiles = 0,5 ; un titre vu il y a 12 mois pèse 3/4, il y a 3 ans 5/8 */
+  const compte = {}, maint = Date.now();
+  vus.forEach(f => {
+    const note = f.note ? Math.max(0.5, f.note - 2) : 1, d = Date.parse(f.date_vu || ''), mois = isNaN(d) ? 0 : Math.max(0, (maint - d) / 2.63e9);
+    const poids = note * (0.5 + 0.5 / (1 + mois / 12));
+    (f.genres || []).forEach(g => { compte[g] = (compte[g] || 0) + poids; });
+  });
   const aimes = Object.keys(compte).sort((a, b) => compte[b] - compte[a] || a.localeCompare(b, 'fr'));
   const pool = S.base.map(x => x.f).filter(f => !deja.has(f.id) && f.affiche);
   const filtre = f => !S.gi || (f.genres || []).includes(S.gi);
-  const utilises = new Set(), bandes = [];
+  const utilises = new Set(); let bandes = [];
   const ajouter = (titre, sous, l, n) => { l = l.filter(f => !utilises.has(f.id)).slice(0, n || 16); if (l.length) { l.forEach(f => utilises.add(f.id)); bandes.push([titre, sous, l]); } };
   const parAlea = l => l.sort((a, b) => alea(a) - alea(b));
   /* 1. le genre le plus vu (ou le genre choisi) */
@@ -964,9 +1048,13 @@ function rendreIdees(p, vus, tout) {
   ajouter('Sorties de la semaine ', 'qui te ressemblent', S.catalogue.filter(f => f.sortie >= iso(lundi) && f.sortie <= iso(dim) && !deja.has(f.id) && f.affiche && filtre(f) && sc4(f) > 0).sort((a, b) => sc4(b) - sc4(a) || a.sortie.localeCompare(b.sortie)));
   /* pastilles de genres : d'abord ceux que tu vois le plus */
   const tous = [...new Set(pool.flatMap(f => f.genres || []))].sort((a, b) => (compte[b] || 0) - (compte[a] || 0) || a.localeCompare(b, 'fr')).slice(0, 14);
-  const rang = h('div', { class: 'genres-i bande', role: 'group', 'aria-label': 'Genre' });
-  ['', ...tous].forEach(g => rang.append(h('button', { class: 'puce', type: 'button', 'aria-pressed': String(g === S.gi), on: { click: () => { S.gi = g === S.gi ? '' : g; rendre(); } } }, g || 'Tout')));
-  p.append(rang);
+  /* v0.140 : Idées figé sur « 6 genres + Plus… » (choix de Simon) */
+  const puceG = g => h('button', { class: 'puce', type: 'button', 'aria-pressed': String(g === S.gi), on: { click: () => { S.gi = g === S.gi ? '' : g; S.gOuv = false; rendre(); } } }, g || 'Tout');
+  {
+    const six = tous.slice(0, 6); if (S.gi && !six.includes(S.gi) && tous.includes(S.gi)) six.push(S.gi);
+    const liste = S.gPlus ? tous : six;
+    p.append(h('div', { class: 'genres-i genres-w', role: 'group', 'aria-label': 'Genre' }, ...['', ...liste].map(puceG), tous.length > six.length ? h('button', { class: 'puce voirplus', type: 'button', on: { click: () => { S.gPlus = !S.gPlus; rendre(); } } }, S.gPlus ? 'Moins' : 'Plus…') : null));
+  }
   if (!bandes.length) { p.append(h('p', { class: 'vide' }, S.gi ? `Rien de nouveau dans le genre « ${S.gi.toLowerCase()} ». Touche-le encore pour revenir à « Tout ».` : 'Pas encore d’idées : note quelques films vus (4 étoiles ou plus), les idées viennent de tes goûts.')); return; }
   bandes.forEach(([t, s, l]) => {
     const bande = h('div', { class: 'bande' });
@@ -1019,18 +1107,22 @@ function majMenus(tout) {
   $('#f-annee').hidden = !vu; $('#f-tri').hidden = !vu; $('#f-annee').setAttribute('aria-label', 'Année de visionnage');
   const t = $('#f-tri'); t.textContent = ''; TRIS.vus.forEach(([v, x]) => t.append(h('option', { value: v }, x))); t.value = S.tri;
 }
-function rendreStats(p, vus, heures) {
+function rendreStats(p, tous, heures0) {
+  /* v0.135 : la rangée de périodes reste courte quelle que soit l'ancienneté du journal : Global, les 3 dernières années, puis « Avant » (tout le reste, regroupé par décennie) */
+  const dispo = [...new Set(tous.map(f => (f.date_vu || '').slice(0, 4)).filter(a => /^\d{4}$/.test(a)))].sort().reverse();   // années où quelque chose a été vu
+  const recent = dispo.slice(0, 3), avant = dispo.length > 3 ? recent[recent.length - 1] : null;
+  if (S.statAnnee !== '' && !recent.includes(S.statAnnee) && !(S.statAnnee === 'avant' && avant)) S.statAnnee = '';
+  const vus = S.statAnnee === 'avant' ? tous.filter(f => (f.date_vu || '').slice(0, 4) < avant) : tous;
+  const heures = S.statAnnee === 'avant' ? Math.round(vus.filter(f => f.type === 'film').reduce((t, f) => t + (f.duree_min || 0), 0) / 60) : heures0;
   const n = t => vus.filter(f => f.type === t).length;
   const par = (cle, lim) => { const m = {}; vus.forEach(f => cle(f).forEach(k => { m[k] = (m[k] || 0) + 1; })); return Object.entries(m); };
   const barres = (entrees, cls) => {
     const max = Math.max(1, ...entrees.map(e => e[1]));
     return h('ul', { class: 'barres ' + (cls || '') }, entrees.map(([k, v]) => h('li', null, h('span', null, k), h('span', { class: 'r' }, h('i', { style: `width:${v / max * 100}%` })), h('span', { class: 'n' }, v))));
   };
-  const dispo = [...new Set(vus.map(f => (f.date_vu || '').slice(0, 4)).filter(a => /^\d{4}$/.test(a)))].sort().reverse();   // années où quelque chose a été vu
-  if (!dispo.includes(S.statAnnee)) S.statAnnee = '';
   $('#compte').textContent = '';
-  p.append(h('div', { class: 'puces an-puces', role: 'group', 'aria-label': 'Période' }, ['', ...dispo].map(a => h('button', { class: 'puce', type: 'button', 'aria-pressed': String(a === S.statAnnee), on: { click: () => { S.statAnnee = a; rendre(); } } }, a || 'Global'))));
-  if (S.statAnnee) {
+  p.append(h('div', { class: 'puces an-puces', role: 'group', 'aria-label': 'Période' }, ['', ...recent, ...(avant ? ['avant'] : [])].map(a => h('button', { class: 'puce', type: 'button', 'aria-pressed': String(a === S.statAnnee), on: { click: () => { S.statAnnee = a; rendre(); } } }, a === 'avant' ? 'Avant ' + avant : a || 'Global'))));
+  if (S.statAnnee && S.statAnnee !== 'avant') {
     /* récap d'une année : total, rythme par mois, genres, meilleures notes */
     const an = S.statAnnee, va = vus.filter(f => (f.date_vu || '').startsWith(an));
     const hf = Math.round(va.filter(f => f.type === 'film').reduce((t, f) => t + (f.duree_min || 0), 0) / 60);
@@ -1049,9 +1141,13 @@ function rendreStats(p, vus, heures) {
       h('div', null, h('h2', null, 'Mieux notés'), notesA.length ? h('ul', { class: 'top-notes' }, notesA.slice(0, 5).map(f => h('li', null, h('span', null, f.titre), h('b', null, `${fmtNote(String(f.note))} / 5`)))) : h('p', { class: 'compte' }, 'Aucune note cette année.'))));
     return;
   }
-  const ans = par(f => [(f.date_vu || '').slice(0, 4)].filter(Boolean)).sort((a, b) => b[0].localeCompare(a[0]));
+  /* par année pour les 3 dernières, par décennie pour le reste (la liste ne grandit plus avec les années) */
+  const ans = par(f => { const y = (f.date_vu || '').slice(0, 4); return !y ? [] : (S.statAnnee !== 'avant' && recent.includes(y)) ? [y] : [Math.floor(+y / 10) * 10 + 's']; }).sort((a, b) => b[0].localeCompare(a[0]));
   const gens = par(f => f.genres || []).sort((a, b) => b[1] - a[1]).slice(0, 8);
   const notes = vus.filter(f => f.note);
+  /* v0.140 : Stats figé sur « récent + décennies » (choix de Simon) */
+  const variante = h('div', null, h('h2', null, S.statAnnee === 'avant' ? 'Par décennie' : 'Par année'), barres(ans));
+
   const moy = notes.length ? fmtNote((notes.reduce((s, f) => s + f.note, 0) / notes.length).toFixed(1)) : '—';
   p.append(h('div', { class: 'stats' },
     h('div', { class: 'chiffres' },
@@ -1059,7 +1155,7 @@ function rendreStats(p, vus, heures) {
       h('p', null, h('b', null, n('serie')), h('span', null, 'séries')),
       h('p', null, h('b', null, n('anime')), h('span', null, 'anime')),
       h('p', null, h('b', null, heures + ' h'), h('span', null, 'de films vus'))),
-    h('div', null, h('h2', null, 'Par année'), barres(ans)),
+    variante,
     h('div', null, h('h2', null, 'Genres les plus vus'), barres(gens, 'genres'), notes.length ? h('p', { class: 'compte' }, `Note moyenne : ${moy} sur 5 (${notes.length} notés)`) : h('p', { class: 'compte' }, 'Aucune note pour l’instant.'))));
 }
 
@@ -1593,10 +1689,11 @@ addEventListener('scroll', () => { $('#b-haut').hidden = scrollY < 400; document
 $('#b-copie').addEventListener('click', envoyer);
 
 (async () => {
+  let pret = false;   // v0.137 : bandeau « ^ » (réseau local seulement) ; re-dessine Stats quand on change d'option
   lire(); await chargerJournal(); nettoyer(); majBoutons();
   $('#version').textContent = `v${VERSION}` + (S.exemple ? ' · exemple' : '');
   $('#pied').textContent = stockageOk ? '' : 'Ce navigateur ne garde pas mes ajouts : pense à les copier.';
-  ecran(); rendre();
+  ecran(); rendre(); pret = true;
 })();
 })();
 </script>
@@ -1627,6 +1724,6 @@ $('#b-copie').addEventListener('click', envoyer);
   const s = document.querySelector('#o-avoir svg'); if (s) s.innerHTML = '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>';
 })();
 </script>
-<script src="filtres.js?v=0.131"></script>
+<script src="filtres.js?v=0.142"></script>
 </body>
 </html>
