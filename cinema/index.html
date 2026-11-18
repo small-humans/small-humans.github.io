@@ -508,6 +508,22 @@ details.syn summary{min-height:44px}
   dialog.plein .rd-lect{padding:8px 0 8px;gap:28px}
   dialog.plein .c-stars{width:320px}
   dialog.plein .f-tete h2.t-film .tb b{font-size:20px}
+
+  /* menu et filtres en colonne latérale fixe à gauche (onglets, puis type / année / genre / tri) ; plus d'arc ni de bouton filtres */
+  main.cadre{padding-left:268px}
+  main.cadre .onglets{position:fixed;left:var(--gx);top:96px;width:220px;margin:0;padding:0;display:flex;flex-direction:column;background:none;z-index:15}
+  main.cadre .onglets button{flex-direction:row;justify-content:flex-start;gap:14px;width:100%;height:46px!important;min-height:46px!important;padding:0 10px;font-size:16px;overflow:visible}
+  main.cadre .onglets button span,main.cadre .onglets button svg{opacity:1!important}
+  main.cadre .onglets i{width:28px;height:28px}
+  html #outils{display:flex!important;flex-direction:column;align-items:stretch;justify-content:flex-start;position:fixed!important;left:var(--gx)!important;right:auto!important;bottom:auto!important;top:394px;width:220px;max-height:calc(100vh - 394px - 20px);overflow-y:auto;scrollbar-width:thin;background:none!important;border:0!important;border-top:1px solid rgba(186,187,207,.14)!important;box-shadow:none!important;border-radius:0!important;padding:18px 0 0!important;gap:14px;z-index:14}
+  html #outils[hidden]{display:none!important}
+  html #outils .puces[aria-label="Type"]{display:flex!important;flex-direction:column;align-items:stretch;gap:0}
+  html #outils .puces[aria-label="Type"] .puce{width:100%;flex-direction:row;justify-content:flex-start;gap:14px;height:42px;min-height:42px;padding:0 10px;font-size:15px}
+  html #outils .menus{display:flex;flex-direction:column;gap:6px}
+  html #outils select,html #outils .recherche{width:100%;font-size:15px}
+  #essai-d,#essai-f{display:none!important}
+  @media (max-height:860px){main.cadre .onglets{top:80px}main.cadre .onglets button{height:40px!important;min-height:40px!important}html #outils{top:330px;max-height:calc(100vh - 346px);padding-top:12px!important;gap:8px}html #outils .puces[aria-label="Type"] .puce{height:36px;min-height:36px}}
+  .ebas,.sc.up .ebas{display:none!important}
 }
 </style>
 </head>
@@ -568,7 +584,7 @@ details.syn summary{min-height:44px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.129 · 18 nov. 2026';
+const VERSION = '0.130 · 18 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -1609,6 +1625,6 @@ $('#b-copie').addEventListener('click', envoyer);
   const s = document.querySelector('#o-avoir svg'); if (s) s.innerHTML = '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>';
 })();
 </script>
-<script src="filtres.js?v=0.129"></script>
+<script src="filtres.js?v=0.130"></script>
 </body>
 </html>
