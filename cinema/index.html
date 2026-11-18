@@ -463,6 +463,8 @@ dialog.rd-ferme .feuille{padding-top:0;grid-template-rows:minmax(0,1fr)}
 .grille .jour{text-transform:none}
 .grille .jour::first-letter{text-transform:uppercase}
 details.syn summary{min-height:44px}
+/* v0.131 : l'aperçu replié de la fiche n'affiche plus le début du synopsis (rempli le vide en v0.66, retiré à la demande de Simon le 2026-11-18 : étoiles collées à l'affiche sur iPhone) ; le synopsis complet reste dans la fiche dépliée */
+.rd-resume{display:none!important}
 
 /* v0.129 DA Cinéma : portage ORDINATEUR (souris, écran large ≥ 1100 px). Rien ne change sur téléphone ni sur tablette.
    Principes : colonne large alignée sur un même bord (titre, onglets, liste, capsule), affiches plus grandes, rien de permanent qui ne serve qu'au pouce
@@ -584,7 +586,7 @@ details.syn summary{min-height:44px}
 <script>
 (() => {
 'use strict';
-const VERSION = '0.130 · 18 nov. 2026';
+const VERSION = '0.131 · 18 nov. 2026';
 /* mise à jour auto : le raccourci iPhone garde une vieille copie ; on compare avec la page en ligne et on recharge si la version a changé */
 function verifierVersion() {
   fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
@@ -1625,6 +1627,6 @@ $('#b-copie').addEventListener('click', envoyer);
   const s = document.querySelector('#o-avoir svg'); if (s) s.innerHTML = '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>';
 })();
 </script>
-<script src="filtres.js?v=0.130"></script>
+<script src="filtres.js?v=0.131"></script>
 </body>
 </html>
