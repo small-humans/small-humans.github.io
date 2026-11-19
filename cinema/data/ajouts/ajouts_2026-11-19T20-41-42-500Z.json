@@ -1,0 +1,28 @@
+{
+ "version": 1,
+ "titres": [
+  {
+   "id": "tmdb-movie-1193614",
+   "type": "film",
+   "titre": "Il faut brûler maman",
+   "annee": 2026,
+   "statut": "vu",
+   "date_vu": "2026-11-19",
+   "note": 5,
+   "commentaire": "Très bon films dupontel comme toujours !",
+   "commentaire_oriana": "Entre la vie et la mort, la comédie poétique et drôle mais tellement vraie de Dupontel laisse songeur. Qu’est ce que le bonheur ? Les relations frères et sœurs ? L’amour est il simple et rêveur malgré les peurs ? Un film qui fait rire commet pleurer. Il défini la vie. Un coup de cœur !",
+   "genres": [
+    "Comédie",
+    "Drame"
+   ],
+   "duree_min": 95,
+   "affiche": "/3KDbl3m07R9hsFgM04JetRSJWeR.jpg",
+   "tmdb": {
+    "id": 1193614,
+    "type": "movie"
+   },
+   "ajoute_le": "2026-11-11",
+   "maj": "2026-11-19"
+  }
+ ]
+}
