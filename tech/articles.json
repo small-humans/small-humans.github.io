@@ -1,5 +1,15 @@
 [
   {
+    "titre": "Ma méthode de travail avec Claude",
+    "date": "2026-11-22",
+    "sujets": [
+      "IA",
+      "Projets"
+    ],
+    "resume": "Le cycle d'un écran (brief chiffré, un parti pris, jugement sur téléphone), les mécanismes plutôt que les règles, et le socle commun, alimenté des deux côtés, qui s'améliore en boucle sans laisser passer de données.",
+    "lien": "methode-de-travail/"
+  },
+  {
     "titre": "Animations 3D : la méthode derrière les rendus",
     "date": "2026-10-31",
     "sujets": [
