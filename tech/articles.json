@@ -1,5 +1,15 @@
 [
   {
+    "titre": "Retirer en masse les réactions des anciens membres d'un Discord",
+    "date": "2026-11-22",
+    "sujets": [
+      "IA",
+      "Projets"
+    ],
+    "resume": "Un petit bot jetable et un script en simulation d'abord : créer le bot, ses droits minimaux, les identifiants, le script complet et les pièges.",
+    "lien": "nettoyer-reactions-discord/"
+  },
+  {
     "titre": "Ma méthode de travail avec Claude",
     "date": "2026-11-22",
     "sujets": [

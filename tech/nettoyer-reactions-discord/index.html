@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nettoyer les réactions Discord – Small Humans</title>
+<style>
+@font-face{font-family:Raleway;src:url(../../cinema/Raleway.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{color-scheme:dark}
+body{margin:0;background:#0b1020;color:#dfe6f7;font:16px/1.55 Raleway,system-ui,sans-serif}
+main{max-width:40rem;margin:0 auto;padding:28px 16px 64px}
+h1{font-size:1.5rem;margin:.2em 0 .1em}
+.date{color:#46557a;font-size:.85rem;margin:0 0 1.2em}
+a{color:#6FA8FF}
+h2{font-size:1.1rem;margin:2.2em 0 .4em;padding-top:.6em;border-top:1px solid #24305a}
+li{margin:.35em 0}
+code{font-size:.86em;background:#121a33;padding:1px 5px;border-radius:4px}
+pre{background:#121a33;border:1px solid #24305a;border-radius:8px;padding:10px 12px;overflow-x:auto;font:.78rem/1.45 ui-monospace,Consolas,monospace;color:#c9d3f0;margin:.6em 0}
+.tw{overflow-x:auto;margin:.6em 0}
+table{border-collapse:collapse;font-size:.82rem;min-width:100%}
+th,td{border:1px solid #24305a;padding:5px 8px;text-align:left;vertical-align:top}
+th{background:#121a33;color:#9fb8ee;font-weight:600}
+.k{color:#9fb0d8;font-size:.9rem}
+svg{width:100%;height:auto;max-width:420px;display:block;margin:.8em auto}
+.bx{fill:#121a33;stroke:#24305a}
+.bx.good{stroke:#4ade80}.bx.bad{stroke:#f87171}.bx.amb{stroke:#fbbf24}
+.tx{fill:#dfe6f7;font:12.5px Raleway,system-ui,sans-serif}
+.tx.b{font-weight:600}
+.tx.s{fill:#9fb0d8;font-size:11.5px}
+.tx.m{font:11px ui-monospace,Consolas,monospace;fill:#c9d3f0}
+.ar{stroke:#6FA8FF;stroke-width:1.5;fill:none}
+.ck{fill:#121a33;stroke:#6FA8FF;stroke-width:1.5}
+.ct{stroke:#6FA8FF;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.cx{stroke:#f87171;stroke-width:2.2;fill:none;stroke-linecap:round}
+.lire{color:#9fb0d8;font-size:.85rem;margin:-.2em 0 1em;text-align:center}
+.warn{background:#121a33;border-left:3px solid #6FA8FF;padding:8px 12px;border-radius:0 8px 8px 0;margin:.8em 0}
+</style>
+</head>
+<body>
+<main>
+<p><a href="../">← Tech &amp; IA</a></p>
+<h1>Retirer en masse les réactions des anciens membres d'un Discord</h1>
+<p class="date">22 novembre 2026 · pas à pas, avec un petit bot jetable et un script en simulation d'abord</p>
+
+<h2>Le problème</h2>
+<p>Un message de rôles à réactions (ici celui d'un bot de rôles) affiche des compteurs qui incluent des gens partis du serveur. Discord n'a pas de bouton « retirer les réactions des anciens membres », et le faire un par un est impossible quand il y a plusieurs centaines de réactions. Il faut un bot qui parcourt les réactions et retire celles des comptes absents du serveur.</p>
+
+<h2>Le principe en un coup d'œil</h2>
+<svg viewBox="0 0 360 250" role="img" aria-label="Pour chaque compte ayant réagi : présent, on ne touche pas ; parti, la réaction est retirée ; autre erreur, le script s'arrête" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#6FA8FF" stroke-width="1.6"/></marker></defs>
+<rect class="bx" x="70" y="6" width="220" height="40" rx="6"/>
+<text class="tx b" x="180" y="24" text-anchor="middle">Message de rôles</text>
+<text class="tx s" x="180" y="39" text-anchor="middle">des centaines de réactions</text>
+<line class="ar" x1="180" y1="46" x2="180" y2="66" marker-end="url(#a)"/>
+<rect class="bx" x="70" y="68" width="220" height="40" rx="6"/>
+<text class="tx b" x="180" y="86" text-anchor="middle">Pour chaque compte</text>
+<text class="tx s" x="180" y="101" text-anchor="middle">qui a réagi, le script demande à Discord</text>
+<line class="ar" x1="180" y1="108" x2="180" y2="128" marker-end="url(#a)"/>
+<rect class="bx" x="50" y="130" width="260" height="34" rx="6"/>
+<text class="tx b" x="180" y="152" text-anchor="middle">Ce compte est-il encore sur le serveur ?</text>
+<line class="ar" x1="150" y1="164" x2="70" y2="194" marker-end="url(#a)"/>
+<line class="ar" x1="180" y1="164" x2="180" y2="194" marker-end="url(#a)"/>
+<line class="ar" x1="210" y1="164" x2="290" y2="194" marker-end="url(#a)"/>
+<rect class="bx good" x="4" y="196" width="112" height="48" rx="6"/>
+<text class="tx b" x="60" y="215" text-anchor="middle">Oui</text>
+<text class="tx s" x="60" y="232" text-anchor="middle">on ne touche pas</text>
+<rect class="bx bad" x="124" y="196" width="112" height="48" rx="6"/>
+<text class="tx b" x="180" y="215" text-anchor="middle">Introuvable</text>
+<text class="tx s" x="180" y="232" text-anchor="middle">réaction retirée</text>
+<rect class="bx amb" x="244" y="196" width="112" height="48" rx="6"/>
+<text class="tx b" x="300" y="215" text-anchor="middle">Autre erreur</text>
+<text class="tx s" x="300" y="232" text-anchor="middle">le script s'arrête</text>
+</svg>
+<p class="lire">Lecture : seule la réponse « introuvable » entraîne un retrait. Au moindre doute, rien n'est supprimé.</p>
+
+<div class="warn"><b>À ne pas faire :</b> automatiser avec ton propre compte (script dans la console du navigateur, « selfbot »). C'est contraire aux conditions d'utilisation de Discord et ton compte admin risque le bannissement. Un vrai bot est la seule voie autorisée.</div>
+
+<h2>Ce qu'il te faut</h2>
+<ul>
+<li>Être administrateur (ou avoir « Gérer les messages ») sur le serveur.</li>
+<li>Python 3 installé (<code>python --version</code> dans PowerShell).</li>
+<li>10 minutes. Le bot ne tourne que le temps du script, sur ton PC.</li>
+</ul>
+
+<h2>1. Créer le bot</h2>
+<ol>
+<li>Ouvre <a href="https://discord.com/developers/applications">discord.com/developers/applications</a> avec ton compte Discord.</li>
+<li><b>Nouvelle application</b>, donne un nom (par ex. « Nettoyage »), accepte les conditions, <b>Créer</b>. Crée-en une neuve plutôt que de réutiliser une application dont tu ne te souviens plus des droits.</li>
+<li>Menu de gauche, <b>Bot</b>, puis <b>Réinitialiser le jeton</b>, confirme et copie-le. Il ne s'affiche qu'une fois.</li>
+</ol>
+<div class="warn"><b>Le jeton est un mot de passe.</b> Qui l'a contrôle ton bot. Ne le colle ni dans un message, ni dans un fichier, ni dans un dépôt Git, ni dans une capture d'écran. Si tu le divulgues, réinitialise-le aussitôt.</div>
+
+<h2>2. L'inviter sur le serveur avec le minimum de droits</h2>
+<ol>
+<li>Menu <b>OAuth2</b>, section « Générateur d'URL OAuth2 ». Coche le champ <code>bot</code> (colonne du milieu).</li>
+<li>Dans « Permissions du bot », coche seulement trois cases :</li>
+</ol>
+<svg viewBox="0 0 360 176" role="img" aria-label="Trois cases cochées : Voir les salons, Voir les anciens messages, Gérer les messages ; Administrateur reste décoché" xmlns="http://www.w3.org/2000/svg">
+<rect class="ck" x="20" y="10" width="24" height="24" rx="5"/><path class="ct" d="M26 22 L31 27 L39 16"/>
+<text class="tx b" x="58" y="23">Voir les salons</text><text class="tx s" x="58" y="38">pour trouver le salon</text>
+<rect class="ck" x="20" y="52" width="24" height="24" rx="5"/><path class="ct" d="M26 64 L31 69 L39 58"/>
+<text class="tx b" x="58" y="65">Voir les anciens messages</text><text class="tx s" x="58" y="80">pour lire le message de rôles</text>
+<rect class="ck" x="20" y="94" width="24" height="24" rx="5"/><path class="ct" d="M26 106 L31 111 L39 100"/>
+<text class="tx b" x="58" y="107">Gérer les messages</text><text class="tx s" x="58" y="122">pour retirer une réaction</text>
+<rect class="ck" x="20" y="136" width="24" height="24" rx="5" style="stroke:#f87171"/><path class="cx" d="M27 143 L37 153 M37 143 L27 153"/>
+<text class="tx b" x="58" y="149" style="fill:#f87171">Administrateur</text><text class="tx s" x="58" y="164">jamais : le bot n'en a pas besoin</text>
+</svg>
+<div class="tw"><table><thead><tr><th>Case (en français)</th><th>Nom anglais</th><th>Pourquoi</th></tr></thead><tbody>
+<tr><td>Voir les salons</td><td>View Channels</td><td>trouver le salon</td></tr>
+<tr><td>Voir les anciens messages</td><td>Read Message History</td><td>lire le message de rôles</td></tr>
+<tr><td>Gérer les messages</td><td>Manage Messages</td><td>retirer une réaction</td></tr>
+</tbody></table></div>
+<ol start="3">
+<li>Copie l'URL générée en bas, ouvre-la dans le navigateur, choisis ton serveur, <b>Autoriser</b>.</li>
+<li>Si le salon des rôles est restreint : clic droit sur le salon, <b>Modifier le salon</b>, <b>Permissions</b>, ajoute le bot (ou son rôle) et mets ✓ sur « Voir le salon », « Gérer les messages » et « Voir les anciens messages ».</li>
+</ol>
+
+<h2>3. Récupérer les identifiants</h2>
+<ol>
+<li>Discord : <b>Paramètres utilisateur</b>, <b>Avancé</b>, active le <b>Mode développeur</b>.</li>
+<li>Clic droit sur le salon, <b>Copier l'identifiant du salon</b>.</li>
+<li>Clic droit sur chaque message de rôles, <b>Copier l'identifiant du message</b>.</li>
+</ol>
+<svg viewBox="0 0 360 190" role="img" aria-label="Le salon va dans CHANNEL_ID, les messages vont dans la liste MESSAGE_IDS" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#6FA8FF" stroke-width="1.6"/></marker></defs>
+<text class="tx s" x="8" y="9">Dans Discord (clic droit)</text><text class="tx s" x="206" y="9">Dans le script</text>
+<rect class="bx" x="8" y="16" width="150" height="44" rx="6"/>
+<text class="tx b" x="83" y="34" text-anchor="middle">Le salon</text><text class="tx s" x="83" y="50" text-anchor="middle">Copier l'identifiant</text>
+<rect class="bx" x="8" y="74" width="150" height="44" rx="6"/>
+<text class="tx b" x="83" y="92" text-anchor="middle">Message 1</text><text class="tx s" x="83" y="108" text-anchor="middle">Copier l'identifiant</text>
+<rect class="bx" x="8" y="132" width="150" height="44" rx="6"/>
+<text class="tx b" x="83" y="150" text-anchor="middle">Message 2</text><text class="tx s" x="83" y="166" text-anchor="middle">Copier l'identifiant</text>
+<rect class="bx" x="200" y="16" width="152" height="44" rx="6"/>
+<text class="tx m" x="208" y="35">CHANNEL_ID =</text><text class="tx m" x="208" y="51">identifiant du salon</text>
+<rect class="bx" x="200" y="74" width="152" height="102" rx="6"/>
+<text class="tx m" x="208" y="93">MESSAGE_IDS = [</text>
+<text class="tx m" x="220" y="113">id du message 1,</text>
+<text class="tx m" x="220" y="133">id du message 2</text>
+<text class="tx m" x="208" y="153">]</text>
+<line class="ar" x1="158" y1="38" x2="198" y2="38" marker-end="url(#b)"/>
+<line class="ar" x1="158" y1="96" x2="198" y2="108" marker-end="url(#b)"/>
+<line class="ar" x1="158" y1="154" x2="198" y2="140" marker-end="url(#b)"/>
+</svg>
+<p class="k">Ces nombres ne sont pas secrets, mais je ne publie pas les miens : remplace les exemples du script par les tiens.</p>
+
+<h3 style="font-size:1rem;margin:1.6em 0 .3em">Plusieurs messages : comment les écrire</h3>
+<p>Dans le script, <code>MESSAGE_IDS</code> est une <b>liste</b> : des crochets autour, les identifiants séparés par des virgules, <b>sans guillemets</b> (ce sont des nombres).</p>
+<div class="tw"><table><thead><tr><th></th><th>Écriture</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>✅</td><td><code>[111111111111111111, 222222222222222222, 333333333333333333]</code></td><td>correct, 3 messages</td></tr>
+<tr><td>✅</td><td><code>[111111111111111111]</code></td><td>correct, 1 seul message</td></tr>
+<tr><td>❌</td><td><code>["111…", "222…"]</code></td><td>guillemets en trop</td></tr>
+<tr><td>❌</td><td><code>[111… 222…]</code></td><td>virgule oubliée</td></tr>
+<tr><td>❌</td><td><code>111…, 222…</code></td><td>crochets oubliés</td></tr>
+</tbody></table></div>
+<p>Pour la lisibilité, tu peux aussi mettre un identifiant par ligne :</p>
+<pre>MESSAGE_IDS = [
+    111111111111111111,
+    222222222222222222,
+    333333333333333333,
+]</pre>
+<p><b>Règle importante :</b> tous les messages d'une exécution doivent être dans le <b>même salon</b>, celui de <code>CHANNEL_ID</code>.</p>
+<svg viewBox="0 0 360 150" role="img" aria-label="Les messages du salon configuré sont traités, ceux d'un autre salon sont ignorés" xmlns="http://www.w3.org/2000/svg">
+<rect class="bx good" x="8" y="8" width="168" height="134" rx="6"/>
+<text class="tx b" x="92" y="28" text-anchor="middle">Salon A (CHANNEL_ID)</text>
+<rect class="bx" x="24" y="40" width="136" height="26" rx="5"/><text class="tx s" x="92" y="57" text-anchor="middle">message 1 : traité</text>
+<rect class="bx" x="24" y="72" width="136" height="26" rx="5"/><text class="tx s" x="92" y="89" text-anchor="middle">message 2 : traité</text>
+<rect class="bx" x="24" y="104" width="136" height="26" rx="5"/><text class="tx s" x="92" y="121" text-anchor="middle">message 3 : traité</text>
+<rect class="bx bad" x="188" y="8" width="164" height="134" rx="6"/>
+<text class="tx b" x="270" y="28" text-anchor="middle">Salon B</text>
+<rect class="bx" x="204" y="40" width="132" height="26" rx="5"/><text class="tx s" x="270" y="57" text-anchor="middle">message 4 : ignoré</text>
+<text class="tx s" x="270" y="88" text-anchor="middle">« introuvable dans ce salon »</text>
+<text class="tx s" x="270" y="108" text-anchor="middle">relance avec le CHANNEL_ID</text>
+<text class="tx s" x="270" y="124" text-anchor="middle">du salon B et le message 4</text>
+</svg>
+<p class="k">Un message d'un autre salon ne casse rien : le script l'écrit comme « ignoré » et continue avec les autres.</p>
+
+<h2>4. Le script</h2>
+<p>Enregistre ceci dans <code>nettoie_reactions.py</code>. Par défaut, il <b>simule</b> : il liste ce qu'il retirerait sans rien supprimer.</p>
+<pre>import os, sys, discord
+
+CHANNEL_ID = 111111111111111111          # ton identifiant de salon
+MESSAGE_IDS = [222222222222222222,       # un ou plusieurs identifiants de message,
+               333333333333333333]       # séparés par des virgules, sans guillemets
+SUPPRIMER = "--supprimer" in sys.argv    # sans cet argument : simulation
+
+client = discord.Client(intents=discord.Intents.default())
+presents = {}
+
+async def est_present(guild, uid):
+    if uid not in presents:
+        try:
+            await guild.fetch_member(uid)
+            presents[uid] = True
+        except discord.NotFound:          # seule réponse qui veut dire « parti »
+            presents[uid] = False
+    return presents[uid]
+
+@client.event
+async def on_ready():
+    ch = await client.fetch_channel(CHANNEL_ID)
+    guild = ch.guild
+    total, vus, par_emoji = 0, 0, {}
+    print("MODE : " + ("SUPPRESSION RÉELLE" if SUPPRIMER else "SIMULATION (rien n'est supprimé)"))
+    for mid in MESSAGE_IDS:
+        try:
+            msg = await ch.fetch_message(mid)
+        except discord.NotFound:
+            print(f"Message {mid} introuvable dans ce salon, ignoré")
+            continue
+        print(f"--- message {mid} ---")
+        for r in msg.reactions:
+            async for u in r.users():
+                if u.id == client.user.id:
+                    continue
+                vus += 1
+                if not await est_present(guild, u.id):
+                    total += 1
+                    par_emoji[str(r.emoji)] = par_emoji.get(str(r.emoji), 0) + 1
+                    if SUPPRIMER:
+                        print(f"RETIRÉ        {r.emoji}  {u} ({u.id})")
+                        await msg.remove_reaction(r.emoji, u)
+                    else:
+                        print(f"[SIMULATION] retirerait  {r.emoji}  {u} ({u.id})")
+    print("\n=== Récapitulatif ===")
+    print(f"Réactions examinées : {vus}")
+    for e, n in par_emoji.items():
+        print(f"  {e} : {n} à retirer")
+    print(f"Total {'retiré' if SUPPRIMER else 'à retirer (simulation, RIEN supprimé)'} : {total}")
+    await client.close()
+
+client.run(os.environ["DISCORD_TOKEN"])</pre>
+
+<h2>5. Lancer : d'abord la simulation</h2>
+<p>Dans PowerShell, dans le dossier du script, une commande à la fois :</p>
+<pre>pip install discord.py
+$env:DISCORD_TOKEN = "colle_ton_jeton_ici"
+python nettoie_reactions.py</pre>
+<p>Le jeton est une variable de cette fenêtre PowerShell seulement : il disparaît quand tu la fermes.</p>
+<ol>
+<li>Lis la ligne <code>MODE : SIMULATION</code> en haut, puis la liste et le récapitulatif par emoji.</li>
+<li>Contrôle au hasard : prends deux ou trois pseudos de la liste et cherche-les dans la liste des membres du serveur. Ils ne doivent pas y être.</li>
+<li>Si tout est juste, relance avec la suppression réelle :</li>
+</ol>
+<pre>python nettoie_reactions.py --supprimer</pre>
+<p>Compte quelques minutes pour plusieurs centaines de réactions : la bibliothèque respecte seule les limites de débit de Discord. Les compteurs sous le message baissent en direct.</p>
+
+<h2>Ce que le script touche, et ce qu'il ne touche pas</h2>
+<div class="tw"><table><thead><tr><th>Touché</th><th>Jamais touché</th></tr></thead><tbody>
+<tr><td>Les réactions, sur les messages listés, de comptes qui ne sont plus membres du serveur</td><td>Les réactions des membres présents, les autres messages et salons, les rôles, les réactions posées par le bot lui-même</td></tr>
+</tbody></table></div>
+<p class="k">Une erreur de Discord (droits manquants, coupure) arrête le script au lieu de retirer par défaut : seule la réponse « introuvable » classe un compte comme parti. Un compte supprimé définitivement compte aussi comme parti, ce qui est voulu. Retirer une réaction est définitif, d'où la simulation d'abord.</p>
+
+<h2>6. Après : ranger</h2>
+<ul>
+<li><b>One-shot :</b> supprime l'application sur le portail développeur. Un jeton qui traîne finit par fuiter.</li>
+<li><b>Réutilisable :</b> garde-la, avec le jeton dans un gestionnaire de mots de passe. Le bot ne fait que ce que ses droits permettent : pour d'autres tâches (supprimer des messages en masse, exporter un salon), il suffit d'un autre script. Pour des droits en plus, génère une nouvelle URL d'invitation.</li>
+<li>Un script lancé à la main ne tourne que pendant son exécution. Un bot qui répond en continu à des commandes demande un programme différent, sur une machine toujours allumée.</li>
+</ul>
+
+<h2>Si ça bloque</h2>
+<div class="tw"><table><thead><tr><th>Message</th><th>Cause probable</th></tr></thead><tbody>
+<tr><td><code>Improper token</code></td><td>jeton mal copié, ou réinitialisé depuis</td></tr>
+<tr><td><code>Missing Access</code></td><td>le bot n'a pas accès au salon (étape 2, point 4)</td></tr>
+<tr><td><code>Missing Permissions</code> à la suppression</td><td>« Gérer les messages » manque sur ce salon</td></tr>
+<tr><td>« Message introuvable dans ce salon »</td><td>le message est dans un autre salon : vérifie l'identifiant du salon</td></tr>
+<tr><td><code>python</code> inconnu</td><td>Python absent ou hors du PATH : réinstalle en cochant « Add to PATH »</td></tr>
+</tbody></table></div>
+</main>
+</body>
+</html>
