@@ -2,120 +2,132 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ma méthode de travail avec Claude</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ma méthode de travail avec Claude – Small Humans</title>
 <style>
-:root{--bg:#0b1020;--panel:#141b33;--line:#2a3560;--tx:#e6e9f5;--mut:#9aa3c7;--lk:#6FA8FF;--ok:#7fd6a0;--ko:#ff8a7a;--wait:#f2c46d;--new:#c59bff}
+@font-face{font-family:Raleway;src:url(../../cinema/Raleway.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{color-scheme:dark;--fond:#0b1020;--carte:#121a33;--bord:#24305a;--texte:#dfe6f7;--doux:#9fb0d8;--accent:#6FA8FF;--ok:#7fd6a0;--ko:#ff8a7a;--att:#f2c46d;--nv:#c59bff}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 Raleway,system-ui,sans-serif}
-main{max-width:980px;margin:0 auto;padding:24px 16px 80px}
-h1{font-size:2rem;margin:.2em 0}h2{margin:2.2em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.2em}
-a{color:var(--lk)}p.lead{color:var(--mut);font-size:1.05rem}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
-.ok{color:var(--ok)}.ko{color:var(--ko)}
-table{width:100%;border-collapse:collapse;font-size:.92rem;margin:10px 0}
-th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{color:var(--mut);font-weight:600}
-svg{width:100%;height:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px}
-svg text{fill:var(--tx);font:13px Raleway,system-ui,sans-serif}svg .m{fill:var(--mut);font-size:11px}
-.note{color:var(--mut);font-size:.9rem}
-.ba td:nth-child(2){background:#ff8a7a14}.ba td:nth-child(3){background:#7fd6a014}
-.chiffre{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin:10px 0}
-.chiffre div{background:#0b1020;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:.9rem}
-.chiffre b{display:block;color:var(--lk);font-size:1.5rem;line-height:1.1}
-@media(max-width:640px){h1{font-size:1.5rem}}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.5 Raleway,system-ui,sans-serif}
+main{max-width:40rem;margin:0 auto;padding:20px 16px 64px}
+a{color:var(--accent)}
+h1{font-size:1.5rem;margin:.2em 0 .1em}
+.date{color:#46557a;font-size:.85rem;margin:0 0 1em}
+.lead{color:var(--doux);margin:0 0 1.2em}
+h2{font-size:1.1rem;margin:2em 0 .5em;padding-top:.6em;border-top:1px solid var(--bord)}
+.cap{color:var(--doux);font-size:.88rem;margin:.3em 0 0}
+.chiffres{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 .5em}
+.chiffres div{background:var(--carte);border:1px solid var(--bord);border-radius:8px;padding:8px 10px;font-size:.82rem;color:var(--doux)}
+.chiffres b{display:block;color:var(--accent);font-size:1.45rem;line-height:1.15;font-weight:600}
+svg{width:100%;height:auto;max-width:420px;display:block;margin:.6em auto}
+.bx{fill:var(--carte);stroke:var(--bord)}
+.tx{fill:var(--texte);font:12.5px Raleway,system-ui,sans-serif}
+.tx.b{font-weight:600}
+.tx.s{fill:var(--doux);font-size:11.5px}
+.ar{stroke:var(--accent);stroke-width:1.5;fill:none}
+.tw{overflow-x:auto;margin:.6em 0}
+table{border-collapse:collapse;font-size:.84rem;min-width:100%}
+th,td{border:1px solid var(--bord);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--carte);color:#9fb8ee;font-weight:600}
+td.av{color:var(--ko)}td.ap{color:var(--ok)}
+.st{font-size:.75rem;border:1px solid var(--bord);border-radius:999px;padding:0 8px;white-space:nowrap}
+.st.c{color:var(--ok);border-color:var(--ok)}.st.p{color:var(--att);border-color:var(--att)}
+ul.l{margin:.4em 0;padding-left:1.1em}ul.l li{margin:.3em 0}
+details{background:var(--carte);border:1px solid var(--bord);border-radius:8px;padding:2px 12px;margin:.8em 0}
+summary{cursor:pointer;color:var(--accent);min-height:44px;display:flex;align-items:center}
 </style>
 </head>
 <body>
 <main>
-<p class="note"><a href="../">← Tech &amp; IA</a> · 2026-11-22</p>
+<p><a href="../">← Tech &amp; IA</a></p>
 <h1>Ma méthode de travail avec Claude</h1>
-<p class="lead">Pas un tutoriel d'outil : ce que j'ai appris en un mois à bâtir ce site avec une IA. Ce qui a marché, ce qui a coûté cher, et les mécanismes qui m'évitent de me répéter.</p>
+<p class="date">22 novembre 2026 · un mois de pratique sur ce site</p>
+<p class="lead">Une IA rapide produit du désordre à la même vitesse. Ce qui a aidé : des mécanismes, pas des règles.</p>
 
-<div class="card"><strong>En trois phrases.</strong> Une IA qui travaille vite produit du désordre à la même vitesse : en un mois, 1 135 captures d'écran et des dizaines de notes de passation ont rempli le dépôt. Ce qui a corrigé le tir, ce ne sont pas des règles de plus mais des <em>mécanismes</em> (un contrôle au commit, des rappels automatiques) et un cycle de rendu qui impose un seul parti pris à la fois. Ma méthode tient dans un socle commun de règles, une couche perso et une barrière technique qui empêche les données de circuler ; et le socle s'améliore tout seul, parce que ce qui marche d'un côté y remonte, puis est essayé de l'autre.</div>
+<div class="chiffres">
+ <div><b>~90</b>versions d'un même écran en 2 jours</div>
+ <div><b>1 135</b>captures commitées</div>
+ <div><b>788</b>images entrées en 2 commits</div>
+ <div><b>1 017 → 643</b>fichiers après rangement</div>
+</div>
 
 <h2>1. Le cycle d'un écran</h2>
-<p>Pour chaque écran du site : un brief chiffré avant tout code, <em>un</em> parti pris défendu (pas un menu de trois options), un rendu sur la vraie page, une critique écrite contre le brief, puis mon jugement sur un vrai téléphone. Rien n'est « fini » tant que chaque ligne du brief n'est pas tenue sur capture.</p>
-<svg viewBox="0 0 940 150" role="img" aria-label="Le cycle d'un écran en cinq temps">
- <g text-anchor="middle">
-  <rect x="10" y="25" width="170" height="90" rx="10" fill="#0b1020" stroke="#7fd6a0"/><text x="95" y="52" font-weight="700">1. Brief chiffré</text><text class="m" x="95" y="75">couleurs, px, ms,</text><text class="m" x="95" y="91">interdits, « fini quand »</text>
-  <rect x="195" y="25" width="170" height="90" rx="10" fill="#0b1020" stroke="#7fd6a0"/><text x="280" y="52" font-weight="700">2. Un parti pris</text><text class="m" x="280" y="75">défendu en 3 lignes,</text><text class="m" x="280" y="91">un contre-avis</text>
-  <rect x="380" y="25" width="170" height="90" rx="10" fill="#0b1020" stroke="#c59bff"/><text x="465" y="52" font-weight="700">3. Rendu réel</text><text class="m" x="465" y="75">sur la vraie page,</text><text class="m" x="465" y="91">une seule adresse</text>
-  <rect x="565" y="25" width="170" height="90" rx="10" fill="#0b1020" stroke="#f2c46d"/><text x="650" y="52" font-weight="700">4. Autocritique</text><text class="m" x="650" y="75">captures, ligne à ligne,</text><text class="m" x="650" y="91">3 tours maximum</text>
-  <rect x="750" y="25" width="180" height="90" rx="10" fill="#0b1020" stroke="#6FA8FF"/><text x="840" y="52" font-weight="700">5. Mon jugement</text><text class="m" x="840" y="75">sur téléphone réel ;</text><text class="m" x="840" y="91">retour = une ligne de brief</text>
- </g>
- <g stroke="#9aa3c7" stroke-width="2"><line x1="180" y1="70" x2="195" y2="70"/><line x1="365" y1="70" x2="380" y2="70"/><line x1="550" y1="70" x2="565" y2="70"/><line x1="735" y1="70" x2="750" y2="70"/></g>
+<svg viewBox="0 0 360 330" role="img" aria-label="Cycle d'un écran en cinq temps">
+<defs><marker id="f" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8z" fill="#6FA8FF"/></marker></defs>
+<rect class="bx" x="20" y="6" width="230" height="46" rx="6"/><text class="tx b" x="32" y="26">1. Brief chiffré</text><text class="tx s" x="32" y="43">couleurs, px, ms, interdits</text>
+<rect class="bx" x="20" y="72" width="230" height="46" rx="6"/><text class="tx b" x="32" y="92">2. Un parti pris</text><text class="tx s" x="32" y="109">défendu en 3 lignes, pas 3 options</text>
+<rect class="bx" x="20" y="138" width="230" height="46" rx="6"/><text class="tx b" x="32" y="158">3. Rendu sur la vraie page</text><text class="tx s" x="32" y="175">une seule adresse, options dans un bandeau</text>
+<rect class="bx" x="20" y="204" width="230" height="46" rx="6"/><text class="tx b" x="32" y="224">4. Autocritique sur captures</text><text class="tx s" x="32" y="241">ligne à ligne, 3 tours maximum</text>
+<rect class="bx" x="20" y="270" width="230" height="46" rx="6" style="stroke:#7fd6a0"/><text class="tx b" x="32" y="290">5. Mon jugement sur iPhone</text><text class="tx s" x="32" y="307">mon retour devient une ligne de brief</text>
+<g class="ar" marker-end="url(#f)"><line x1="135" y1="52" x2="135" y2="70"/><line x1="135" y1="118" x2="135" y2="136"/><line x1="135" y1="184" x2="135" y2="202"/><line x1="135" y1="250" x2="135" y2="268"/></g>
+<path class="ar" marker-end="url(#f)" d="M250 293 H300 V161 H252"/>
+<text class="tx s" x="306" y="230">« pas</text><text class="tx s" x="306" y="244">encore »</text>
 </svg>
-<p class="note">Lecture : de gauche à droite ; si le brief n'est pas tenu à l'étape 4, on retourne au rendu, et si je dis « pas encore » à l'étape 5, ma remarque s'ajoute au brief au lieu d'être une retouche à l'aveugle.</p>
+<p class="cap">Rien n'est « fini » tant que chaque ligne du brief n'est pas tenue sur capture.</p>
 
-<h2>2. Avant / après : ce que j'ai changé</h2>
-<table class="ba">
-<tr><th></th><th>AVANT (octobre)</th><th>MAINTENANT (22 nov.)</th></tr>
-<tr><td>Propositions</td><td>3 concepts à choisir à chaque passage</td><td>un parti pris tranché, avec ce qu'il sacrifie</td></tr>
-<tr><td>Cible</td><td>« plus beau », « plus calme »</td><td>valeurs chiffrées et critère « fini quand » vérifiable</td></tr>
-<tr><td>Adresses d'essai</td><td>une page de test par variante</td><td>la vraie page, une adresse par sujet, options dans un bandeau</td></tr>
-<tr><td>Dépôt</td><td>captures et notes commitées au fil de l'eau</td><td>contrôle au commit, archives hors Git</td></tr>
-<tr><td>Rappel des règles</td><td>une phrase dans un fichier, relue ou non</td><td>un script qui rappelle ou bloque au bon moment</td></tr>
-</table>
+<h2>2. Avant / après</h2>
+<div class="tw"><table>
+<thead><tr><th></th><th>Octobre</th><th>22 nov.</th></tr></thead>
+<tbody>
+<tr><td>Propositions</td><td class="av">3 concepts par passage</td><td class="ap">un parti pris tranché</td></tr>
+<tr><td>Cible</td><td class="av">« plus beau »</td><td class="ap">valeurs chiffrées + « fini quand »</td></tr>
+<tr><td>Essais</td><td class="av">une page par variante</td><td class="ap">la vraie page, un bandeau</td></tr>
+<tr><td>Dépôt</td><td class="av">captures commitées</td><td class="ap">contrôle au commit</td></tr>
+<tr><td>Règles</td><td class="av">une phrase relue ou non</td><td class="ap">un script qui rappelle ou bloque</td></tr>
+</tbody></table></div>
 
-<h2>3. Ce qui a coûté cher (chiffres du dépôt)</h2>
-<div class="chiffre">
- <div><b>~90</b>versions d'un même écran en 2 jours, avec « 3 concepts » à chaque tour</div>
- <div><b>1 135</b>captures PNG commitées sur 2 094 fichiers ajoutés en tout</div>
- <div><b>788</b>de ces images entrées par seulement 2 commits « de fin de version »</div>
- <div><b>1 017 → 643</b>fichiers suivis après le grand rangement du 22 novembre</div>
-</div>
-<p>La cause n'était pas un manque de ménage périodique : c'était un geste précis, le commit qui ramasse un dossier entier. Un skill « ménage » aurait refait la journée de rangement tous les mois. Le bon remède était un garde-fou <em>au moment du commit</em>.</p>
+<h2>3. Les mécanismes</h2>
+<div class="tw"><table>
+<thead><tr><th>Mécanisme</th><th>Effet</th></tr></thead>
+<tbody>
+<tr><td>Contrôle au commit</td><td>refuse &gt; 20 fichiers, 3 images ou 5 Mo. Sur l'historique : 25 commits refusés sur 796, porteurs de 94 % des images</td></tr>
+<tr><td>Garde de commandes</td><td>bloque ajout global, installs à la volée, suppressions récursives, push forcé</td></tr>
+<tr><td>Contrôle de version</td><td>version affichée = fichier chargé</td></tr>
+<tr><td>Rappel de contrat</td><td>300 caractères quand je parle d'un écran</td></tr>
+<tr><td>Mesure hebdomadaire</td><td>une ligne (fichiers, Mo, images, notes périmées)</td></tr>
+</tbody></table></div>
+<p class="cap">La cause du désordre : un geste précis, le commit qui ramasse un dossier entier. Le remède : un garde-fou à ce moment-là, pas un ménage mensuel.</p>
 
-<h2>4. Les mécanismes plutôt que les règles</h2>
-<p>Règle d'or : une règle de texte n'est ajoutée que si une autre est retirée, et toute règle apprise devient d'abord un mécanisme.</p>
-<table>
-<tr><th>Mécanisme</th><th>Ce qu'il fait</th><th>Ce qu'il remplace</th></tr>
-<tr><td>Contrôle au commit</td><td>refuse plus de 20 nouveaux fichiers, 3 images ou 5 Mo ; simulé sur l'historique : il aurait refusé 25 commits sur 796, ceux qui portent 94 % des images ajoutées</td><td>la consigne « ajoute les fichiers un par un »</td></tr>
-<tr><td>Garde de commandes</td><td>bloque l'ajout global, les installations à la volée, les suppressions récursives et les pushs forcés</td><td>la vigilance de l'IA et la mienne</td></tr>
-<tr><td>Contrôle de version</td><td>vérifie que la version affichée et celle du fichier chargé restent identiques</td><td>un oubli qui laissait le navigateur sur l'ancien code</td></tr>
-<tr><td>Rappel de contrat</td><td>rappelle en 300 caractères le contrat d'écran quand je parle d'un écran</td><td>mes « j'en ai marre de me répéter »</td></tr>
-<tr><td>Mesure hebdomadaire</td><td>une ligne (fichiers, Mo, images, notes périmées) lue par la revue de la semaine</td><td>le grand rangement de fin de mois</td></tr>
-</table>
-
-<h2>5. Un socle commun, une barrière sur les données</h2>
-<p>La méthode vit dans un petit socle commun de règles : formats de réponse, noter une décision dans le même tour, un « fini quand » prouvable de l'extérieur, le choix du modèle selon le travail. Un autre contexte de travail, professionnel, partage ce même socle : seule la <em>méthode</em> circule, jamais les données.</p>
-<svg viewBox="0 0 940 170" role="img" aria-label="Socle commun, perso, barrière">
- <g text-anchor="middle">
-  <rect x="20" y="25" width="250" height="100" rx="10" fill="#0b1020" stroke="#c59bff"/><text x="145" y="55" font-weight="700">Travail perso</text><text class="m" x="145" y="80">ce site, ses essais,</text><text class="m" x="145" y="96">ses captures et ses brouillons</text>
-  <rect x="345" y="25" width="250" height="100" rx="10" fill="#0b1020" stroke="#7fd6a0"/><text x="470" y="55" font-weight="700">Socle commun</text><text class="m" x="470" y="80">règles, pièges, gabarits</text><text class="m" x="470" y="96">méthode seulement</text>
-  <rect x="670" y="25" width="250" height="100" rx="10" fill="#0b1020" stroke="#6FA8FF"/><text x="795" y="55" font-weight="700">Autre contexte</text><text class="m" x="795" y="80">même méthode,</text><text class="m" x="795" y="96">ses propres données</text>
- </g>
- <g stroke="#9aa3c7" stroke-width="2"><line x1="270" y1="75" x2="345" y2="75"/><line x1="595" y1="75" x2="670" y2="75"/></g>
- <text class="m" x="470" y="152" text-anchor="middle">Barrière : aucune donnée entre les deux côtés ; contrôle avant commit et avant publication</text>
+<h2>4. Un socle commun qui s'améliore</h2>
+<svg viewBox="0 0 360 150" role="img" aria-label="Perso, socle commun, autre contexte, barrière sur les données">
+<rect class="bx" x="6" y="14" width="100" height="62" rx="6" style="stroke:#c59bff"/><text class="tx b" x="56" y="38" text-anchor="middle">Perso</text><text class="tx s" x="56" y="56" text-anchor="middle">ce site</text>
+<rect class="bx" x="130" y="14" width="100" height="62" rx="6" style="stroke:#7fd6a0"/><text class="tx b" x="180" y="38" text-anchor="middle">Socle</text><text class="tx s" x="180" y="56" text-anchor="middle">méthode seule</text>
+<rect class="bx" x="254" y="14" width="100" height="62" rx="6" style="stroke:#6FA8FF"/><text class="tx b" x="304" y="38" text-anchor="middle">Autre contexte</text><text class="tx s" x="304" y="56" text-anchor="middle">mêmes règles</text>
+<g class="ar" marker-end="url(#f)"><line x1="106" y1="40" x2="128" y2="40"/><line x1="230" y1="40" x2="252" y2="40"/></g>
+<path class="ar" d="M56 76 V104 H304 V76" stroke-dasharray="5 4"/>
+<text class="tx s" x="180" y="124" text-anchor="middle">barrière : aucune donnée</text>
+<text class="tx s" x="180" y="140" text-anchor="middle">contrôle avant commit et avant mise en ligne</text>
 </svg>
-<p class="note">Lecture : les deux côtés enrichissent le socle, le socle les nourrit ; la barrière est technique (contrôles automatiques avant commit et avant mise en ligne), pas seulement écrite.</p>
+<p class="cap">Le socle s'alimente des deux côtés : ce qui marche d'un côté y remonte, l'autre côté l'essaie.</p>
 
-<h2>6. La boucle d'auto-amélioration</h2>
-<p>Le socle n'est pas un document figé : c'est la colonne du système, et il s'alimente des <em>deux</em> côtés. Quand une technique marche quelque part (un contrôle, un piège évité, une façon de briefer), elle remonte dans le socle sous forme d'une fiche de 8 lignes, avec l'effet visé. L'autre contexte la lit à sa reprise, l'essaie, puis rend un verdict daté : adoptée, en essai ou rejetée. Une fiche sans verdict au bout de quatre semaines est retirée ; un essai qui échoue s'écrit aussi, pour ne pas le refaire.</p>
-<svg viewBox="0 0 940 190" role="img" aria-label="Boucle : essai, fiche, socle, verdict, retour">
- <defs><marker id="f" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8z" fill="#9aa3c7"/></marker></defs>
- <g text-anchor="middle">
-  <rect x="10" y="30" width="200" height="80" rx="10" fill="#0b1020" stroke="#c59bff"/><text x="110" y="58" font-weight="700">1. Un essai marche</text><text class="m" x="110" y="80">d'un côté ou de l'autre</text><text class="m" x="110" y="96">(vérifié, pas supposé)</text>
-  <rect x="250" y="30" width="200" height="80" rx="10" fill="#0b1020" stroke="#f2c46d"/><text x="350" y="58" font-weight="700">2. Fiche de 8 lignes</text><text class="m" x="350" y="80">méthode seule,</text><text class="m" x="350" y="96">valeurs fictives</text>
-  <rect x="490" y="30" width="200" height="80" rx="10" fill="#0b1020" stroke="#7fd6a0"/><text x="590" y="58" font-weight="700">3. Socle commun</text><text class="m" x="590" y="80">l'autre côté la lit</text><text class="m" x="590" y="96">et l'essaie</text>
-  <rect x="730" y="30" width="200" height="80" rx="10" fill="#0b1020" stroke="#6FA8FF"/><text x="830" y="58" font-weight="700">4. Verdict daté</text><text class="m" x="830" y="80">adoptée, essai ou rejetée</text><text class="m" x="830" y="96">sans verdict : retirée</text>
- </g>
- <g stroke="#9aa3c7" stroke-width="2" marker-end="url(#f)"><line x1="210" y1="70" x2="246" y2="70"/><line x1="450" y1="70" x2="486" y2="70"/><line x1="690" y1="70" x2="726" y2="70"/></g>
- <path d="M830 110 V160 H110 V114" fill="none" stroke="#9aa3c7" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#f)"/>
- <text class="m" x="470" y="180" text-anchor="middle">Une règle adoptée remplace une règle existante : le socle ne grossit pas, il s'affine</text>
+<svg viewBox="0 0 360 230" role="img" aria-label="Boucle d'auto-amélioration en quatre temps">
+<rect class="bx" x="20" y="6" width="230" height="40" rx="6"/><text class="tx b" x="32" y="24">1. Un essai marche (vérifié)</text><text class="tx s" x="32" y="39">d'un côté ou de l'autre</text>
+<rect class="bx" x="20" y="64" width="230" height="40" rx="6"/><text class="tx b" x="32" y="82">2. Fiche de 8 lignes</text><text class="tx s" x="32" y="97">méthode seule, valeurs fictives</text>
+<rect class="bx" x="20" y="122" width="230" height="40" rx="6"/><text class="tx b" x="32" y="140">3. L'autre côté l'essaie</text><text class="tx s" x="32" y="155">à sa reprise</text>
+<rect class="bx" x="20" y="180" width="230" height="40" rx="6" style="stroke:#7fd6a0"/><text class="tx b" x="32" y="198">4. Verdict daté</text><text class="tx s" x="32" y="213">adoptée · essai · rejetée</text>
+<g class="ar" marker-end="url(#f)"><line x1="135" y1="46" x2="135" y2="62"/><line x1="135" y1="104" x2="135" y2="120"/><line x1="135" y1="162" x2="135" y2="178"/></g>
+<path class="ar" marker-end="url(#f)" d="M250 200 H300 V26 H252" stroke-dasharray="5 4"/>
+<text class="tx s" x="306" y="110">règle</text><text class="tx s" x="306" y="124">adoptée</text><text class="tx s" x="306" y="138">= une règle</text><text class="tx s" x="306" y="152">retirée</text>
 </svg>
-<p class="note">Lecture : chaque tour de boucle part d'un essai réel et finit par un verdict ; seule la méthode traverse, la barrière sur les données reste fermée. C'est ce qui rend le système capable de s'améliorer sans que je le surveille à la main.</p>
+<p class="cap">Sans verdict au bout de 4 semaines, la fiche est retirée. Un essai raté s'écrit aussi.</p>
 
-<h2>7. Ce que je referais autrement</h2>
-<div class="grid">
- <div class="card"><strong class="ko">Trop tôt</strong><br>Écrire des règles avant d'avoir un incident réel pour les justifier : une partie a fini retirée à l'audit du 22 novembre.</div>
- <div class="card"><strong class="ko">Trop de passages</strong><br>Laisser l'IA proposer trois pistes à chaque fois : on tourne en rond. Un avis tranché, que je peux refuser, avance plus vite.</div>
- <div class="card"><strong class="ok">À garder</strong><br>Le jugement final sur téléphone réel, un brief chiffré, et un garde-fou mécanique pour tout ce qui s'est déjà répété deux fois.</div>
-</div>
+<div class="tw"><table>
+<thead><tr><th>Fiche du socle</th><th>Statut</th></tr></thead>
+<tbody>
+<tr><td>Rendu visuel : brief chiffré, un seul parti pris</td><td><span class="st p">probable</span></td></tr>
+<tr><td>Tester une page sur l'iPhone depuis le PC, sans rien publier</td><td><span class="st c">confirmé</span></td></tr>
+</tbody></table></div>
 
-<h2>8. Et les articles ?</h2>
-<p class="note">Cette page est arrivée tard : le site avait reçu 131 modifications depuis le dernier article sans qu'aucun mécanisme ne dise « ceci mérite d'être raconté ». La suite de cette méthode, c'est justement de compter les faits datés sans article et de le signaler à la revue de la semaine.</p>
+<h2>5. Ce que je referais autrement</h2>
+<ul class="l">
+<li><b>Trop tôt :</b> des règles sans incident réel pour les justifier. Une partie a été retirée à l'audit.</li>
+<li><b>Trop de choix :</b> trois pistes à chaque passage. Un avis tranché que je peux refuser va plus vite.</li>
+<li><b>À garder :</b> le jugement sur téléphone réel, un brief chiffré, un garde-fou pour tout ce qui s'est répété deux fois.</li>
+</ul>
+
+<details><summary>Pourquoi cet article arrive tard</summary>
+<p class="cap" style="margin:.4em 0 .8em">Le site avait reçu 131 modifications depuis le dernier article sans qu'aucun mécanisme dise « ceci mérite d'être raconté ». La suite : compter les faits datés sans article et le signaler à la revue de la semaine.</p>
+</details>
 </main>
 </body>
 </html>
